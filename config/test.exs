@@ -15,5 +15,5 @@ config :omscore, Omscore.Repo,
   username: "postgres",
   password: "postgres",
   database: "omscore_test",
-  hostname: "localhost",
+  hostname: System.get_env("DB_HOST") || "localhost",
   pool: Ecto.Adapters.SQL.Sandbox

@@ -1,0 +1,49 @@
+version: '3.2'
+
+services:
+    oms-core-elixir:
+        build:
+            context: ./$PATH_OMS_CORE_ELIXIR/oms-core-elixir/
+            dockerfile: ./Dockerfile.dev
+        volumes:
+            - ./$PATH_OMS_CORE_ELIXIR/../:/usr/src/myapp
+        depends_on:
+            - postgres-oms-core-elixir
+        expose:
+            - "4000"
+        labels:
+            - "traefik.frontend.rule=HostRegexp:{domain:[a-z0-9.]+};PathPrefix:/services/oms-core-elixir;PathPrefixStrip:/services/oms-core-elixir"
+            - "traefik.frontend.priority=100"
+            - "traefik.port=4000"
+            - "traefik.backend=oms-core-elixir"
+            - "traefik.enable=true"
+            #- "registry.modules=/static/getModules.json"
+            #- "registry.status=/status"
+        environment:
+            JWT_ISSUER: OMS
+            JWT_SECRET_KEY_FILE: /run/secrets/jwt_key
+            DB_HOST: postgres-oms-core-elixir
+#        secrets:
+#            - jwt_key
+
+
+    postgres-oms-core-elixir:
+        image: postgres:latest
+        volumes:
+            - postgres-oms-core-elixir:/var/lib/postgresql/data
+        expose:
+            - "5432"
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: postgres
+
+
+#secrets:
+#    jwt_key:
+#        external: true
+
+
+volumes:
+    postgres-oms-core-elixir:
+        driver: "local"
+

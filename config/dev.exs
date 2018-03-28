@@ -43,5 +43,5 @@ config :omscore, Omscore.Repo,
   username: "postgres",
   password: "postgres",
   database: "omscore_dev",
-  hostname: "localhost",
+  hostname: System.get_env("DB_HOST") || "localhost",
   pool_size: 10
