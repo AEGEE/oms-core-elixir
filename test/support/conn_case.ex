@@ -21,6 +21,21 @@ defmodule OmscoreWeb.ConnCase do
       use Phoenix.ConnTest
       import OmscoreWeb.Router.Helpers
 
+      def map_inclusion(map_to_check, should_be_in_there) when is_map(should_be_in_there) do
+        should_be_in_there
+        |> Map.keys
+        |> Enum.all?(fn(key) -> Map.has_key?(map_to_check, key) && Map.get(map_to_check, key) == Map.get(should_be_in_there, key) end)
+      end
+
+      def map_inclusion(map_to_check, should_be_in_there) when is_list(should_be_in_there) do
+        should_be_in_there
+        |> Enum.all?(fn(key) -> Map.has_key?(map_to_check, key) end)
+      end
+
+      def map_inclusion(map_to_check, should_be_in_there) do
+        Map.has_key?(map_to_check, should_be_in_there)
+      end
+
       # The default endpoint for testing
       @endpoint OmscoreWeb.Endpoint
     end

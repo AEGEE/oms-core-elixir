@@ -71,6 +71,41 @@ defmodule Omscore.CoreTest do
       permission = permission_fixture()
       assert %Ecto.Changeset{} = Core.change_permission(permission)
     end
+
+    test "find_permissions/2 converts an array of input data circles to loaded ecto models" do
+      permission1 = permission_fixture()
+      permission2 = permission_fixture(@update_attrs)
+
+      input_data = [%{"id" => permission1.id}, %{id: permission2.id}]
+
+      assert {:ok, permission_list} = Core.find_permissions(input_data)
+      assert permission_list |> Enum.any?(fn(x) -> x == permission1 end)
+      assert permission_list |> Enum.any?(fn(x) -> x == permission2 end)
+    end
+
+    test "reduce_permissions/1 removes duplicate permissions" do
+      permission_list = [permission_fixture()] ++ [permission_fixture()]
+      permission_list = Core.reduce_permission_list(permission_list)
+      assert Enum.count(permission_list) == 1
+    end
+
+    test "reduce_permissions/1 keeps different permissions" do
+      permission_list = [permission_fixture()] ++ [permission_fixture(@update_attrs)]
+      permission_list = Core.reduce_permission_list(permission_list)
+      assert Enum.count(permission_list) == 2
+    end
+
+    test "reduce_permissions/1 merges duplicate permissions with different scopes and keeps the higher one" do
+      permission_list = [permission_fixture()] ++ [permission_fixture(%{scope: "local"})]
+      permission_list = Core.reduce_permission_list(permission_list)
+      assert Enum.count(permission_list) == 1
+      assert Enum.at(permission_list, 0).scope == "global"
+    end
+
+    test "search_permission/1 finds permissions" do
+      permission_list = [permission_fixture()] ++ [permission_fixture(@update_attrs)]
+      assert Core.search_permission_list(permission_list, @valid_attrs.action, @valid_attrs.object).scope == @valid_attrs.scope
+    end
   end
 
   describe "bodies" do
@@ -96,7 +131,11 @@ defmodule Omscore.CoreTest do
 
     test "get_body!/1 returns the body with given id" do
       body = body_fixture()
-      assert Core.get_body!(body.id) == body
+      assert new_body = Core.get_body!(body.id)
+      assert new_body.name == body.name
+      assert new_body.id == body.id
+      assert Ecto.assoc_loaded?(new_body.circles)
+      assert new_body.circles == []
     end
 
     test "create_body/1 with valid data creates a body" do
@@ -128,8 +167,9 @@ defmodule Omscore.CoreTest do
     test "update_body/2 with invalid data returns error changeset" do
       body = body_fixture()
       assert {:error, %Ecto.Changeset{}} = Core.update_body(body, @invalid_attrs)
-      assert body == Core.get_body!(body.id)
-    end
+      assert new_body = Core.get_body!(body.id)
+      assert new_body.name == body.name
+      assert new_body.id == body.id    end
 
     test "delete_body/1 deletes the body" do
       body = body_fixture()
@@ -166,7 +206,16 @@ defmodule Omscore.CoreTest do
 
     test "get_circle!/1 returns the circle with given id" do
       circle = circle_fixture()
-      assert Core.get_circle!(circle.id) == circle
+      assert circle = Core.get_circle!(circle.id)
+      assert circle.name == @valid_attrs.name
+      assert circle.joinable == @valid_attrs.joinable
+      assert circle.description == @valid_attrs.description
+      assert Ecto.assoc_loaded?(circle.permissions)
+      assert circle.permissions == []
+      assert Ecto.assoc_loaded?(circle.parent_circle)
+      assert circle.parent_circle == nil
+      assert Ecto.assoc_loaded?(circle.child_circles)
+      assert circle.child_circles == []
     end
 
     test "create_circle/1 with valid data creates a circle" do
@@ -174,6 +223,7 @@ defmodule Omscore.CoreTest do
       assert circle.description == "some description"
       assert circle.joinable == true
       assert circle.name == "some name"
+      assert !Ecto.assoc_loaded?(circle.permissions)
     end
 
     test "create_circle/1 with invalid data returns error changeset" do
@@ -187,12 +237,16 @@ defmodule Omscore.CoreTest do
       assert circle.description == "some updated description"
       assert circle.joinable == false
       assert circle.name == "some updated name"
+      assert !Ecto.assoc_loaded?(circle.permissions)
     end
 
     test "update_circle/2 with invalid data returns error changeset" do
       circle = circle_fixture()
       assert {:error, %Ecto.Changeset{}} = Core.update_circle(circle, @invalid_attrs)
-      assert circle == Core.get_circle!(circle.id)
+      assert circle_new = Core.get_circle!(circle.id)
+      assert circle.name == circle_new.name
+      assert circle.description == circle_new.description
+      assert circle.joinable == circle_new.joinable
     end
 
     test "delete_circle/1 deletes the circle" do
@@ -204,6 +258,61 @@ defmodule Omscore.CoreTest do
     test "change_circle/1 returns a circle changeset" do
       circle = circle_fixture()
       assert %Ecto.Changeset{} = Core.change_circle(circle)
+    end
+
+    test "put_circle_permissions/2 assigns permissions to the circle" do
+      circle = circle_fixture()
+      permission = permission_fixture()
+
+      assert {:ok, _circle} = Core.put_circle_permissions(circle, [permission])
+      assert circle = Core.get_circle!(circle.id)
+      assert Ecto.assoc_loaded?(circle.permissions)
+      assert circle.permissions != []
+      assert circle.permissions |> Enum.any?(fn(x) -> x.action == "some action" && x.scope == "global" end)
+    end
+
+    test "find_circles/2 converts an array of input data circles to loaded ecto models" do
+      circle1 = circle_fixture()
+      circle2 = circle_fixture(@update_attrs)
+
+      input_data = [%{"id" => circle1.id}, %{id: circle2.id}]
+
+      assert {:ok, circle_list} = Core.find_circles(input_data)
+      assert circle_list |> Enum.any?(fn(x) -> x == circle1 end)
+      assert circle_list |> Enum.any?(fn(x) -> x == circle2 end)
+    end
+
+    test "put_child_circles/2 assigns child circles to the circle" do
+      circle1 = circle_fixture()
+      circle2 = circle_fixture(@update_attrs)
+
+      assert {:ok, _circle} = Core.put_child_circles(circle1, [circle2])
+      assert circle1 = Core.get_circle!(circle1.id)
+      assert Ecto.assoc_loaded?(circle1.child_circles)
+      assert circle1.child_circles != []
+      assert Enum.any?(circle1.child_circles, fn(x) -> x.id == circle2.id end)
+
+      assert circle2 = Core.get_circle!(circle2.id)
+      assert circle2.parent_circle.id == circle1.id
+    end
+
+    test "get_permissions_recursive/1 returns all permissions from the current circle and all parent circles" do
+      circle1 = circle_fixture()
+      circle2 = circle_fixture()
+      circle3 = circle_fixture()
+      permission1 = permission_fixture()
+      permission2 = permission_fixture(%{action: "some other action"})
+
+      assert {:ok, _} = Core.put_circle_permissions(circle1, [permission1])
+      assert {:ok, _} = Core.put_circle_permissions(circle3, [permission2])
+      assert {:ok, _} = Core.put_child_circles(circle1, [circle2])
+      assert {:ok, _} = Core.put_child_circles(circle2, [circle3])
+
+      circle3 = Core.get_circle!(circle3.id)
+
+      assert permission_list = Core.get_permissions_recursive(circle3)
+      assert Enum.any?(permission_list, fn(x) -> x.id == permission1.id end)
+      assert Enum.any?(permission_list, fn(x) -> x.id == permission2.id end)
     end
   end
 end

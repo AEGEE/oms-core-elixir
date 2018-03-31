@@ -9,8 +9,6 @@ defmodule Omscore.Repo.Migrations.CreateCirclePermissions do
       timestamps()
     end
 
-    create index(:circle_permissions, [:circle_id])
-    create index(:circle_permissions, [:permission_id])
     create unique_index(:circle_permissions, [:circle_id, :permission_id])
   end
 end

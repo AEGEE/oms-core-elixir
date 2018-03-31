@@ -8,6 +8,26 @@ defmodule Omscore.Core do
 
   alias Omscore.Core.Permission
 
+  # Converts an array that came from the user with maps that contain an id to a list of ecto models
+  # In case not all elements could be loaded, returns an error
+  def find_array(type, input_data) do
+    res = input_data
+    |> Enum.map(fn(x) ->
+      id = Map.get(x, :id) || Map.get(x, "id")
+
+      if id != nil do
+        Repo.get(type, id)
+      else
+        nil
+      end
+    end)
+
+    case Enum.find(res, fn(x) -> x == nil end) do
+      nil -> {:ok, res}
+      _ -> {:error, "Invalid input data"}
+    end
+  end
+
   @doc """
   Returns the list of permissions.
 
@@ -102,6 +122,47 @@ defmodule Omscore.Core do
     Permission.changeset(permission, %{})
   end
 
+  # Finds all db permissions from a list of input permissions
+  def find_permissions(input_data), do: find_array(Permission, input_data)
+
+  # Reduces a permission list to remove duplicates
+  # If a permission existed twice with different scopes, the one with the highest scope is returned
+  def reduce_permission_list(permission_list) do
+    reduce_permission_list(permission_list, %{})
+  end
+
+  # Returns the permission with the highest scope
+  defp highest_scope(a, b) do
+    if a.scope == "global" do
+      a
+    else
+      b
+    end
+  end
+
+  # Put all permissions into a Map, in  case the permission is already in put the one with the highest scope
+  defp reduce_permission_list([x | rest], found) do
+    case Map.get(found, {x.action, x.object}) do
+      nil -> reduce_permission_list(rest, Map.put(found, {x.action, x.object}, x))
+      y -> reduce_permission_list(rest, Map.put(found, {x.action, x.object}, highest_scope(x, y)))
+    end
+  end
+
+  # When all permissions are in the map, return the contents of the map
+  defp reduce_permission_list([], found) do
+    found
+    |> Map.to_list
+    |> Enum.map(fn({_, x}) -> x end)
+  end
+  
+
+  # Seaches a list of permissions for one specific action and object and returns it
+  # In case none was found, returns nil
+  # Returns the first occurrence, use reduce_permission_list in advance in case you want the highest scoped one
+  def search_permission_list(permission_list, action, object) do
+    Enum.find(permission_list, fn(x) -> x.action == action && x.object == object end)
+  end
+
   alias Omscore.Core.Body
 
   @doc """
@@ -131,7 +192,7 @@ defmodule Omscore.Core do
       ** (Ecto.NoResultsError)
 
   """
-  def get_body!(id), do: Repo.get!(Body, id)
+  def get_body!(id), do: Repo.get!(Body, id) |> Repo.preload([:circles])
 
   @doc """
   Creates a body.
@@ -227,7 +288,7 @@ defmodule Omscore.Core do
       ** (Ecto.NoResultsError)
 
   """
-  def get_circle!(id), do: Repo.get!(Circle, id)
+  def get_circle!(id), do: Repo.get!(Circle, id) |> Repo.preload([:permissions, :child_circles, :parent_circle])
 
   @doc """
   Creates a circle.
@@ -292,5 +353,41 @@ defmodule Omscore.Core do
   """
   def change_circle(%Circle{} = circle) do
     Circle.changeset(circle, %{})
+  end
+
+  # Puts the permissions to a circle object
+  # You should preload the permission data with find_permissions if the data came from the user
+  def put_circle_permissions(%Circle{} = circle, permissions) do
+    circle
+    |> Repo.preload([:permissions])
+    |> Circle.changeset(%{})
+    |> Ecto.Changeset.put_assoc(:permissions, permissions)
+    |> Repo.update()
+  end
+
+  # From an array of possibly circles, load those who are actually circles in the db
+  # This is useful for put_child_circles
+  def find_circles(input_data), do: find_array(Circle, input_data)
+
+  # Puts child circles for a circle
+  # You should preload circles with find_circles if the data came from the user
+  def put_child_circles(%Circle{} = circle, child_circles) do
+    circle
+    |> Repo.preload([:child_circles])
+    |> Circle.changeset(%{})
+    |> Ecto.Changeset.put_assoc(:child_circles, child_circles)
+    |> Repo.update()
+  end
+
+  # Returns all permissions that are attached to this circle or any of its parent circles
+  def get_permissions_recursive(circle) do
+    circle = Repo.preload(circle, [:parent_circle, :permissions])
+
+    permissions = circle.permissions
+    if circle.parent_circle do
+      permissions ++ get_permissions_recursive(circle.parent_circle)
+    else
+      permissions
+    end
   end
 end
