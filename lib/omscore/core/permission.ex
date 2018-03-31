@@ -18,7 +18,7 @@ defmodule Omscore.Core.Permission do
   def changeset(permission, attrs) do
     permission
     |> cast(attrs, [:scope, :action, :object, :description])
-    |> validate_required([:scope, :action, :object, :description])
+    |> validate_required([:scope, :action, :object])
     |> validate_inclusion(:scope, ["global", "local"])
   end
 end

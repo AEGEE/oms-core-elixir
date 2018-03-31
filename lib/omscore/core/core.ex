@@ -274,6 +274,11 @@ defmodule Omscore.Core do
     Repo.all(Circle)
   end
 
+  def list_free_circles do
+    query = from u in Circle, where: is_nil(u.body_id)
+    Repo.all(query)
+  end
+
   @doc """
   Gets a single circle.
 
@@ -290,23 +295,23 @@ defmodule Omscore.Core do
   """
   def get_circle!(id), do: Repo.get!(Circle, id) |> Repo.preload([:permissions, :child_circles, :parent_circle])
 
-  @doc """
-  Creates a circle.
 
-  ## Examples
+  # Create a bound circle
+  def create_circle(attrs, %Body{} = body) do
+    %Circle{}
+    |> Circle.changeset(attrs)
+    |> Ecto.Changeset.put_assoc(:body, body)
+    |> Repo.insert()
+  end
 
-      iex> create_circle(%{field: value})
-      {:ok, %Circle{}}
 
-      iex> create_circle(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
+  # Creates a free circle
   def create_circle(attrs \\ %{}) do
     %Circle{}
     |> Circle.changeset(attrs)
     |> Repo.insert()
   end
+
 
   @doc """
   Updates a circle.

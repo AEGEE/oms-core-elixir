@@ -204,6 +204,14 @@ defmodule Omscore.CoreTest do
       assert Core.list_circles() == [circle]
     end
 
+    test "list_free_circles/0 returns all circles without a body" do
+      circle = circle_fixture()
+      body = body_fixture()
+      Core.create_circle(%{}, body)
+
+      assert Core.list_free_circles() == [circle]
+    end
+
     test "get_circle!/1 returns the circle with given id" do
       circle = circle_fixture()
       assert circle = Core.get_circle!(circle.id)
