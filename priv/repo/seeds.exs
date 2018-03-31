@@ -11,6 +11,7 @@
 # and so on) as they will fail if something goes wrong.
 
 alias Omscore.Core.Permission
+alias Omscore.Repo
 
 if Repo.all(Permission) == [] do
   Repo.insert!(%Permission{

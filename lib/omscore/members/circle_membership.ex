@@ -6,8 +6,9 @@ defmodule Omscore.Members.CircleMembership do
   schema "circle_memberships" do
     field :circle_admin, :boolean, default: false
     field :position, :string
-    field :circle_id, :id
-    field :member_id, :id
+
+    belongs_to :circle, Omscore.Core.Circle
+    belongs_to :member, Omscore.Members.Member
 
     timestamps()
   end
@@ -15,7 +16,7 @@ defmodule Omscore.Members.CircleMembership do
   @doc false
   def changeset(circle_membership, attrs) do
     circle_membership
-    |> cast(attrs, [:circle_admin, :position])
-    |> validate_required([:circle_admin, :position])
+    |> cast(attrs, [:position])
+    |> validate_required([])
   end
 end

@@ -4,8 +4,8 @@ defmodule Omscore.Members.BodyMembership do
 
 
   schema "body_memberships" do
-    field :body_id, :id
-    field :member_id, :id
+    belongs_to :body, Omscore.Core.Body
+    belongs_to :member, Omscore.Members.Member
 
     timestamps()
   end

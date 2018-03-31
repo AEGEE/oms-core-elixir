@@ -8,192 +8,73 @@ defmodule Omscore.Members do
 
   alias Omscore.Members.Member
 
-  @doc """
-  Returns the list of members.
-
-  ## Examples
-
-      iex> list_members()
-      [%Member{}, ...]
-
-  """
+  # Returns all members
   def list_members do
     Repo.all(Member)
   end
 
-  @doc """
-  Gets a single member.
-
-  Raises `Ecto.NoResultsError` if the Member does not exist.
-
-  ## Examples
-
-      iex> get_member!(123)
-      %Member{}
-
-      iex> get_member!(456)
-      ** (Ecto.NoResultsError)
-
-  """
+  # Gets a single member
   def get_member!(id), do: Repo.get!(Member, id)
 
-  @doc """
-  Creates a member.
-
-  ## Examples
-
-      iex> create_member(%{field: value})
-      {:ok, %Member{}}
-
-      iex> create_member(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
+  # Creates a member
   def create_member(attrs \\ %{}) do
     %Member{}
     |> Member.changeset(attrs)
     |> Repo.insert()
   end
 
-  @doc """
-  Updates a member.
-
-  ## Examples
-
-      iex> update_member(member, %{field: new_value})
-      {:ok, %Member{}}
-
-      iex> update_member(member, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
+  # Updates a member
   def update_member(%Member{} = member, attrs) do
     member
     |> Member.changeset(attrs)
     |> Repo.update()
   end
 
-  @doc """
-  Deletes a Member.
-
-  ## Examples
-
-      iex> delete_member(member)
-      {:ok, %Member{}}
-
-      iex> delete_member(member)
-      {:error, %Ecto.Changeset{}}
-
-  """
+  # Deletes a member
   def delete_member(%Member{} = member) do
     Repo.delete(member)
   end
 
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking member changes.
-
-  ## Examples
-
-      iex> change_member(member)
-      %Ecto.Changeset{source: %Member{}}
-
-  """
+  # Create a member changeset
   def change_member(%Member{} = member) do
     Member.changeset(member, %{})
   end
 
   alias Omscore.Members.JoinRequest
 
-  @doc """
-  Returns the list of join_requests.
-
-  ## Examples
-
-      iex> list_join_requests()
-      [%JoinRequest{}, ...]
-
-  """
-  def list_join_requests do
-    Repo.all(JoinRequest)
+  # Get all join requests for a body
+  def list_join_requests(body, outstanding_only \\ false) do
+    query = if outstanding_only do
+      from u in JoinRequest, where: u.body_id == ^body.id
+    else
+      from u in JoinRequest, where: u.body_id == ^body.id && !u.approved
+    end 
+    Repo.all(query)
   end
 
-  @doc """
-  Gets a single join_request.
-
-  Raises `Ecto.NoResultsError` if the Join request does not exist.
-
-  ## Examples
-
-      iex> get_join_request!(123)
-      %JoinRequest{}
-
-      iex> get_join_request!(456)
-      ** (Ecto.NoResultsError)
-
-  """
+  # Get a single join request by id
   def get_join_request!(id), do: Repo.get!(JoinRequest, id)
 
-  @doc """
-  Creates a join_request.
-
-  ## Examples
-
-      iex> create_join_request(%{field: value})
-      {:ok, %JoinRequest{}}
-
-      iex> create_join_request(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
+  # Creates a join request
   def create_join_request(attrs \\ %{}) do
     %JoinRequest{}
     |> JoinRequest.changeset(attrs)
     |> Repo.insert()
   end
 
-  @doc """
-  Updates a join_request.
-
-  ## Examples
-
-      iex> update_join_request(join_request, %{field: new_value})
-      {:ok, %JoinRequest{}}
-
-      iex> update_join_request(join_request, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
+  # Updates a join request
   def update_join_request(%JoinRequest{} = join_request, attrs) do
     join_request
     |> JoinRequest.changeset(attrs)
     |> Repo.update()
   end
 
-  @doc """
-  Deletes a JoinRequest.
-
-  ## Examples
-
-      iex> delete_join_request(join_request)
-      {:ok, %JoinRequest{}}
-
-      iex> delete_join_request(join_request)
-      {:error, %Ecto.Changeset{}}
-
-  """
+  # Deletes a join request
   def delete_join_request(%JoinRequest{} = join_request) do
     Repo.delete(join_request)
   end
 
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking join_request changes.
-
-  ## Examples
-
-      iex> change_join_request(join_request)
-      %Ecto.Changeset{source: %JoinRequest{}}
-
-  """
+  # Creates a JoinRequest changeset
   def change_join_request(%JoinRequest{} = join_request) do
     JoinRequest.changeset(join_request, %{})
   end

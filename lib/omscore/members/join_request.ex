@@ -6,16 +6,17 @@ defmodule Omscore.Members.JoinRequest do
   schema "join_requests" do
     field :approved, :boolean, default: false
     field :motivation, :string
-    field :member_id, :id
-    field :body_id, :id
 
+    belongs_to :member, Omscore.Members.Member
+    belongs_to :body, Omscore.Core.Body
+    
     timestamps()
   end
 
   @doc false
   def changeset(join_request, attrs) do
     join_request
-    |> cast(attrs, [:motivation, :approved])
-    |> validate_required([:motivation, :approved])
+    |> cast(attrs, [:motivation, :approved, :body_id])
+    |> validate_required([:motivation, :approved, :body_id])
   end
 end
