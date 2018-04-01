@@ -8,7 +8,6 @@ defmodule Omscore.Members do
 
   alias Omscore.Members.Member
   alias Omscore.Core.Circle
-  alias Omscore.Members.BodyMembership
 
   # Returns all members
   def list_members do
@@ -19,9 +18,10 @@ defmodule Omscore.Members do
   def get_member!(id), do: Repo.get!(Member, id)
 
   # Creates a member
-  def create_member(attrs \\ %{}) do
+  def create_member(user_id, attrs \\ %{}) when is_integer(user_id) do
     %Member{}
     |> Member.changeset(attrs)
+    |> Ecto.Changeset.put_change(:user_id, user_id)
     |> Repo.insert()
   end
 
@@ -94,14 +94,6 @@ defmodule Omscore.Members do
     |> Repo.insert()
   end
 
-  def create_body_membership(%Omscore.Core.Body{} = body, %Member{} = member) do
-    %BodyMembership{}
-    |> BodyMembership.changeset(%{})
-    |> Ecto.Changeset.put_assoc(:body, body)
-    |> Ecto.Changeset.put_assoc(:member, member)
-    |> Repo.insert()
-  end
-
   # Approving a join request means creating a body membership and setting the join request to approved
   def approve_join_request(%JoinRequest{} = join_request) do
     Repo.transaction fn ->
@@ -122,6 +114,24 @@ defmodule Omscore.Members do
   def reject_join_request(%JoinRequest{} = join_request) do
     join_request |> Repo.delete!
   end
+
+  
+  alias Omscore.Members.BodyMembership
+
+  #def get_body_membership!(id), do: Repo.get(BodyMembership, id)
+  def get_body_membership(%Omscore.Core.Body{} = body, %Member{} = member), do: get_body_membership(body.id, member.id)
+  def get_body_membership(body_id, member_id), do: Repo.get_by(BodyMembership, %{body_id: body_id, member_id: member_id})
+
+  # Creates a membership with a body
+  # Should not be used directly, only by tests and approve_join_request
+  def create_body_membership(%Omscore.Core.Body{} = body, %Member{} = member) do
+    %BodyMembership{}
+    |> BodyMembership.changeset(%{})
+    |> Ecto.Changeset.put_assoc(:body, body)
+    |> Ecto.Changeset.put_assoc(:member, member)
+    |> Repo.insert()
+  end
+
 
 
   alias Omscore.Members.CircleMembership
@@ -173,12 +183,21 @@ defmodule Omscore.Members do
 
   # Creates a circle membership
   def create_circle_membership(%Circle{} = circle, %Member{} = member, attrs \\ %{}) do
-    
-    %CircleMembership{}
-    |> CircleMembership.changeset(attrs)
-    |> Ecto.Changeset.put_assoc(:member, member)
-    |> Ecto.Changeset.put_assoc(:circle, circle)
-    |> Repo.insert()
+    with {:ok} <- test_body_membership(circle, member) do
+      %CircleMembership{}
+      |> CircleMembership.changeset(attrs)
+      |> Ecto.Changeset.put_assoc(:member, member)
+      |> Ecto.Changeset.put_assoc(:circle, circle)
+      |> Repo.insert()
+    end
+  end
+
+  defp test_body_membership(circle, member) do
+    if circle.body_id && !get_body_membership(circle.body_id, member.id) do
+      {:error, "A bound circle can only be joined by members of the body it is bound to"}
+    else
+      {:ok}
+    end
   end
 
   # Updates a circle membership

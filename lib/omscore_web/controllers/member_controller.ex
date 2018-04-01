@@ -12,7 +12,7 @@ defmodule OmscoreWeb.MemberController do
   end
 
   def create(conn, %{"member" => member_params}) do
-    with {:ok, %Member{} = member} <- Members.create_member(member_params) do
+    with {:ok, %Member{} = member} <- Members.create_member(1, member_params) do
       conn
       |> put_status(:created)
       |> put_resp_header("location", member_path(conn, :show, member))

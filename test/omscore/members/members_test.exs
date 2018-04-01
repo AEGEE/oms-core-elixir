@@ -13,10 +13,8 @@ defmodule Omscore.MembersTest do
     @invalid_attrs %{about_me: nil, address: nil, date_of_birth: nil, first_name: nil, gender: nil, last_name: nil, phone: nil, seo_url: nil, user_id: nil}
 
     def member_fixture(attrs \\ %{}) do
-      {:ok, member} =
-        attrs
-        |> Enum.into(@valid_attrs)
-        |> Members.create_member()
+      attrs = Enum.into(attrs, @valid_attrs)
+      {:ok, member} = Members.create_member(1, attrs)
 
       member
     end
@@ -41,7 +39,7 @@ defmodule Omscore.MembersTest do
     end
 
     test "create_member/1 with valid data creates a member" do
-      assert {:ok, %Member{} = member} = Members.create_member(@valid_attrs)
+      assert {:ok, %Member{} = member} = Members.create_member(1, @valid_attrs)
       assert member.about_me == "some about_me"
       assert member.address == "some address"
       assert member.date_of_birth == ~D[2010-04-17]
@@ -50,11 +48,11 @@ defmodule Omscore.MembersTest do
       assert member.last_name == "some last_name"
       assert member.phone == "+1212345678"
       assert member.seo_url == "some_seo_url"
-      assert member.user_id == 42
+      assert member.user_id == 1
     end
 
     test "create_member/1 with invalid data returns error changeset" do
-      assert {:error, %Ecto.Changeset{}} = Members.create_member(@invalid_attrs)
+      assert {:error, %Ecto.Changeset{}} = Members.create_member(1, @invalid_attrs)
     end
 
     test "update_member/2 with valid data updates the member" do
@@ -69,7 +67,7 @@ defmodule Omscore.MembersTest do
       assert member.last_name == "some updated last_name"
       assert member.phone == "+1212345679"
       assert member.seo_url == "some_updated_seo_url"
-      assert member.user_id == 43
+      assert member.user_id == 1
     end
 
     test "update_member/2 with invalid data returns error changeset" do
@@ -110,6 +108,7 @@ defmodule Omscore.MembersTest do
       assert !Enum.any?(permissions, fn(x) -> x.action == "even other action" end)
     end
 
+    # Impressive test case...
     test "get_local_permissions/2 returns all permissions the user obtained in context with the body" do
       body = body_fixture()
       member = member_fixture()
@@ -145,7 +144,7 @@ defmodule Omscore.MembersTest do
       assert !Enum.any?(permissions, fn(x) -> x.id == permission4.id end) # Permission 4 is a local permission which is not directly or indirectly attached to the members body, so should not be in the result set
       assert Enum.any?(permissions, fn(x) -> x.id == permission5.id end)  # Permission 5 is a global permission in the same circle as 4, but global permissions are included independent of where the member got them
       assert Enum.any?(permissions, fn(x) -> x.id == permission6.id end)  # Permission 6 is a local permission which is indirectly attached to the body and thus should be inherited
-      assert !Enum.any?(permissions, fn(x) -> x.id == permission7.id end) # Local permission should have been overwritten by global one with same action and object
+      assert !Enum.any?(permissions, fn(x) -> x.id == permission7.id end) # Permission 7 is a local permission with the same action and object as permission 1 and thus should have been overwritten by permission 1
     end
   end
 
@@ -302,6 +301,17 @@ defmodule Omscore.MembersTest do
       assert {:ok, %CircleMembership{} = circle_membership} = Members.create_circle_membership(circle, member, @valid_attrs)
       assert circle_membership.circle_admin == true
       assert circle_membership.position == "some position"
+    end
+
+    test "creade_circle_membership/1 only allows members of the body to join a bound circle" do
+      body = body_fixture()
+      member1 = member_fixture()
+      member2 = member_fixture()
+      circle = bound_circle_fixture(body)
+      {:ok, _} = Members.create_body_membership(body, member1)
+
+      assert {:ok, _} = Members.create_circle_membership(circle, member1, @valid_attrs)
+      assert {:error, _} = Members.create_circle_membership(circle, member2, @valid_attrs)
     end
 
     test "update_circle_membership/2 with valid data updates the circle_membership" do

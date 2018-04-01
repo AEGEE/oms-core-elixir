@@ -9,7 +9,7 @@ defmodule OmscoreWeb.MemberControllerTest do
   @invalid_attrs %{about_me: nil, address: nil, date_of_birth: nil, first_name: nil, gender: nil, last_name: nil, phone: nil, seo_url: nil, user_id: nil}
 
   def fixture(:member) do
-    {:ok, member} = Members.create_member(@create_attrs)
+    {:ok, member} = Members.create_member(1, @create_attrs)
     member
   end
 
@@ -40,7 +40,7 @@ defmodule OmscoreWeb.MemberControllerTest do
         "last_name" => "some last_name",
         "phone" => "+1212345678",
         "seo_url" => "some_seo_url",
-        "user_id" => 42}
+        "user_id" => 1}
     end
 
     test "renders errors when data is invalid", %{conn: conn} do
@@ -67,7 +67,7 @@ defmodule OmscoreWeb.MemberControllerTest do
         "last_name" => "some updated last_name",
         "phone" => "+1212345679",
         "seo_url" => "some_updated_seo_url",
-        "user_id" => 43}
+        "user_id" => 1}
     end
 
     test "renders errors when data is invalid", %{conn: conn, member: member} do
