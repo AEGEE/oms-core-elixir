@@ -87,7 +87,30 @@ defmodule Omscore.Members do
   end
 
   # Gets a single circle membership
-  def get_circle_membership!(id), do: Repo.get!(CircleMembership, id) |> Repo.preload([:member, :circle])
+  def get_circle_membership!(id), do: Repo.get!(CircleMembership, id)
+
+  # Gets a single circle membership by a circle and a member
+  def get_circle_membership(%Circle{} = circle, %Member{} = member), do: get_circle_membership(circle.id, member.id)
+  def get_circle_membership(circle_id, member_id) do
+    Repo.get_by(CircleMembership, %{member_id: member_id, circle_id: circle_id})
+  end 
+
+  # Checks if a member is a circle admin in the current circle or any of the parent circles
+  # Returns {true, circle_membership} or {false, nil}
+  def is_circle_admin(%Circle{} = circle, %Member{} = member), do: is_circle_admin(circle.id, member.id)
+  def is_circle_admin(circle_id, member_id) do
+    circle_membership = get_circle_membership(circle_id, member_id)
+    if circle_membership != nil && circle_membership.circle_admin do
+      {true, circle_membership}
+    else
+      circle = Omscore.Core.get_circle(circle_id)
+      if circle.parent_circle_id != nil do
+        is_circle_admin(circle.parent_circle_id, member_id)
+      else
+        {false, nil}
+      end
+    end
+  end
 
   # Creates a circle membership
   def create_circle_membership(%Circle{} = circle, %Member{} = member, attrs \\ %{}) do

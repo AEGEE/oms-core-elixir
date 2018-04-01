@@ -151,6 +151,7 @@ defmodule Omscore.Core do
 
   # Get a single circle
   def get_circle!(id), do: Repo.get!(Circle, id) |> Repo.preload([:permissions, :child_circles, :parent_circle])
+  def get_circle(id), do: Repo.get!(Circle, id)
 
 
   # Create a bound circle

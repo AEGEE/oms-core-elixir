@@ -176,7 +176,28 @@ defmodule Omscore.MembersTest do
 
     test "get_circle_membership!/1 returns the circle_membership with given id" do
       {circle_membership, _, _} = circle_membership_fixture()
-      assert Members.get_circle_membership!(circle_membership.id) == circle_membership
+      assert Members.get_circle_membership!(circle_membership.id) |> Repo.preload([:circle, :member]) == circle_membership
+    end
+
+    test "get_circle_membership/2 returns the circle membership between the given circle and member" do
+      {circle_membership, circle, member} = circle_membership_fixture()
+      assert Members.get_circle_membership(circle, member) |> Repo.preload([:circle, :member]) == circle_membership
+    end
+
+    test "is_circle_admin/2 checks if a user is admin in the current circle" do
+      {_circle_membership, circle, member} = circle_membership_fixture(%{circle_admin: true})
+      assert {true, _cm} = Members.is_circle_admin(circle, member)
+
+      {_circle_membership, circle, member} = circle_membership_fixture(%{circle_admin: false})
+      assert {false, nil} = Members.is_circle_admin(circle, member)
+    end
+
+    test "is_circle_admin/2 also checks parent circles for circle_admin rights" do
+      {_circle_membership, circle1, member} = circle_membership_fixture(%{circle_admin: true})
+      circle2 = circle_fixture()
+      assert {:ok, _} = Omscore.Core.put_child_circles(circle1, [circle2])
+
+      assert {true, _cm} = Members.is_circle_admin(circle2, member)
     end
 
     test "create_circle_membership/1 with valid data creates a circle_membership" do
