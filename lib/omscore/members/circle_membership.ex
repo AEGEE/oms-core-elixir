@@ -16,7 +16,9 @@ defmodule Omscore.Members.CircleMembership do
   @doc false
   def changeset(circle_membership, attrs) do
     circle_membership
-    |> cast(attrs, [:position])
-    |> validate_required([])
+    |> cast(attrs, [:position, :circle_admin])
+    |> validate_required([:circle_admin])
+    |> foreign_key_constraint(:circle_id)
+    |> foreign_key_constraint(:member_id)
   end
 end

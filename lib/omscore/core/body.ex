@@ -12,6 +12,9 @@ defmodule Omscore.Core.Body do
     field :phone, :string
 
     has_many :circles, Omscore.Core.Circle
+    many_to_many :members, Omscore.Members.Member, join_through: Omscore.Members.BodyMembership
+    has_many :join_requests, Omscore.Members.JoinRequest
+    has_many :body_memberships, Omscore.Members.BodyMembership
 
     timestamps()
   end

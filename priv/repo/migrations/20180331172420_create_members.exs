@@ -11,7 +11,7 @@ defmodule Omscore.Repo.Migrations.CreateMembers do
       add :phone, :string
       add :seo_url, :string
       add :address, :string
-      add :about_me, :string
+      add :about_me, :text
       add :primary_body_id, references(:bodies, on_delete: :nothing)
 
       timestamps()

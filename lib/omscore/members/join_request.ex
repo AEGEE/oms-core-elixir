@@ -9,14 +9,16 @@ defmodule Omscore.Members.JoinRequest do
 
     belongs_to :member, Omscore.Members.Member
     belongs_to :body, Omscore.Core.Body
-    
+
     timestamps()
   end
 
   @doc false
   def changeset(join_request, attrs) do
     join_request
-    |> cast(attrs, [:motivation, :approved, :body_id])
-    |> validate_required([:motivation, :approved, :body_id])
+    |> cast(attrs, [:motivation])
+    |> validate_required([:motivation, :approved])
+    |> foreign_key_constraint(:body_id)
+    |> foreign_key_constraint(:member_id)
   end
 end

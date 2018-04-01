@@ -257,6 +257,20 @@ defmodule Omscore.CoreTest do
       assert circle.joinable == circle_new.joinable
     end
 
+    @tag only: true
+    test "update_circle/2 prohibits making a circle joinable whos parent is non-joinable" do
+      circle1 = circle_fixture(%{joinable: false})
+      circle2 = circle_fixture(%{joinable: false})
+      Core.put_child_circles(circle1, [circle2])
+      circle2 = Core.get_circle!(circle2.id)
+
+      assert {:error, _msg} = Core.update_circle(circle2, @update_attrs |> Map.put(:joinable, true))
+      assert circle_new = Core.get_circle!(circle2.id)
+      assert circle2.name == circle_new.name
+      assert circle2.description == circle_new.description
+      assert circle2.joinable == circle_new.joinable
+    end
+
     test "delete_circle/1 deletes the circle" do
       circle = circle_fixture()
       assert {:ok, %Circle{}} = Core.delete_circle(circle)
@@ -304,23 +318,47 @@ defmodule Omscore.CoreTest do
       assert circle2.parent_circle.id == circle1.id
     end
 
+    test "put_child_circles/2 forbids to put joinable child circles to a non-joinable parent circle" do
+      circle1 = circle_fixture(%{joinable: false})
+      circle2 = circle_fixture(%{joinable: true})
+
+      assert {:error, _msg} = Core.put_child_circles(circle1, [circle2])
+      assert circle1 = Core.get_circle!(circle1.id)
+      assert Ecto.assoc_loaded?(circle1.child_circles)
+      assert circle1.child_circles == []
+
+      assert circle2 = Core.get_circle!(circle2.id)
+      assert circle2.parent_circle == nil
+    end
+
     test "get_permissions_recursive/1 returns all permissions from the current circle and all parent circles" do
       circle1 = circle_fixture()
       circle2 = circle_fixture()
       circle3 = circle_fixture()
+      circle4 = circle_fixture()
       permission1 = permission_fixture()
       permission2 = permission_fixture(%{action: "some other action"})
+      permission3 = permission_fixture(%{action: "even other action"})
 
       assert {:ok, _} = Core.put_circle_permissions(circle1, [permission1])
       assert {:ok, _} = Core.put_circle_permissions(circle3, [permission2])
-      assert {:ok, _} = Core.put_child_circles(circle1, [circle2])
+      assert {:ok, _} = Core.put_circle_permissions(circle4, [permission3])
+      assert {:ok, _} = Core.put_child_circles(circle1, [circle2, circle4])
       assert {:ok, _} = Core.put_child_circles(circle2, [circle3])
 
       circle3 = Core.get_circle!(circle3.id)
 
+      # Test single circle version
       assert permission_list = Core.get_permissions_recursive(circle3)
       assert Enum.any?(permission_list, fn(x) -> x.id == permission1.id end)
       assert Enum.any?(permission_list, fn(x) -> x.id == permission2.id end)
+      assert !Enum.any?(permission_list, fn(x) -> x.id == permission3.id end)
+
+      # Test version for a list of circles
+      assert permission_list = Core.get_permissions_recursive([circle3, circle4])
+      assert Enum.any?(permission_list, fn(x) -> x.id == permission1.id end)
+      assert Enum.any?(permission_list, fn(x) -> x.id == permission2.id end)
+      assert Enum.any?(permission_list, fn(x) -> x.id == permission3.id end)
     end
   end
 end

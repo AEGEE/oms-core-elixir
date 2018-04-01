@@ -4,8 +4,8 @@ defmodule OmscoreWeb.MemberControllerTest do
   alias Omscore.Members
   alias Omscore.Members.Member
 
-  @create_attrs %{about_me: "some about_me", address: "some address", date_of_birth: ~D[2010-04-17], first_name: "some first_name", gender: "some gender", last_name: "some last_name", phone: "some phone", seo_url: "some seo_url", user_id: 42}
-  @update_attrs %{about_me: "some updated about_me", address: "some updated address", date_of_birth: ~D[2011-05-18], first_name: "some updated first_name", gender: "some updated gender", last_name: "some updated last_name", phone: "some updated phone", seo_url: "some updated seo_url", user_id: 43}
+  @create_attrs %{about_me: "some about_me", address: "some address", date_of_birth: ~D[2010-04-17], first_name: "some first_name", gender: "some gender", last_name: "some last_name", phone: "+1212345678", seo_url: "some_seo_url", user_id: 42}
+  @update_attrs %{about_me: "some updated about_me", address: "some updated address", date_of_birth: ~D[2011-05-18], first_name: "some updated first_name", gender: "some updated gender", last_name: "some updated last_name", phone: "+1212345679", seo_url: "some_updated_seo_url", user_id: 43}
   @invalid_attrs %{about_me: nil, address: nil, date_of_birth: nil, first_name: nil, gender: nil, last_name: nil, phone: nil, seo_url: nil, user_id: nil}
 
   def fixture(:member) do
@@ -38,8 +38,8 @@ defmodule OmscoreWeb.MemberControllerTest do
         "first_name" => "some first_name",
         "gender" => "some gender",
         "last_name" => "some last_name",
-        "phone" => "some phone",
-        "seo_url" => "some seo_url",
+        "phone" => "+1212345678",
+        "seo_url" => "some_seo_url",
         "user_id" => 42}
     end
 
@@ -65,8 +65,8 @@ defmodule OmscoreWeb.MemberControllerTest do
         "first_name" => "some updated first_name",
         "gender" => "some updated gender",
         "last_name" => "some updated last_name",
-        "phone" => "some updated phone",
-        "seo_url" => "some updated seo_url",
+        "phone" => "+1212345679",
+        "seo_url" => "some_updated_seo_url",
         "user_id" => 43}
     end
 

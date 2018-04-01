@@ -204,6 +204,21 @@ defmodule Omscore.Core do
   # Puts child circles for a circle
   # You should preload circles with find_circles if the data came from the user
   def put_child_circles(%Circle{} = circle, child_circles) do
+    with {:ok} <- check_joinable_consistency(circle, child_circles),
+        circle <- put_child_circles_unchecked(circle, child_circles) do
+      circle
+    end
+  end
+
+  defp check_joinable_consistency(circle, child_circles) do
+    if !circle.joinable && Enum.any?(child_circles, fn(x) -> x.joinable end) do
+      {:error, "A non-joinable parent circle can not have a joinable child"}
+    else
+      {:ok}
+    end
+  end
+
+  defp put_child_circles_unchecked(circle, child_circles) do
     circle
     |> Repo.preload([:child_circles])
     |> Circle.changeset(%{})
@@ -212,7 +227,7 @@ defmodule Omscore.Core do
   end
 
   # Returns all permissions that are attached to this circle or any of its parent circles
-  def get_permissions_recursive(circle) do
+  def get_permissions_recursive(%Circle{} = circle) do
     circle = Repo.preload(circle, [:parent_circle, :permissions])
 
     permissions = circle.permissions
@@ -222,4 +237,13 @@ defmodule Omscore.Core do
       permissions
     end
   end
+
+  # Returns all permissions that are attached to any of the circles in the list or any of their parent circles
+  # Some performance optimization by async execution
+  def get_permissions_recursive([first | rest]) do
+    task = Task.async(fn -> get_permissions_recursive(rest) end)
+    permissions = get_permissions_recursive(first)
+    permissions ++ Task.await(task)
+  end
+  def get_permissions_recursive([]), do: []
 end

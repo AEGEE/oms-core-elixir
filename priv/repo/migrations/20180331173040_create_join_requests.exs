@@ -3,7 +3,7 @@ defmodule Omscore.Repo.Migrations.CreateJoinRequests do
 
   def change do
     create table(:join_requests) do
-      add :motivation, :string
+      add :motivation, :text
       add :approved, :boolean, default: false, null: false
       add :member_id, references(:members, on_delete: :nothing)
       add :body_id, references(:bodies, on_delete: :nothing)

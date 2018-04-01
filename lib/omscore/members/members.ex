@@ -7,6 +7,7 @@ defmodule Omscore.Members do
   alias Omscore.Repo
 
   alias Omscore.Members.Member
+  alias Omscore.Core.Circle
 
   # Returns all members
   def list_members do
@@ -47,7 +48,7 @@ defmodule Omscore.Members do
     query = if outstanding_only do
       from u in JoinRequest, where: u.body_id == ^body.id
     else
-      from u in JoinRequest, where: u.body_id == ^body.id && !u.approved
+      from u in JoinRequest, where: u.body_id == ^body.id and not(u.approved)
     end 
     Repo.all(query)
   end
@@ -56,121 +57,60 @@ defmodule Omscore.Members do
   def get_join_request!(id), do: Repo.get!(JoinRequest, id)
 
   # Creates a join request
-  def create_join_request(attrs \\ %{}) do
+  def create_join_request(body, attrs \\ %{}) do
     %JoinRequest{}
     |> JoinRequest.changeset(attrs)
+    |> Ecto.Changeset.put_assoc(:body, body)
     |> Repo.insert()
   end
 
-  # Updates a join request
-  def update_join_request(%JoinRequest{} = join_request, attrs) do
-    join_request
-    |> JoinRequest.changeset(attrs)
-    |> Repo.update()
-  end
-
-  # Deletes a join request
-  def delete_join_request(%JoinRequest{} = join_request) do
-    Repo.delete(join_request)
-  end
-
-  # Creates a JoinRequest changeset
-  def change_join_request(%JoinRequest{} = join_request) do
-    JoinRequest.changeset(join_request, %{})
-  end
 
   alias Omscore.Members.CircleMembership
 
-  @doc """
-  Returns the list of circle_memberships.
-
-  ## Examples
-
-      iex> list_circle_memberships()
-      [%CircleMembership{}, ...]
-
-  """
-  def list_circle_memberships do
-    Repo.all(CircleMembership)
+  # Returns the list of members in the circle
+  def list_circle_memberships(%Circle{} = circle) do
+    query = from u in CircleMembership, where: u.circle_id == ^circle.id, preload: [:member]
+    Repo.all(query)
   end
 
-  @doc """
-  Gets a single circle_membership.
+  # Returns the list of circles for a member
+  def list_circle_memberships(%Member{} = member) do
+    query = from u in CircleMembership, where: u.member_id == ^member.id, preload: [:circle]
+    Repo.all(query)
+  end
 
-  Raises `Ecto.NoResultsError` if the Circle membership does not exist.
+  # Returns the list of circle memberships for a member with bound circles
+  def list_circle_memberships(%Member{} = member, %Omscore.Core.Body{} = body) do
+    query = from u in CircleMembership, where: u.member_id == ^member.id, preload: [circle: [:body]]
+    Repo.all(query)
+    |> Enum.filter(fn(x) -> x.circle.body_id == body.id end)
+  end
 
-  ## Examples
+  # Gets a single circle membership
+  def get_circle_membership!(id), do: Repo.get!(CircleMembership, id) |> Repo.preload([:member, :circle])
 
-      iex> get_circle_membership!(123)
-      %CircleMembership{}
-
-      iex> get_circle_membership!(456)
-      ** (Ecto.NoResultsError)
-
-  """
-  def get_circle_membership!(id), do: Repo.get!(CircleMembership, id)
-
-  @doc """
-  Creates a circle_membership.
-
-  ## Examples
-
-      iex> create_circle_membership(%{field: value})
-      {:ok, %CircleMembership{}}
-
-      iex> create_circle_membership(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def create_circle_membership(attrs \\ %{}) do
+  # Creates a circle membership
+  def create_circle_membership(%Circle{} = circle, %Member{} = member, attrs \\ %{}) do
     %CircleMembership{}
     |> CircleMembership.changeset(attrs)
+    |> Ecto.Changeset.put_assoc(:member, member)
+    |> Ecto.Changeset.put_assoc(:circle, circle)
     |> Repo.insert()
   end
 
-  @doc """
-  Updates a circle_membership.
-
-  ## Examples
-
-      iex> update_circle_membership(circle_membership, %{field: new_value})
-      {:ok, %CircleMembership{}}
-
-      iex> update_circle_membership(circle_membership, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
+  # Updates a circle membership
   def update_circle_membership(%CircleMembership{} = circle_membership, attrs) do
     circle_membership
     |> CircleMembership.changeset(attrs)
     |> Repo.update()
   end
 
-  @doc """
-  Deletes a CircleMembership.
-
-  ## Examples
-
-      iex> delete_circle_membership(circle_membership)
-      {:ok, %CircleMembership{}}
-
-      iex> delete_circle_membership(circle_membership)
-      {:error, %Ecto.Changeset{}}
-
-  """
+  # Deletes a circle membership
   def delete_circle_membership(%CircleMembership{} = circle_membership) do
     Repo.delete(circle_membership)
   end
 
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking circle_membership changes.
-
-  ## Examples
-
-      iex> change_circle_membership(circle_membership)
-      %Ecto.Changeset{source: %CircleMembership{}}
-
-  """
+  # Creates a CircleMembership changeset
   def change_circle_membership(%CircleMembership{} = circle_membership) do
     CircleMembership.changeset(circle_membership, %{})
   end
