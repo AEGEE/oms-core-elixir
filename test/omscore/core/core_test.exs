@@ -257,7 +257,6 @@ defmodule Omscore.CoreTest do
       assert circle.joinable == circle_new.joinable
     end
 
-    @tag only: true
     test "update_circle/2 prohibits making a circle joinable whos parent is non-joinable" do
       circle1 = circle_fixture(%{joinable: false})
       circle2 = circle_fixture(%{joinable: false})
@@ -359,6 +358,18 @@ defmodule Omscore.CoreTest do
       assert Enum.any?(permission_list, fn(x) -> x.id == permission1.id end)
       assert Enum.any?(permission_list, fn(x) -> x.id == permission2.id end)
       assert Enum.any?(permission_list, fn(x) -> x.id == permission3.id end)
+    end
+
+    test "circles_have_same_body?/1 checks if all circles are from the same body" do
+      body = body_fixture()
+      {:ok, circle1} = Core.create_circle(@valid_attrs, body)
+      {:ok, circle2} = Core.create_circle(@valid_attrs, body)
+      {:ok, circle3} = Core.create_circle(@valid_attrs, body)
+      {:ok, circle4} = Core.create_circle(@valid_attrs)
+
+      assert Core.circles_have_same_body?([circle1, circle2, circle3]) == true
+      assert Core.circles_have_same_body?([circle1, circle2, circle3, circle4]) == false
+      assert Core.circles_have_same_body?([]) == true
     end
   end
 end

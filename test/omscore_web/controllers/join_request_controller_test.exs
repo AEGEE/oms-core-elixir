@@ -29,11 +29,11 @@ defmodule OmscoreWeb.JoinRequestControllerTest do
     end
   end
 
-  describe "create join_request" do
-    test "renders join_request when data is valid", %{conn: conn} do
-      body = body_fixture()
-      conn = post conn, body_join_request_path(conn, :create, body.id), join_request: @create_attrs
-      assert %{"id" => _id} = json_response(conn, 201)["data"]
-    end
-  end
+  #describe "create join_request" do
+  #  test "renders join_request when data is valid", %{conn: conn} do
+  #    body = body_fixture()
+  #    conn = post conn, body_join_request_path(conn, :create, body.id), join_request: @create_attrs
+  #    assert %{"id" => _id} = json_response(conn, 201)["data"]
+  #  end
+  #end
 end

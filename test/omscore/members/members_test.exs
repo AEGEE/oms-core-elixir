@@ -6,6 +6,8 @@ defmodule Omscore.MembersTest do
   describe "members" do
     alias Omscore.Members.Member
 
+    @permission_attrs %{action: "some action", description: "some description", object: "some object", scope: "global"}
+
     @valid_attrs %{about_me: "some about_me", address: "some address", date_of_birth: ~D[2010-04-17], first_name: "some first_name", gender: "some gender", last_name: "some last_name", phone: "+1212345678", seo_url: "some_seo_url", user_id: 42}
     @update_attrs %{about_me: "some updated about_me", address: "some updated address", date_of_birth: ~D[2011-05-18], first_name: "some updated first_name", gender: "some updated gender", last_name: "some updated last_name", phone: "+1212345679", seo_url: "some_updated_seo_url", user_id: 43}
     @invalid_attrs %{about_me: nil, address: nil, date_of_birth: nil, first_name: nil, gender: nil, last_name: nil, phone: nil, seo_url: nil, user_id: nil}
@@ -17,6 +19,15 @@ defmodule Omscore.MembersTest do
         |> Members.create_member()
 
       member
+    end
+
+    def permission_fixture(attrs \\ %{}) do
+      {:ok, permission} =
+        attrs
+        |> Enum.into(@permission_attrs)
+        |> Omscore.Core.create_permission()
+
+      permission
     end
 
     test "list_members/0 returns all members" do
@@ -77,6 +88,65 @@ defmodule Omscore.MembersTest do
       member = member_fixture()
       assert %Ecto.Changeset{} = Members.change_member(member)
     end
+
+    test "get_global_permissions/1 returns all global permissions of the user" do
+      {_, circle1, member} = circle_membership_fixture()
+      circle2 = circle_fixture()
+      circle3 = circle_fixture()
+      circle4 = circle_fixture()
+      permission1 = permission_fixture(%{scope: "global", action: "some action"})
+      permission2 = permission_fixture(%{scope: "local", action: "some other action"})
+      permission3 = permission_fixture(%{scope: "global", action: "even other action"})
+
+      assert {:ok, _} = Omscore.Core.put_circle_permissions(circle1, [permission1])
+      assert {:ok, _} = Omscore.Core.put_circle_permissions(circle3, [permission2])
+      assert {:ok, _} = Omscore.Core.put_circle_permissions(circle4, [permission3])
+      assert {:ok, _} = Omscore.Core.put_child_circles(circle3, [circle2, circle4])
+      assert {:ok, _} = Omscore.Core.put_child_circles(circle2, [circle1])
+
+      permissions = Members.get_global_permissions(member)
+      assert Enum.any?(permissions, fn(x) -> x.action == "some action" end)
+      assert !Enum.any?(permissions, fn(x) -> x.action == "some other action" end)
+      assert !Enum.any?(permissions, fn(x) -> x.action == "even other action" end)
+    end
+
+    test "get_local_permissions/2 returns all permissions the user obtained in context with the body" do
+      body = body_fixture()
+      member = member_fixture()
+      circle1 = circle_fixture()
+      circle2 = circle_fixture()
+      circle3 = bound_circle_fixture(body)
+      circle4 = bound_circle_fixture(body)
+      circle5 = circle_fixture()
+      permission1 = permission_fixture(%{scope: "global", action: "some action"})
+      permission2 = permission_fixture(%{scope: "local", action: "some other action"})
+      permission3 = permission_fixture(%{scope: "global", action: "even other action"})
+      permission4 = permission_fixture(%{scope: "local", action: "most other action"})
+      permission5 = permission_fixture(%{scope: "global", action: "same action"})
+      permission6 = permission_fixture(%{scope: "local", action: "nothing"})
+      permission7 = permission_fixture(%{scope: "local", action: "some action"})
+
+      assert {:ok, _} = Omscore.Core.put_circle_permissions(circle1, [permission1, permission6, permission7])
+      assert {:ok, _} = Omscore.Core.put_circle_permissions(circle3, [permission2])
+      assert {:ok, _} = Omscore.Core.put_circle_permissions(circle4, [permission3])
+      assert {:ok, _} = Omscore.Core.put_circle_permissions(circle5, [permission4, permission5])
+      assert {:ok, _} = Omscore.Core.put_child_circles(circle1, [circle2, circle4])
+      assert {:ok, _} = Omscore.Core.put_child_circles(circle2, [circle3])
+
+      assert {:ok, _} = Members.create_body_membership(body, member)
+      assert {:ok, _} = Members.create_circle_membership(circle3, member)
+      assert {:ok, _} = Members.create_circle_membership(circle5, member)
+
+
+      permissions = Members.get_all_permissions(member, body)
+      assert Enum.any?(permissions, fn(x) -> x.id == permission1.id end)  # Permission 1 should be inherited
+      assert Enum.any?(permissions, fn(x) -> x.id == permission2.id end)  # Permission 2 comes directly from circle membership
+      assert !Enum.any?(permissions, fn(x) -> x.id == permission3.id end) # Permission 3 is not in the parent hierarchy from circle3 upwards
+      assert !Enum.any?(permissions, fn(x) -> x.id == permission4.id end) # Permission 4 is a local permission which is not directly or indirectly attached to the members body, so should not be in the result set
+      assert Enum.any?(permissions, fn(x) -> x.id == permission5.id end)  # Permission 5 is a global permission in the same circle as 4, but global permissions are included independent of where the member got them
+      assert Enum.any?(permissions, fn(x) -> x.id == permission6.id end)  # Permission 6 is a local permission which is indirectly attached to the body and thus should be inherited
+      assert !Enum.any?(permissions, fn(x) -> x.id == permission7.id end) # Local permission should have been overwritten by global one with same action and object
+    end
   end
 
   describe "join_requests" do
@@ -89,13 +159,14 @@ defmodule Omscore.MembersTest do
 
     def join_request_fixture(attrs \\ %{}) do
       body = body_fixture()
+      member = member_fixture()
 
       attrs = attrs
       |> Enum.into(@valid_attrs)
         
-       {:ok, join_request} = Members.create_join_request(body, attrs)
+       {:ok, join_request} = Members.create_join_request(body, member, attrs)
 
-      {join_request, body}
+      {join_request, body, member}
     end
 
     def body_fixture(attrs \\ %{}) do
@@ -108,12 +179,12 @@ defmodule Omscore.MembersTest do
     end
 
     test "list_join_requests/0 returns all join_requests" do
-      {join_request, body} = join_request_fixture()
+      {join_request, body, _} = join_request_fixture()
       assert Members.list_join_requests(body) |> Enum.any?(fn(x) -> x.id == join_request.id && x.motivation == join_request.motivation end)
     end
 
     test "get_join_request!/1 returns the join_request with given id" do
-      {join_request, _} = join_request_fixture()
+      {join_request, _, _} = join_request_fixture()
       assert new_request = Members.get_join_request!(join_request.id)
       assert new_request.id == join_request.id
       assert new_request.motivation == join_request.motivation
@@ -121,10 +192,27 @@ defmodule Omscore.MembersTest do
 
     test "create_join_request/1 with valid data creates a join_request" do
       body = body_fixture()
+      member = member_fixture()
 
-      assert {:ok, %JoinRequest{} = join_request} = Members.create_join_request(body, @valid_attrs)
+      assert {:ok, %JoinRequest{} = join_request} = Members.create_join_request(body, member, @valid_attrs)
       assert join_request.approved == false
       assert join_request.motivation == "some motivation"
+    end
+
+    test "reject_join_request/1 deletes a join request" do
+      {join_request, _body, _member} = join_request_fixture()
+
+      Members.reject_join_request(join_request)
+      assert_raise Ecto.NoResultsError, fn -> Members.get_join_request!(join_request.id) end
+    end
+
+    test "approve_join_request/1 approves a join request and creates a body membership" do
+      {join_request, body, member} = join_request_fixture()
+
+      assert {:ok, _body_membership} = Members.approve_join_request(join_request)
+      assert join_request = Members.get_join_request!(join_request.id)
+      assert join_request.approved == true
+      assert Omscore.Core.get_body_members(body) |> Enum.any?(fn(x) -> x.id == member.id end)
     end
   end
 
@@ -141,6 +229,15 @@ defmodule Omscore.MembersTest do
         attrs
         |> Enum.into(@circle_attrs)
         |> Omscore.Core.create_circle()
+
+      circle
+    end
+
+    def bound_circle_fixture(body, attrs \\ %{}) do
+      {:ok, circle} =
+        attrs
+        |> Enum.into(@circle_attrs)
+        |> Omscore.Core.create_circle(body)
 
       circle
     end

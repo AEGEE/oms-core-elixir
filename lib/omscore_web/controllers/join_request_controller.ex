@@ -15,7 +15,7 @@ defmodule OmscoreWeb.JoinRequestController do
   def create(conn, %{"body_id" => body_id, "join_request" => join_request_params}) do
     body = Omscore.Core.get_body!(body_id)
 
-    with {:ok, %JoinRequest{} = join_request} <- Members.create_join_request(body, join_request_params) do
+    with {:ok, %JoinRequest{} = join_request} <- Members.create_join_request(body, conn.assigns.member, join_request_params) do
       conn
       |> put_status(:created)
       |> render("show.json", join_request: join_request)

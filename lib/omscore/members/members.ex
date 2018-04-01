@@ -8,6 +8,7 @@ defmodule Omscore.Members do
 
   alias Omscore.Members.Member
   alias Omscore.Core.Circle
+  alias Omscore.Members.BodyMembership
 
   # Returns all members
   def list_members do
@@ -41,6 +42,34 @@ defmodule Omscore.Members do
     Member.changeset(member, %{})
   end
 
+  # Gathers all global permissions that the member obtained through any of his circle memberships
+  def get_global_permissions(%Member{} = member) do
+    member
+    |> list_circle_memberships()                      # Get all circle memberships of the member
+    |> Enum.map(fn(x) -> x.circle end)                # Strip the circle_membership part
+    |> Omscore.Core.get_permissions_recursive()       # Gather all permissions on any of the circles
+    |> Enum.filter(fn(x) -> x.scope == "global" end)  # Filter out non-global permissions
+    |> Omscore.Core.reduce_permission_list()          # Remove duplicates
+  end
+
+  # Get all local permissions that the user has through his membership in the body
+  defp get_local_permissions(%Member{} = member, %Omscore.Core.Body{} = body) do
+    member
+    |> list_circle_memberships(body)                  # Get all circle memberships of the member in that body
+    |> Enum.map(fn(x) -> x.circle end)                # Strip the circle_membership part
+    |> Omscore.Core.get_permissions_recursive()       # Gather all permissions on any of the circles
+    |> Omscore.Core.reduce_permission_list()          # Remove duplicates and overwrite local permissions with global permission, thus no need to filter before
+  end
+
+  # A bit of a lazy implementation of a get all permissions from the body plus all global ones
+  def get_all_permissions(%Member{} = member, %Omscore.Core.Body{} = body) do
+    task = Task.async(fn -> get_global_permissions(member) end)
+    
+    get_local_permissions(member, body)
+    |> Enum.into(Task.await(task))
+    |> Omscore.Core.reduce_permission_list()
+  end
+
   alias Omscore.Members.JoinRequest
 
   # Get all join requests for a body
@@ -57,11 +86,41 @@ defmodule Omscore.Members do
   def get_join_request!(id), do: Repo.get!(JoinRequest, id)
 
   # Creates a join request
-  def create_join_request(body, attrs \\ %{}) do
+  def create_join_request(%Omscore.Core.Body{} = body, %Member{} = member, attrs \\ %{}) do
     %JoinRequest{}
     |> JoinRequest.changeset(attrs)
     |> Ecto.Changeset.put_assoc(:body, body)
+    |> Ecto.Changeset.put_assoc(:member, member)
     |> Repo.insert()
+  end
+
+  def create_body_membership(%Omscore.Core.Body{} = body, %Member{} = member) do
+    %BodyMembership{}
+    |> BodyMembership.changeset(%{})
+    |> Ecto.Changeset.put_assoc(:body, body)
+    |> Ecto.Changeset.put_assoc(:member, member)
+    |> Repo.insert()
+  end
+
+  # Approving a join request means creating a body membership and setting the join request to approved
+  def approve_join_request(%JoinRequest{} = join_request) do
+    Repo.transaction fn ->
+      join_request = join_request
+      |> Repo.preload([:body, :member])
+      |> JoinRequest.changeset(%{})
+      |> Ecto.Changeset.put_change(:approved, true)
+      |> Repo.update!()
+
+      case create_body_membership(join_request.body, join_request.member) do
+        {:ok, membership} -> {:ok, membership}
+        {:error, msg} -> Repo.rollback(msg)
+      end
+    end
+  end
+
+  # Rejecting a join request means just deleting it
+  def reject_join_request(%JoinRequest{} = join_request) do
+    join_request |> Repo.delete!
   end
 
 
@@ -81,7 +140,7 @@ defmodule Omscore.Members do
 
   # Returns the list of circle memberships for a member with bound circles
   def list_circle_memberships(%Member{} = member, %Omscore.Core.Body{} = body) do
-    query = from u in CircleMembership, where: u.member_id == ^member.id, preload: [circle: [:body]]
+    query = from u in CircleMembership, where: u.member_id == ^member.id, preload: [:circle]
     Repo.all(query)
     |> Enum.filter(fn(x) -> x.circle.body_id == body.id end)
   end
@@ -114,6 +173,7 @@ defmodule Omscore.Members do
 
   # Creates a circle membership
   def create_circle_membership(%Circle{} = circle, %Member{} = member, attrs \\ %{}) do
+    
     %CircleMembership{}
     |> CircleMembership.changeset(attrs)
     |> Ecto.Changeset.put_assoc(:member, member)

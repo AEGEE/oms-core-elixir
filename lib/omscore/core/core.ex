@@ -111,6 +111,12 @@ defmodule Omscore.Core do
   # Gets a single body, circles preloaded
   def get_body!(id), do: Repo.get!(Body, id) |> Repo.preload([:circles])
 
+  def get_body_members(body) do
+    body 
+    |> Repo.preload(:members) 
+    |> Map.get(:members)
+  end
+
   # Creates a body.
   def create_body(attrs \\ %{}) do
     %Body{}
@@ -247,4 +253,15 @@ defmodule Omscore.Core do
     permissions ++ Task.await(task)
   end
   def get_permissions_recursive([]), do: []
+
+  # Checks if all the circles are from the same body
+  # I start liking recursion...
+  def circles_have_same_body?([x | rest]) do
+    circles_have_same_body?(rest, x.body_id)
+  end
+  def circles_have_same_body?([]), do: true
+  defp circles_have_same_body?([x | rest], body_id) do
+    x.body_id == body_id && circles_have_same_body?(rest, body_id)
+  end
+  defp circles_have_same_body?([], _), do: true
 end
