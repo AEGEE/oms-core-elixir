@@ -181,6 +181,23 @@ defmodule Omscore.Members do
     end
   end
 
+  # Checks if a member is in the current circle or any of the parent circles
+  # Returns {true, circle_membership} or {false, nil}
+  def is_circle_member(%Circle{} = circle, %Member{} = member), do: is_circle_member(circle.id, member.id)
+  def is_circle_member(circle_id, member_id) do
+    circle_membership = get_circle_membership(circle_id, member_id)
+    if circle_membership != nil do
+      {true, circle_membership}
+    else
+      circle = Omscore.Core.get_circle(circle_id)
+      if circle.parent_circle_id != nil do
+        is_circle_member(circle.parent_circle_id, member_id)
+      else
+        {false, nil}
+      end
+    end
+  end
+
   # Creates a circle membership
   def create_circle_membership(%Circle{} = circle, %Member{} = member, attrs \\ %{}) do
     with {:ok} <- test_body_membership(circle, member) do
