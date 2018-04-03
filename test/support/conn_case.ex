@@ -36,6 +36,56 @@ defmodule OmscoreWeb.ConnCase do
         Map.has_key?(map_to_check, should_be_in_there)
       end
 
+      @user_attrs %{id: 3, email: "some@email.com", superadmin: false, name: "some name"}
+      def create_token(attrs) do
+        user = Enum.into(attrs, @user_attrs)
+        {:ok, token, _claims} = Omscore.Guardian.encode_and_sign(user, %{name: user.name, email: user.email, superadmin: user.superadmin}, token_type: "access", ttl: {100, :seconds})
+        token  
+      end
+
+      @member_attrs %{about_me: "some about_me", address: "some address", date_of_birth: ~D[2010-04-17], first_name: "some first_name", gender: "some gender", last_name: "some last_name", phone: "+1212345678", seo_url: "some_seo_url", user_id: 3}
+      def member_fixture(attrs \\ %{}) do
+        attrs = Enum.into(attrs, @member_attrs)
+        {:ok, member} = Omscore.Members.create_member(attrs.user_id, attrs)
+
+        member
+      end
+
+      @permission_attrs %{action: "some action", description: "some description", object: "some object", scope: "global"}
+      def permission_fixture(attrs \\ %{}) do
+        {:ok, permission} =
+          attrs
+          |> Enum.into(@permission_attrs)
+          |> Omscore.Core.create_permission()
+
+        permission
+      end
+
+      @circle_attrs %{description: "some description", joinable: true, name: "some name"}
+      def circle_fixture(attrs \\ %{}) do
+        {:ok, circle} =
+          attrs
+          |> Enum.into(@circle_attrs)
+          |> Omscore.Core.create_circle()
+
+        circle
+      end
+
+      # Takes a map with permission attributes and creates a member, a circle and the permissions with the attributes and links them all together
+      def create_member_with_permissions(permissions) when not(is_list(permissions)), do: create_member_with_permissions([permissions])
+      def create_member_with_permissions(permissions) when is_list(permissions) do
+        id = :rand.uniform(100000)
+        member = member_fixture(%{user_id: id})
+        circle = circle_fixture()
+        token = create_token(%{id: id})
+
+        permissions = Enum.map(permissions, fn(x) -> permission_fixture(x) end)
+        Omscore.Core.put_circle_permissions(circle, permissions)
+        Omscore.Members.create_circle_membership(circle, member)
+
+        %{token: token, member: member, circle: circle, permissions: permissions}
+      end
+
       # The default endpoint for testing
       @endpoint OmscoreWeb.Endpoint
     end

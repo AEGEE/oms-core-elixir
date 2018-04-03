@@ -8,13 +8,13 @@ defmodule Omscore.MembersTest do
 
     @permission_attrs %{action: "some action", description: "some description", object: "some object", scope: "global"}
 
-    @valid_attrs %{about_me: "some about_me", address: "some address", date_of_birth: ~D[2010-04-17], first_name: "some first_name", gender: "some gender", last_name: "some last_name", phone: "+1212345678", seo_url: "some_seo_url", user_id: 42}
+    @valid_attrs %{about_me: "some about_me", address: "some address", date_of_birth: ~D[2010-04-17], first_name: "some first_name", gender: "some gender", last_name: "some last_name", phone: "+1212345678"}
     @update_attrs %{about_me: "some updated about_me", address: "some updated address", date_of_birth: ~D[2011-05-18], first_name: "some updated first_name", gender: "some updated gender", last_name: "some updated last_name", phone: "+1212345679", seo_url: "some_updated_seo_url", user_id: 43}
     @invalid_attrs %{about_me: nil, address: nil, date_of_birth: nil, first_name: nil, gender: nil, last_name: nil, phone: nil, seo_url: nil, user_id: nil}
 
     def member_fixture(attrs \\ %{}) do
       attrs = Enum.into(attrs, @valid_attrs)
-      {:ok, member} = Members.create_member(1, attrs)
+      {:ok, member} = Members.create_member(:rand.uniform(10000), attrs)
 
       member
     end
@@ -38,8 +38,13 @@ defmodule Omscore.MembersTest do
       assert Members.get_member!(member.id) == member
     end
 
+    test "get_member_by_userid/1 returns the member with given userid" do
+      member = member_fixture()
+      assert Members.get_member_by_userid(member.user_id) == member
+    end
+
     test "create_member/1 with valid data creates a member" do
-      assert {:ok, %Member{} = member} = Members.create_member(1, @valid_attrs)
+      assert {:ok, %Member{} = member} = Members.create_member(1, @valid_attrs |> Map.put(:seo_url, "some_seo_url"))
       assert member.about_me == "some about_me"
       assert member.address == "some address"
       assert member.date_of_birth == ~D[2010-04-17]
@@ -48,7 +53,6 @@ defmodule Omscore.MembersTest do
       assert member.last_name == "some last_name"
       assert member.phone == "+1212345678"
       assert member.seo_url == "some_seo_url"
-      assert member.user_id == 1
     end
 
     test "create_member/1 with invalid data returns error changeset" do
@@ -67,7 +71,6 @@ defmodule Omscore.MembersTest do
       assert member.last_name == "some updated last_name"
       assert member.phone == "+1212345679"
       assert member.seo_url == "some_updated_seo_url"
-      assert member.user_id == 1
     end
 
     test "update_member/2 with invalid data returns error changeset" do
@@ -95,6 +98,7 @@ defmodule Omscore.MembersTest do
       permission1 = permission_fixture(%{scope: "global", action: "some action"})
       permission2 = permission_fixture(%{scope: "local", action: "some other action"})
       permission3 = permission_fixture(%{scope: "global", action: "even other action"})
+      _permission4 = permission_fixture(%{scope: "global", action: "lazying around", always_assigned: true})
 
       assert {:ok, _} = Omscore.Core.put_circle_permissions(circle1, [permission1])
       assert {:ok, _} = Omscore.Core.put_circle_permissions(circle3, [permission2])
@@ -106,6 +110,7 @@ defmodule Omscore.MembersTest do
       assert Enum.any?(permissions, fn(x) -> x.action == "some action" end)
       assert !Enum.any?(permissions, fn(x) -> x.action == "some other action" end)
       assert !Enum.any?(permissions, fn(x) -> x.action == "even other action" end)
+      assert Enum.any?(permissions, fn(x) -> x.action == "lazying around" end)
     end
 
     # Impressive test case...

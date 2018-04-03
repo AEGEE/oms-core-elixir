@@ -19,15 +19,27 @@ defmodule OmscoreWeb.PermissionControllerTest do
 
   describe "index" do
     test "lists all permissions", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "view", object: "permission"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      permission = permission_fixture()
+
       conn = get conn, permission_path(conn, :index)
-      assert json_response(conn, 200)["data"] == []
+      assert json_response(conn, 200)["data"] |> Enum.any?(fn(x) -> x["id"] == permission.id end)
     end
   end
 
   describe "create permission" do
     test "renders permission when data is valid", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "create", object: "permission"}, %{action: "view", object: "permission"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
       conn = post conn, permission_path(conn, :create), permission: @create_attrs
       assert %{"id" => id} = json_response(conn, 201)["data"]
+
+      conn = conn
+      |> recycle()
+      |> put_req_header("x-auth-token", token)
 
       conn = get conn, permission_path(conn, :show, id)
       assert json_response(conn, 200)["data"] == %{
@@ -39,6 +51,9 @@ defmodule OmscoreWeb.PermissionControllerTest do
     end
 
     test "renders errors when data is invalid", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "create", object: "permission"}, %{action: "view", object: "permission"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
       conn = post conn, permission_path(conn, :create), permission: @invalid_attrs
       assert json_response(conn, 422)["errors"] != %{}
     end
@@ -48,8 +63,15 @@ defmodule OmscoreWeb.PermissionControllerTest do
     setup [:create_permission]
 
     test "renders permission when data is valid", %{conn: conn, permission: %Permission{id: id} = permission} do
+      %{token: token} = create_member_with_permissions([%{action: "update", object: "permission"}, %{action: "view", object: "permission"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
       conn = put conn, permission_path(conn, :update, permission), permission: @update_attrs
       assert %{"id" => ^id} = json_response(conn, 200)["data"]
+
+      conn = conn
+      |> recycle()
+      |> put_req_header("x-auth-token", token)
 
       conn = get conn, permission_path(conn, :show, id)
       assert json_response(conn, 200)["data"] == %{
@@ -61,6 +83,9 @@ defmodule OmscoreWeb.PermissionControllerTest do
     end
 
     test "renders errors when data is invalid", %{conn: conn, permission: permission} do
+      %{token: token} = create_member_with_permissions([%{action: "update", object: "permission"}, %{action: "view", object: "permission"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
       conn = put conn, permission_path(conn, :update, permission), permission: @invalid_attrs
       assert json_response(conn, 422)["errors"] != %{}
     end
@@ -70,8 +95,16 @@ defmodule OmscoreWeb.PermissionControllerTest do
     setup [:create_permission]
 
     test "deletes chosen permission", %{conn: conn, permission: permission} do
+      %{token: token} = create_member_with_permissions([%{action: "delete", object: "permission"}, %{action: "view", object: "permission"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
       conn = delete conn, permission_path(conn, :delete, permission)
       assert response(conn, 204)
+
+      conn = conn
+      |> recycle()
+      |> put_req_header("x-auth-token", token)
+
       assert_error_sent 404, fn ->
         get conn, permission_path(conn, :show, permission)
       end

@@ -7,6 +7,7 @@ defmodule Omscore.Repo.Migrations.CreatePermissions do
       add :action, :string
       add :object, :string
       add :description, :text
+      add :always_assigned, :boolean, null: false, default: false
 
       timestamps()
     end

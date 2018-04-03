@@ -5,6 +5,16 @@
 # is restricted to this project.
 use Mix.Config
 
+defmodule Helper do
+  def read_secret_from_file(nil, fallback), do: fallback
+  def read_secret_from_file(file, fallback) do
+    case File.read(file) do
+      {:ok, content} -> content
+      {:error, _} -> fallback
+    end
+  end
+end
+
 # General application configuration
 config :omscore,
   ecto_repos: [Omscore.Repo]
@@ -16,6 +26,11 @@ config :omscore, OmscoreWeb.Endpoint,
   render_errors: [view: OmscoreWeb.ErrorView, accepts: ~w(json)],
   pubsub: [name: Omscore.PubSub,
            adapter: Phoenix.PubSub.PG2]
+
+config :omscore, Omscore.Guardian,
+  issuer: System.get_env("JWT_ISSUER") || "OMS", 
+  secret_key: Helper.read_secret_from_file(System.get_env("JWT_SECRET_KEY_FILE"), "rrSTfyfvFlFj1JCl8QW/ritOLKzIncRPC5ic0l0ENVUoiSIPBCDrdU6Su5vZHngY")
+
 
 # Configures Elixir's Logger
 config :logger, :console,

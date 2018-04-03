@@ -21,7 +21,15 @@ defmodule Omscore.CoreTest do
 
     test "list_permissions/0 returns all permissions" do
       permission = permission_fixture()
-      assert Core.list_permissions() == [permission]
+      assert Core.list_permissions() |> Enum.any?(fn(x) -> x.id == permission.id end)
+    end
+
+    test "list_always_assigned_permissions returns all always assigned permissions" do
+      permission1 = permission_fixture()
+      permission2 = permission_fixture(%{always_assigned: true})
+      assert permissions = Core.list_always_assigned_permissions()
+      assert !Enum.any?(permissions, fn(x) -> x.id == permission1.id end)
+      assert Enum.any?(permissions, fn(x) -> x.id == permission2.id end)
     end
 
     test "get_permission!/1 returns the permission with given id" do

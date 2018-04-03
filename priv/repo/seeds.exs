@@ -37,10 +37,17 @@ if Repo.all(Permission) == [] do
 
   Repo.insert!(%Permission{
     scope: "global",
+    action: "view",
+    object: "permission",
+    description: "View permissions available in the system"
+  })
+
+  Repo.insert!(%Permission{
+    scope: "global",
     action: "create",
     object: "permission",
     description: "Create new permission objects which haven't been in the system yet, usually only good for microservices"
-    })
+  })
 
   Repo.insert!(%Permission{
     scope: "global",

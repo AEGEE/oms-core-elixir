@@ -17,6 +17,8 @@ defmodule Omscore.Members do
   # Gets a single member
   def get_member!(id), do: Repo.get!(Member, id)
 
+  def get_member_by_userid(userid), do: Repo.get_by(Member, %{user_id: userid})
+
   # Creates a member
   def create_member(user_id, attrs \\ %{}) when is_integer(user_id) do
     %Member{}
@@ -48,6 +50,7 @@ defmodule Omscore.Members do
     |> list_circle_memberships()                      # Get all circle memberships of the member
     |> Enum.map(fn(x) -> x.circle end)                # Strip the circle_membership part
     |> Omscore.Core.get_permissions_recursive()       # Gather all permissions on any of the circles
+    |> Enum.into(Omscore.Core.list_always_assigned_permissions())
     |> Enum.filter(fn(x) -> x.scope == "global" end)  # Filter out non-global permissions
     |> Omscore.Core.reduce_permission_list()          # Remove duplicates
   end

@@ -33,6 +33,12 @@ defmodule Omscore.Core do
     Repo.all(Permission)
   end
 
+  # Returns all always assigned permissions
+  def list_always_assigned_permissions do
+    query = from u in Permission, where: u.always_assigned == true
+    Repo.all(query)
+  end
+
   # Gets a single permission
   def get_permission!(id), do: Repo.get!(Permission, id)
 
