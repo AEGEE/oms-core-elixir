@@ -4,12 +4,6 @@ defmodule OmscoreWeb.JoinRequestControllerTest do
   alias Omscore.Members
 
   @create_attrs %{approved: true, motivation: "some motivation"}
-  @body_attrs %{address: "some address", description: "some description", email: "some email", legacy_key: "some legacy_key", name: "some name", phone: "some phone"}
-
-  def body_fixture() do
-    {:ok, body} = Omscore.Core.create_body(@body_attrs)
-    body
-  end
 
   def fixture(:join_request) do
     body = body_fixture()

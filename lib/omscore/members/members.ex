@@ -56,7 +56,7 @@ defmodule Omscore.Members do
   end
 
   # Get all local permissions that the user has through his membership in the body
-  defp get_local_permissions(%Member{} = member, %Omscore.Core.Body{} = body) do
+  def get_local_permissions(%Member{} = member, %Omscore.Core.Body{} = body) do
     member
     |> list_circle_memberships(body)                  # Get all circle memberships of the member in that body
     |> Enum.map(fn(x) -> x.circle end)                # Strip the circle_membership part

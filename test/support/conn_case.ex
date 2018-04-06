@@ -71,6 +71,17 @@ defmodule OmscoreWeb.ConnCase do
         circle
       end
 
+      @body_attrs %{address: "some address", description: "some description", email: "some email", legacy_key: "some legacy_key", name: "some name", phone: "some phone"}
+      def body_fixture(attrs \\ %{}) do
+        {:ok, body} =
+          attrs
+          |> Enum.into(@body_attrs)
+          |> Omscore.Core.create_body()
+
+        body
+      end
+
+
       # Takes a map with permission attributes and creates a member, a circle and the permissions with the attributes and links them all together
       def create_member_with_permissions(permissions) when not(is_list(permissions)), do: create_member_with_permissions([permissions])
       def create_member_with_permissions(permissions) when is_list(permissions) do
