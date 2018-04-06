@@ -112,7 +112,8 @@ defmodule Omscore.CoreTest do
 
     test "search_permission/1 finds permissions" do
       permission_list = [permission_fixture()] ++ [permission_fixture(@update_attrs)]
-      assert Core.search_permission_list(permission_list, @valid_attrs.action, @valid_attrs.object).scope == @valid_attrs.scope
+      assert {:ok, res} = Core.search_permission_list(permission_list, @valid_attrs.action, @valid_attrs.object)
+      assert res.scope == @valid_attrs.scope
     end
   end
 

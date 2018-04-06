@@ -5,7 +5,7 @@ defmodule OmscoreWeb.PermissionControllerTest do
   alias Omscore.Core.Permission
 
   @create_attrs %{action: "some action", description: "some description", object: "some object", scope: "global"}
-  @update_attrs %{action: "some updated action", description: "some updated description", object: "some updated object", scope: "local"}
+  @update_attrs %{action: "some updated action", description: "some updated description", object: "some updated object", scope: "local", always_assigned: true}
   @invalid_attrs %{action: nil, description: nil, object: nil, scope: nil}
 
   def fixture(:permission) do
@@ -14,6 +14,8 @@ defmodule OmscoreWeb.PermissionControllerTest do
   end
 
   setup %{conn: conn} do
+    Omscore.Repo.delete_all(Permission) # So no auto-assigned permissions can ruin testing without permissions
+
     {:ok, conn: put_req_header(conn, "accept", "application/json")}
   end
 
@@ -26,6 +28,16 @@ defmodule OmscoreWeb.PermissionControllerTest do
 
       conn = get conn, permission_path(conn, :index)
       assert json_response(conn, 200)["data"] |> Enum.any?(fn(x) -> x["id"] == permission.id end)
+    end
+
+    test "rejects request to unauthorized user", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      permission_fixture()
+      
+      conn = get conn, permission_path(conn, :index)
+      assert json_response(conn, 403)
     end
   end
 
@@ -47,7 +59,8 @@ defmodule OmscoreWeb.PermissionControllerTest do
         "action" => "some action",
         "description" => "some description",
         "object" => "some object",
-        "scope" => "global"}
+        "scope" => "global",
+        "always_assigned" => false}
     end
 
     test "renders errors when data is invalid", %{conn: conn} do
@@ -56,6 +69,14 @@ defmodule OmscoreWeb.PermissionControllerTest do
 
       conn = post conn, permission_path(conn, :create), permission: @invalid_attrs
       assert json_response(conn, 422)["errors"] != %{}
+    end
+
+    test "rejects request to unauthorized user", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      conn = post conn, permission_path(conn, :create), permission: @create_attrs
+      assert json_response(conn, 403)
     end
   end
 
@@ -79,7 +100,8 @@ defmodule OmscoreWeb.PermissionControllerTest do
         "action" => "some updated action",
         "description" => "some updated description",
         "object" => "some updated object",
-        "scope" => "local"}
+        "scope" => "local",
+        "always_assigned" => true}
     end
 
     test "renders errors when data is invalid", %{conn: conn, permission: permission} do
@@ -88,6 +110,14 @@ defmodule OmscoreWeb.PermissionControllerTest do
 
       conn = put conn, permission_path(conn, :update, permission), permission: @invalid_attrs
       assert json_response(conn, 422)["errors"] != %{}
+    end
+
+    test "rejects request to unauthorized user", %{conn: conn, permission: permission} do
+      %{token: token} = create_member_with_permissions([])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      conn = put conn, permission_path(conn, :update, permission), permission: @update_attrs
+      assert json_response(conn, 403)
     end
   end
 
@@ -108,6 +138,14 @@ defmodule OmscoreWeb.PermissionControllerTest do
       assert_error_sent 404, fn ->
         get conn, permission_path(conn, :show, permission)
       end
+    end
+
+    test "rejects request to unauthorized user", %{conn: conn, permission: permission} do
+      %{token: token} = create_member_with_permissions([])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      conn = delete conn, permission_path(conn, :delete, permission)
+      assert response(conn, 403)
     end
   end
 

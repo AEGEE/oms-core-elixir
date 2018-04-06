@@ -182,9 +182,20 @@ defmodule Omscore.MembersTest do
       body
     end
 
-    test "list_join_requests/0 returns all join_requests" do
+    test "list_join_requests/1 returns all join_requests" do
       {join_request, body, _} = join_request_fixture()
       assert Members.list_join_requests(body) |> Enum.any?(fn(x) -> x.id == join_request.id && x.motivation == join_request.motivation end)
+    end
+
+    test "list_join_requests/2 returns only outstanding join request if requested" do
+      {join_request, body, _member} = join_request_fixture()
+      member2 = member_fixture()
+      assert {:ok, join_request2} = Members.create_join_request(body, member2, @valid_attrs)
+      assert {:ok, _body_membership} = Members.approve_join_request(join_request)
+
+      res = Members.list_join_requests(body, true)
+      assert !Enum.any?(res, fn(x) -> x.id == join_request.id end)
+      assert Enum.any?(res, fn(x) -> x.id == join_request2.id end)
     end
 
     test "get_join_request!/1 returns the join_request with given id" do

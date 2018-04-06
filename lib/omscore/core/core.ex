@@ -101,10 +101,13 @@ defmodule Omscore.Core do
   
 
   # Seaches a list of permissions for one specific action and object and returns it
-  # In case none was found, returns nil
+  # In case none was found, returns {:forbidden, "Permission xy required but not granted to you"}
   # Returns the first occurrence, use reduce_permission_list in advance in case you want the highest scoped one
   def search_permission_list(permission_list, action, object) do
-    Enum.find(permission_list, fn(x) -> x.action == action && x.object == object end)
+    case Enum.find(permission_list, fn(x) -> x.action == action && x.object == object end) do
+      nil -> {:forbidden, "Permission " <> action <> ":" <> object <> " required but not granted to you"}
+      res -> {:ok, res}
+    end
   end
 
   alias Omscore.Core.Body

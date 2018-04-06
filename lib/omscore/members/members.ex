@@ -78,9 +78,9 @@ defmodule Omscore.Members do
   # Get all join requests for a body
   def list_join_requests(body, outstanding_only \\ false) do
     query = if outstanding_only do
-      from u in JoinRequest, where: u.body_id == ^body.id
-    else
       from u in JoinRequest, where: u.body_id == ^body.id and not(u.approved)
+    else
+      from u in JoinRequest, where: u.body_id == ^body.id
     end 
     Repo.all(query)
   end

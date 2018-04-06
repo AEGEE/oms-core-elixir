@@ -14,4 +14,4 @@ before_script:
 
 
 script:
-    - sudo docker-compose exec oms-core-elixir mix test
+    - sudo docker-compose exec oms-core-elixir mix coveralls

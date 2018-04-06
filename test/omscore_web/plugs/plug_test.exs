@@ -32,8 +32,9 @@ defmodule OmscoreWeb.PlugTest do
 
   test "permission plug automatically fetches global permissions", %{conn: conn} do
     %{token: token} = create_member_with_permissions(%{action: "some action", object: "some object"})
-    conn = put_req_header(conn, "x-auth-token", token)
+
     conn = conn
+    |> put_req_header("x-auth-token", token)
     |> OmscoreWeb.AuthorizePlug.call(nil)
     |> OmscoreWeb.MemberFetchPlug.call(nil)
     |> OmscoreWeb.PermissionFetchPlug.call(nil)
@@ -42,6 +43,20 @@ defmodule OmscoreWeb.PlugTest do
     assert conn.assigns.member
     assert is_list(conn.assigns.permissions)
     assert conn.assigns.permissions |> Enum.any?(fn(x) -> x.action == "some action" && x.object == "some object" end)
+  end
+
+  test "permission plug assigns all permissions in the system to a superadmin", %{conn: conn} do
+    id = :rand.uniform(100000)
+    member_fixture(%{user_id: id})
+    token = create_token(%{id: id, superadmin: true})
+
+    conn = conn
+    |> put_req_header("x-auth-token", token)
+    |> OmscoreWeb.AuthorizePlug.call(nil)
+    |> OmscoreWeb.MemberFetchPlug.call(nil)
+    |> OmscoreWeb.PermissionFetchPlug.call(nil)
+
+    assert Enum.count(conn.assigns.permissions) == Enum.count(Omscore.Core.list_permissions())
   end
 
   test "auth plug rejects an invalid access token", %{conn: conn} do

@@ -15,6 +15,8 @@ defmodule OmscoreWeb.PermissionView do
       scope: permission.scope,
       action: permission.action,
       object: permission.object,
-      description: permission.description}
+      description: permission.description,
+      always_assigned: permission.always_assigned
+    }
   end
 end
