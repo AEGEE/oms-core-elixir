@@ -15,5 +15,6 @@ defmodule Omscore.Core.CirclePermission do
     circle_permission
     |> cast(attrs, [])
     |> validate_required([])
+    |> unique_constraint(:permission_assignment_unique, name: :circle_permissions_circle_id_permission_id_index)
   end
 end

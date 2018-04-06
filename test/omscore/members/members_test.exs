@@ -194,13 +194,21 @@ defmodule Omscore.MembersTest do
       assert new_request.motivation == join_request.motivation
     end
 
-    test "create_join_request/1 with valid data creates a join_request" do
+    test "create_join_request/3 with valid data creates a join_request" do
       body = body_fixture()
       member = member_fixture()
 
       assert {:ok, %JoinRequest{} = join_request} = Members.create_join_request(body, member, @valid_attrs)
       assert join_request.approved == false
       assert join_request.motivation == "some motivation"
+    end
+
+    test "create_join_request/3 prohibits duplicate join requests" do
+      body = body_fixture()
+      member = member_fixture()
+
+      assert {:ok, %JoinRequest{}} = Members.create_join_request(body, member, @valid_attrs)
+      assert {:error, _} = Members.create_join_request(body, member, @valid_attrs)
     end
 
     test "reject_join_request/1 deletes a join request" do
@@ -217,6 +225,36 @@ defmodule Omscore.MembersTest do
       assert join_request = Members.get_join_request!(join_request.id)
       assert join_request.approved == true
       assert Omscore.Core.get_body_members(body) |> Enum.any?(fn(x) -> x.id == member.id end)
+    end
+
+    test "approve_join_request/1 cancels in case somehow the user already got a body membership" do
+      {join_request, body, member} = join_request_fixture()
+      assert {:ok, _} = Members.create_body_membership(body, member)
+
+      assert {:error, _} = Members.approve_join_request(join_request)
+      assert join_request = Members.get_join_request!(join_request.id)
+      assert join_request.approved == false
+    end
+  end
+
+  describe "body_memberships" do
+    alias Omscore.Members.BodyMembership
+
+    test "create_body_membership/2 creates a body membership" do
+      member = member_fixture()
+      body = body_fixture()
+
+      assert {:ok, _} = Members.create_body_membership(body, member)
+    end
+
+    test "get_body_membership/2 returns a body membership if existing" do
+      member1 = member_fixture()
+      member2 = member_fixture()
+      body = body_fixture()
+
+      assert {:ok, _} = Members.create_body_membership(body, member1)
+      assert %BodyMembership{} = Members.get_body_membership(body, member1)
+      assert nil == Members.get_body_membership(body, member2)
     end
   end
 
@@ -318,13 +356,14 @@ defmodule Omscore.MembersTest do
     end
 
     test "create_circle_membership/1 with valid data creates a circle_membership" do
-      {_, circle, member} = circle_membership_fixture()
+      circle = circle_fixture()
+      member = member_fixture()
       assert {:ok, %CircleMembership{} = circle_membership} = Members.create_circle_membership(circle, member, @valid_attrs)
       assert circle_membership.circle_admin == true
       assert circle_membership.position == "some position"
     end
 
-    test "creade_circle_membership/1 only allows members of the body to join a bound circle" do
+    test "create_circle_membership/1 only allows members of the body to join a bound circle" do
       body = body_fixture()
       member1 = member_fixture()
       member2 = member_fixture()
@@ -333,6 +372,13 @@ defmodule Omscore.MembersTest do
 
       assert {:ok, _} = Members.create_circle_membership(circle, member1, @valid_attrs)
       assert {:error, _} = Members.create_circle_membership(circle, member2, @valid_attrs)
+    end
+
+    test "create_circle_membership/1 prohibits duplicate membership" do
+      circle = circle_fixture()
+      member = member_fixture()
+      assert {:ok, %CircleMembership{}} = Members.create_circle_membership(circle, member, @valid_attrs)
+      assert {:error, _} = Members.create_circle_membership(circle, member, @valid_attrs)
     end
 
     test "update_circle_membership/2 with valid data updates the circle_membership" do

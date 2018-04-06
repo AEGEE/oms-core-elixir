@@ -15,5 +15,6 @@ defmodule Omscore.Members.BodyMembership do
     body_membership
     |> cast(attrs, [])
     |> validate_required([])
+    |> unique_constraint(:body_membership_unique, name: :body_memberships_body_id_member_id_index)
   end
 end

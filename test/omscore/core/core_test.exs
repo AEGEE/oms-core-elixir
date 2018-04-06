@@ -300,6 +300,13 @@ defmodule Omscore.CoreTest do
       assert circle.permissions |> Enum.any?(fn(x) -> x.action == "some action" && x.scope == "global" end)
     end
 
+    test "put_circle_permissions/2 prohibits duplicate assignment" do
+      circle = circle_fixture()
+      permission = permission_fixture()
+
+      assert {:error, _} = Core.put_circle_permissions(circle, [permission, permission])
+    end
+
     test "find_circles/2 converts an array of input data circles to loaded ecto models" do
       circle1 = circle_fixture()
       circle2 = circle_fixture(@update_attrs)

@@ -206,6 +206,7 @@ defmodule Omscore.Core do
     circle
     |> Repo.preload([:permissions])
     |> Circle.changeset(%{})
+    |> Ecto.Changeset.unique_constraint(:circle_permission_unique, name: :circle_permissions_circle_id_permission_id_index)
     |> Ecto.Changeset.put_assoc(:permissions, permissions)
     |> Repo.update()
   end

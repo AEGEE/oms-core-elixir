@@ -13,5 +13,6 @@ defmodule Omscore.Repo.Migrations.CreateCircleMemberships do
 
     create index(:circle_memberships, [:circle_id])
     create index(:circle_memberships, [:member_id])
+    create unique_index(:circle_memberships, [:circle_id, :member_id])
   end
 end

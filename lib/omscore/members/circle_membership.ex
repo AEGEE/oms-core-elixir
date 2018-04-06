@@ -20,5 +20,6 @@ defmodule Omscore.Members.CircleMembership do
     |> validate_required([:circle_admin])
     |> foreign_key_constraint(:circle_id)
     |> foreign_key_constraint(:member_id)
+    |> unique_constraint(:circle_membership_unique, name: :circle_memberships_circle_id_member_id_index)
   end
 end

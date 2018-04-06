@@ -20,5 +20,6 @@ defmodule Omscore.Members.JoinRequest do
     |> validate_required([:motivation, :approved])
     |> foreign_key_constraint(:body_id)
     |> foreign_key_constraint(:member_id)
+    |> unique_constraint(:join_request_unique, name: :join_requests_member_id_body_id_index)
   end
 end

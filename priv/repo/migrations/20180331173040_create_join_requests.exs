@@ -13,5 +13,6 @@ defmodule Omscore.Repo.Migrations.CreateJoinRequests do
 
     create index(:join_requests, [:member_id])
     create index(:join_requests, [:body_id])
+    create unique_index(:join_requests, [:member_id, :body_id])
   end
 end

@@ -1,4 +1,4 @@
-defmodule OmscoreWeb.AuthorizePlugTest do
+defmodule OmscoreWeb.PlugTest do
   use OmscoreWeb.ConnCase
 
 
@@ -9,7 +9,6 @@ defmodule OmscoreWeb.AuthorizePlugTest do
 
   test "auth plug successfully decodes a valid access token", %{conn: conn} do
     token = create_token(@user_attrs)
-    member = member_fixture(%{user_id: @user_attrs.id})
 
     conn = put_req_header(conn, "x-auth-token", token)
     conn = OmscoreWeb.AuthorizePlug.call(conn, nil)
@@ -18,13 +17,27 @@ defmodule OmscoreWeb.AuthorizePlugTest do
     assert conn.assigns.user.email == @user_attrs.email
     assert conn.assigns.user.name == @user_attrs.name
     assert conn.assigns.user.superadmin == @user_attrs.superadmin
+  end
+
+  test "member plug fetches member object", %{conn: conn} do
+    token = create_token(@user_attrs)
+    member = member_fixture(%{user_id: @user_attrs.id})
+
+    conn = put_req_header(conn, "x-auth-token", token)
+    conn = conn
+    |> OmscoreWeb.AuthorizePlug.call(nil)
+    |> OmscoreWeb.MemberFetchPlug.call(nil)
     assert conn.assigns.member == member
   end
 
-  test "auth plug automatically fetches global permissions", %{conn: conn} do
+  test "permission plug automatically fetches global permissions", %{conn: conn} do
     %{token: token} = create_member_with_permissions(%{action: "some action", object: "some object"})
     conn = put_req_header(conn, "x-auth-token", token)
-    conn = OmscoreWeb.AuthorizePlug.call(conn, nil)
+    conn = conn
+    |> OmscoreWeb.AuthorizePlug.call(nil)
+    |> OmscoreWeb.MemberFetchPlug.call(nil)
+    |> OmscoreWeb.PermissionFetchPlug.call(nil)
+
     assert conn.assigns.user
     assert conn.assigns.member
     assert is_list(conn.assigns.permissions)
@@ -39,11 +52,14 @@ defmodule OmscoreWeb.AuthorizePlugTest do
     assert json_response(conn, 401)
   end
 
-  test "auth plug rejects a valid access token without a member object", %{conn: conn} do
+  test "member plug rejects a valid access token without a member object", %{conn: conn} do
     token = create_token(@user_attrs)
 
     conn = put_req_header(conn, "x-auth-token", token)
-    conn = OmscoreWeb.AuthorizePlug.call(conn, nil)
+    conn = conn
+    |> OmscoreWeb.AuthorizePlug.call(nil)
+    |> OmscoreWeb.MemberFetchPlug.call(nil)
+
     assert json_response(conn, 401)
   end
 end

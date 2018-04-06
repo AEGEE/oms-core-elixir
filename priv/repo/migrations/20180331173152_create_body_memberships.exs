@@ -11,5 +11,6 @@ defmodule Omscore.Repo.Migrations.CreateBodyMemberships do
 
     create index(:body_memberships, [:body_id])
     create index(:body_memberships, [:member_id])
+    create unique_index(:body_memberships, [:body_id, :member_id])
   end
 end

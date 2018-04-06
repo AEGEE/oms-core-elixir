@@ -7,6 +7,8 @@ defmodule OmscoreWeb.Router do
 
   pipeline :authorize do
     plug OmscoreWeb.AuthorizePlug
+    plug OmscoreWeb.MemberFetchPlug
+    plug OmscoreWeb.PermissionFetchPlug
   end
 
   scope "/api", OmscoreWeb do
