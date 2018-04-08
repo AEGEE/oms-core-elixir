@@ -27,6 +27,7 @@ if Mix.env() == :dev && Repo.all(Member) == [] do
 end
 
 if Repo.all(Permission) == [] do
+  # Permissions
   Repo.insert!(%Permission{
     scope: "global",
     action: "view",
@@ -54,5 +55,64 @@ if Repo.all(Permission) == [] do
     action: "delete",
     object: "permission",
     description: "Delete a permission, should generally happen very rarely as it could break the system"
+  })
+
+  # Free circles
+  Repo.insert!(%Permission{
+    scope: "global",
+    action: "view",
+    object: "free_circle",
+    description: "View free circles",
+    always_assigned: true
+  })
+
+  Repo.insert!(%Permission{
+    scope: "global",
+    action: "create", 
+    object: "free_circle",
+    description: "Create free circles"
+  })
+
+  Repo.insert!(%Permission{
+    scope: "global",
+    action: "update",
+    object: "free_circle",
+    description: "Update any free circle, even those that you are not in a circle_admin position in. Should only be assigned in case of an abandoned toplevel circle as circle_admins automatically get this permission"
+  })
+
+  Repo.insert!(%Permission{
+    scope: "global",
+    action: "delete",
+    object: "free_circle",
+    description: "Delete any free circle, even those that you are not in a circle_admin position in. Should only be assigned in case of an abandoned toplevel circle as circle_admins automatically get this permission"
+  })
+
+  Repo.insert!(%Permission{
+    scope: "global",
+    action: "view_members",
+    object: "free_circle",
+    description: "View members of any free circle, even those you are not member of. Should only be given to very trusted people as this way big portions of the members database can be accessed directly"
+  })
+
+  Repo.insert!(%Permission{
+    scope: "global",
+    action: "update_members",
+    object: "free_circle",
+    description: "Update membership details of members of any free circle, even those that you are not in a circle_admin position in or even have member status. Should never be assigned as circle_admins automatically get this permission"
+  })
+
+  Repo.insert!(%Permission{
+    scope: "global",
+    action: "delete_members",
+    object: "free_circle",
+    description: "Delete any member from any free circle, even those that you are not in a circle_admin position in or even have member status. Should never be assigned as circle_admins automatically get this permission"
+  })
+
+  Repo.insert!(%Permission{
+    scope: "global", 
+    action: "join",
+    object: "free_circle",
+    description: "Allows to join free circles which are joinable. Non-joinable circles can never be joined",
+    always_assigned: true
   })
 end

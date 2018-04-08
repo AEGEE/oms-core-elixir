@@ -5,8 +5,8 @@ defmodule Omscore.Repo.Migrations.CreateCircleMemberships do
     create table(:circle_memberships) do
       add :circle_admin, :boolean, default: false, null: false
       add :position, :string
-      add :circle_id, references(:circles, on_delete: :nothing)
-      add :member_id, references(:members, on_delete: :nothing)
+      add :circle_id, references(:circles, on_delete: :delete_all)
+      add :member_id, references(:members, on_delete: :delete_all)
 
       timestamps()
     end

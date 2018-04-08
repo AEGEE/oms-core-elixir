@@ -37,6 +37,11 @@ defmodule OmscoreWeb do
       import OmscoreWeb.Router.Helpers
       import OmscoreWeb.ErrorHelpers
       import OmscoreWeb.Gettext
+
+      # Every controller can use the success.json
+      def render("success.json", %{msg: msg}) do
+        %{success: true, data: msg}
+      end
     end
   end
 

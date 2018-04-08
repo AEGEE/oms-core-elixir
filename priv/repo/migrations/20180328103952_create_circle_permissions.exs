@@ -3,8 +3,8 @@ defmodule Omscore.Repo.Migrations.CreateCirclePermissions do
 
   def change do
     create table(:circle_permissions) do
-      add :circle_id, references(:circles, on_delete: :nothing)
-      add :permission_id, references(:permissions, on_delete: :nothing)
+      add :circle_id, references(:circles, on_delete: :delete_all)
+      add :permission_id, references(:permissions, on_delete: :delete_all)
 
       timestamps()
     end

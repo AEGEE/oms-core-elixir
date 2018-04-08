@@ -7,4 +7,4 @@ Another addition in the long row of core microservice attempts. This time done b
     cd docker
     docker-compose up -d
 
-API can (soon) be found [here](https://omscoreelixir.docs.apiary.io/)
+API can be found [here](https://omscoreelixir.docs.apiary.io/), some description about the functionings [here](https://oms-project.atlassian.net/wiki/spaces/OMSCORE/pages/169279489/oms-core-elixir)

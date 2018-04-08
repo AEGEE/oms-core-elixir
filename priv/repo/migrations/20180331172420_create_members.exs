@@ -12,7 +12,7 @@ defmodule Omscore.Repo.Migrations.CreateMembers do
       add :seo_url, :string
       add :address, :string
       add :about_me, :text
-      add :primary_body_id, references(:bodies, on_delete: :nothing)
+      add :primary_body_id, references(:bodies, on_delete: :nilify_all)
 
       timestamps()
     end

@@ -43,7 +43,7 @@ defmodule OmscoreWeb.ConnCase do
         token  
       end
 
-      @member_attrs %{about_me: "some about_me", address: "some address", date_of_birth: ~D[2010-04-17], first_name: "some first_name", gender: "some gender", last_name: "some last_name", phone: "+1212345678", seo_url: "some_seo_url", user_id: 3}
+      @member_attrs %{about_me: "some about_me", address: "some address", date_of_birth: ~D[2010-04-17], first_name: "some first_name", gender: "some gender", last_name: "some last_name", phone: "+1212345678", user_id: 3}
       def member_fixture(attrs \\ %{}) do
         attrs = Enum.into(attrs, @member_attrs)
         {:ok, member} = Omscore.Members.create_member(attrs.user_id, attrs)
@@ -67,6 +67,15 @@ defmodule OmscoreWeb.ConnCase do
           attrs
           |> Enum.into(@circle_attrs)
           |> Omscore.Core.create_circle()
+
+        circle
+      end
+
+      def bound_circle_fixture(body, attrs \\ %{}) do
+        {:ok, circle} =
+          attrs
+          |> Enum.into(@circle_attrs)
+          |> Omscore.Core.create_circle(body)
 
         circle
       end
