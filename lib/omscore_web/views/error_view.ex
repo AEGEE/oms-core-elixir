@@ -18,5 +18,8 @@ defmodule OmscoreWeb.ErrorView do
     %{success: false, error: msg}
   end
 
+  def render("500.json", %{msg: msg}) do
+    %{success: false, error: msg}
+  end
 
 end

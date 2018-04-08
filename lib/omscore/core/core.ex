@@ -164,9 +164,16 @@ defmodule Omscore.Core do
     Repo.all(query)
   end
 
+  # List all circles for a body
+  def list_bound_circles(%Body{} = body), do: list_bound_circles(body.id)
+  def list_bound_circles(body_id) do
+    query = from u in Circle, where: u.body_id == ^body_id
+    Repo.all(query)
+  end
+
   # Get a single circle
   def get_circle!(id), do: Repo.get!(Circle, id) |> Repo.preload([:permissions, :child_circles, :parent_circle])
-  def get_circle(id), do: Repo.get!(Circle, id)
+  def get_circle(id), do: Repo.get(Circle, id)
 
 
   # Create a bound circle
@@ -242,6 +249,32 @@ defmodule Omscore.Core do
     |> Ecto.Changeset.put_assoc(:child_circles, child_circles)
     |> Repo.update()
   end
+
+  defp put_parent_circle_unchecked(circle, parent_circle) do
+    circle
+    |> Repo.preload([:parent_circle])
+    |> Circle.changeset(%{})
+    |> Ecto.Changeset.put_assoc(:parent_circle, parent_circle)
+    |> Repo.update()
+  end
+
+  # Removes the parent circle for a circle
+  def put_parent_circle(%Circle{} = circle, nil) do
+    circle
+    |> Circle.changeset(%{})
+    |> Ecto.Changeset.put_change(:parent_circle_id, nil)
+    |> Repo.update()
+  end
+
+  # Puts the parent circle for a circle while maintaining joinable consistency
+  # Returns {:ok, circle} or {:error, error-data}
+  def put_parent_circle(%Circle{} = circle, %Circle{} = parent_circle) do
+    with {:ok} <- check_joinable_consistency(parent_circle, [circle]) do
+      put_parent_circle_unchecked(circle, parent_circle)
+    end
+  end
+
+  
 
   # Returns all permissions that are attached to this circle or any of its parent circles
   def get_permissions_recursive(%Circle{} = circle) do

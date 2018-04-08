@@ -18,6 +18,12 @@ defmodule OmscoreWeb.FallbackController do
     |> render(OmscoreWeb.ErrorView, :"404")
   end
 
+  def call(conn, {:error, message}) do
+    conn
+    |> put_status(:internal_server_error)
+    |> render(OmscoreWeb.ErrorView, "500.json", msg: message)
+  end
+
   def call(conn, {:forbidden, message}) do
     conn
     |> put_status(:forbidden)

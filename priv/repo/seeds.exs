@@ -61,8 +61,8 @@ if Repo.all(Permission) == [] do
   Repo.insert!(%Permission{
     scope: "global",
     action: "view",
-    object: "free_circle",
-    description: "View free circles",
+    object: "circle",
+    description: "List and view the details of any circle, excluding members data",
     always_assigned: true
   })
 
@@ -76,22 +76,43 @@ if Repo.all(Permission) == [] do
   Repo.insert!(%Permission{
     scope: "global",
     action: "update",
-    object: "free_circle",
-    description: "Update any free circle, even those that you are not in a circle_admin position in. Should only be assigned in case of an abandoned toplevel circle as circle_admins automatically get this permission"
+    object: "circle",
+    description: "Update any circle, even those that you are not in a circle_admin position in. Should only be assigned in case of an abandoned toplevel circle as circle_admins automatically get this permission"
+  })
+
+  Repo.insert!(%Permission{
+    scope: "global",
+    action: "put_parent",
+    object: "circle",
+    description: "Assign a parent to any circle. This permission should be granted only to trustworthy persons as it is possible to assign an own circle as child to a parent circle with a lot of permissions"
+  })
+
+  Repo.insert!(%Permission{
+    scope: "local",
+    action: "put_parent",
+    object: "bound_circle",
+    description: "Assign a parent to a bound circle. This only allows to assign parents that are in the same body as the circle to migitate permission escalations where someone with this permission could assign his own circle to one with a lot of permissions"
   })
 
   Repo.insert!(%Permission{
     scope: "global",
     action: "delete",
-    object: "free_circle",
-    description: "Delete any free circle, even those that you are not in a circle_admin position in. Should only be assigned in case of an abandoned toplevel circle as circle_admins automatically get this permission"
+    object: "circle",
+    description: "Delete any circle, even those that you are not in a circle_admin position in. Should only be assigned in case of an abandoned toplevel circle as circle_admins automatically get this permission"
   })
 
   Repo.insert!(%Permission{
     scope: "global",
     action: "view_members",
-    object: "free_circle",
-    description: "View members of any free circle, even those you are not member of. Should only be given to very trusted people as this way big portions of the members database can be accessed directly"
+    object: "circle",
+    description: "View members of any circle, even those you are not member of. Should only be given to very trusted people as this way big portions of the members database can be accessed directly"
+  })
+
+  Repo.insert!(%Permission{
+    scope: "local",
+    action: "view_members",
+    object: "bound_circle",
+    description: "View members of any circle in the body that you got this permission from"
   })
 
   Repo.insert!(%Permission{
@@ -114,5 +135,12 @@ if Repo.all(Permission) == [] do
     object: "free_circle",
     description: "Allows to join free circles which are joinable. Non-joinable circles can never be joined",
     always_assigned: true
+  })
+
+  Repo.insert!(%Permission{
+    scope: "local",
+    action: "create",
+    object: "bound_circle",
+    description: "Creating bound circles to the body the permission was granted in"
   })
 end

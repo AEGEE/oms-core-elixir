@@ -214,11 +214,23 @@ defmodule Omscore.CoreTest do
     end
 
     test "list_free_circles/0 returns all circles without a body" do
-      circle = circle_fixture()
+      circle1 = circle_fixture()
       body = body_fixture()
-      Core.create_circle(%{}, body)
+      assert {:ok, circle2} = Core.create_circle(@valid_attrs, body)
 
-      assert Core.list_free_circles() == [circle]
+      assert res = Core.list_free_circles()
+      assert Enum.any?(res, fn(x) -> x.id == circle1.id end)
+      assert !Enum.any?(res, fn(x) -> x.id == circle2.id end)
+    end
+    
+    test "list_bound_circles/1 returns all circles with the body" do
+      circle1 = circle_fixture()
+      body = body_fixture()
+      assert {:ok, circle2} = Core.create_circle(@valid_attrs, body)
+
+      assert res = Core.list_bound_circles(body)
+      assert !Enum.any?(res, fn(x) -> x.id == circle1.id end)
+      assert Enum.any?(res, fn(x) -> x.id == circle2.id end)
     end
 
     test "get_circle!/1 returns the circle with given id" do
@@ -344,6 +356,28 @@ defmodule Omscore.CoreTest do
 
       assert circle2 = Core.get_circle!(circle2.id)
       assert circle2.parent_circle == nil
+    end
+
+    test "put_parent_circle/2 assigns a parent to a circle" do
+      circle1 = circle_fixture()
+      circle2 = circle_fixture()
+
+      assert {:ok, _} = Core.put_parent_circle(circle1, circle2)
+      assert circle1 = Core.get_circle!(circle1.id)
+      assert circle1.parent_circle_id == circle2.id
+    end
+
+    test "put_parent_circle/2 removes a parent from a circle when called with nil" do
+      circle1 = circle_fixture()
+      circle2 = circle_fixture()
+
+      assert {:ok, _} = Core.put_parent_circle(circle1, circle2)
+      assert circle1 = Core.get_circle!(circle1.id)
+      assert circle1.parent_circle_id == circle2.id
+
+      assert {:ok, _} = Core.put_parent_circle(circle1, nil)
+      assert circle1 = Core.get_circle!(circle1.id)
+      assert circle1.parent_circle_id == nil
     end
 
     test "get_permissions_recursive/1 returns all permissions from the current circle and all parent circles" do

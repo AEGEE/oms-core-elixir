@@ -11,6 +11,10 @@ defmodule OmscoreWeb.Router do
     plug OmscoreWeb.PermissionFetchPlug
   end
 
+  pipeline :fetch_body do
+    plug OmscoreWeb.BodyFetchPlug
+  end
+
   scope "/api", OmscoreWeb do
     pipe_through :api
 
@@ -30,9 +34,22 @@ defmodule OmscoreWeb.Router do
     get "/circles/:id", CircleController, :show
     put "/circles/:id", CircleController, :update
     delete "/circles/:id", CircleController, :delete
+    put "/circles/:id/parent", CircleController, :put_parent
     get "/circles/:id/members", CircleController, :show_members
     post "/circles/:id/members", CircleController, :join_circle
     put "/circles/:id/members/:membership_id", CircleController, :update_circle_membership
     delete "/circles/:id/members/:membership_id", CircleController, :delete_circle_membership
+  end
+
+  scope "/api/body/:body_id", OmscoreWeb, as: :body do
+    pipe_through [:api, :authorize, :fetch_body]
+
+    get "/circles", CircleController, :index_bound
+    post "/circles", CircleController, :create_bound
+    get "/circles/:id", CircleController, :show
+    put "/circles/:id", CircleController, :update
+    delete "/circles/:id", CircleController, :delete
+    put "/circles/:id/parent", CircleController, :put_parent
+    get "/circles/:id/members", CircleController, :show_members
   end
 end

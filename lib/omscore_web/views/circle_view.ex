@@ -23,7 +23,8 @@ defmodule OmscoreWeb.CircleView do
       body_id: circle.body_id,
       parent_circle_id: circle.parent_circle_id,
       body: Helper.render_assoc_one(circle.body, OmscoreWeb.BodyView, "body.json"),
-      parent_circle: Helper.render_assoc_one(circle.parent_circle, CircleView, "circle.json")
+      parent_circle: Helper.render_assoc_one(circle.parent_circle, CircleView, "circle.json"),
+      child_circles: Helper.render_assoc_many(circle.child_circles, CircleView, "circle.json")
     }
   end
 end

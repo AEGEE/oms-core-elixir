@@ -92,7 +92,8 @@ defmodule OmscoreWeb.PlugTest do
     |> OmscoreWeb.AuthorizePlug.call(nil)
     |> OmscoreWeb.MemberFetchPlug.call(nil)
     |> OmscoreWeb.PermissionFetchPlug.call(nil)
-    |> OmscoreWeb.BodyFetchPlug.call(%{"body_id" => body.id})
+    |> Map.put(:path_params, %{"body_id" => body.id})
+    |> OmscoreWeb.BodyFetchPlug.call(nil)
 
     assert conn.assigns.body
     assert conn.assigns.body.id == body.id
