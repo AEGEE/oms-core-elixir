@@ -259,6 +259,49 @@ defmodule OmscoreWeb.CircleControllerTest do
       conn = put conn, circle_path(conn, :put_parent, circle.id), parent_circle_id: circle2.id
       assert json_response(conn, 403)
     end
+
+    test "allows putting null as the parent circle to effectively delete the parent", %{conn: conn, circle: circle} do
+      circle2 = circle_fixture()
+      %{token: token} = create_member_with_permissions([%{action: "put_parent", object: "circle"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      conn = put conn, circle_path(conn, :put_parent, circle), parent_circle_id: circle2.id
+      assert json_response(conn, 200)
+
+      circle = Core.get_circle!(circle.id)
+      assert circle.parent_circle_id == circle2.id
+      
+      conn = recycle(conn) |> put_req_header("x-auth-token", token)
+
+      conn = put conn, circle_path(conn, :put_parent, circle), parent_circle_id: nil
+      assert json_response(conn, 200)
+
+      circle = Core.get_circle!(circle.id)
+      assert circle.parent_circle_id == nil
+    end
+
+    test "prohibits putting the own circle as parent", %{conn: conn, circle: circle} do
+      %{token: token} = create_member_with_permissions([%{action: "put_parent", object: "circle"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+      conn = put conn, circle_path(conn, :put_parent, circle), parent_circle_id: circle.id
+      assert json_response(conn, 422)
+    end
+
+    test "prohibits creating loops with circles", %{conn: conn, circle: circle} do
+      circle2 = circle_fixture()
+      circle3 = circle_fixture()
+
+      %{token: token} = create_member_with_permissions([%{action: "put_parent", object: "circle"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+      conn = put conn, circle_path(conn, :put_parent, circle), parent_circle_id: circle2.id
+      assert json_response(conn, 200)
+      conn = recycle(conn) |> put_req_header("x-auth-token", token)   
+      conn = put conn, circle_path(conn, :put_parent, circle2), parent_circle_id: circle3.id
+      assert json_response(conn, 200)
+      conn = recycle(conn) |> put_req_header("x-auth-token", token)
+      conn = put conn, circle_path(conn, :put_parent, circle3), parent_circle_id: circle.id
+      assert json_response(conn, 422)
+    end
   end
 
   describe "delete circle" do
@@ -558,10 +601,36 @@ defmodule OmscoreWeb.CircleControllerTest do
       assert {:ok, _} = Omscore.Members.create_circle_membership(circle, member)
       assert {:ok, _} = Omscore.Core.put_circle_permissions(circle, [permission])
 
-      conn = get conn, circle_path(conn, :index_permissions, circle2.id)
+      conn = get conn, circle_path(conn, :index_my_permissions, circle2.id)
       assert res = json_response(conn, 200)["data"]
       assert is_list(res)
       assert Enum.any?(res, fn(x) -> x["id"] == permission.id end)
+    end
+
+    test "lists all permissions the circle grants to any user", %{conn: conn} do
+      circle1 = circle_fixture()
+      circle2 = circle_fixture()
+      permission1 = permission_fixture()
+      permission2 = permission_fixture()
+      %{token: token} = create_member_with_permissions([])
+      conn = put_req_header(conn, "x-auth-token", token)
+      assert {:ok, _} = Omscore.Core.put_parent_circle(circle1, circle2)
+      assert {:ok, _} = Omscore.Core.put_circle_permissions(circle1, [permission1])
+      assert {:ok, _} = Omscore.Core.put_circle_permissions(circle2, [permission2])
+
+      conn = get conn, circle_path(conn, :index_permissions, circle2.id)
+      assert res = json_response(conn, 200)["data"]
+      assert is_list(res)
+      assert Enum.any?(res, fn(x) -> x["id"] == permission2.id end)
+      assert !Enum.any?(res, fn(x) -> x["id"] == permission1.id end)
+
+      conn = recycle(conn) |> put_req_header("x-auth-token", token)
+
+      conn = get conn, circle_path(conn, :index_permissions, circle1.id)
+      assert res = json_response(conn, 200)["data"]
+      assert is_list(res)
+      assert Enum.any?(res, fn(x) -> x["id"] == permission2.id end)
+      assert Enum.any?(res, fn(x) -> x["id"] == permission1.id end)      
     end
   end
 

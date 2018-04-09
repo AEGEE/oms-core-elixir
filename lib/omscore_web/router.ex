@@ -49,7 +49,8 @@ defmodule OmscoreWeb.Router do
     post "/members", CircleController, :join_circle
     put "/members/:membership_id", CircleController, :update_circle_membership
     delete "/members/:membership_id", CircleController, :delete_circle_membership
-    get "/my_permissions", CircleController, :index_permissions
+    get "/my_permissions", CircleController, :index_my_permissions
+    get "/permissions", CircleController, :index_permissions
     put "/permissions", CircleController, :put_permissions
   end
 

@@ -115,7 +115,8 @@ defmodule OmscoreWeb.CircleController do
 
   # Those who have general parent circle assignment permissions don't have to undergo further tests
   defp put_parent_free(conn, circle, parent_circle) do
-    with {:ok, circle} <- Core.put_parent_circle(circle, parent_circle) do
+    with {:ok, circle} <- Core.put_parent_circle(circle, parent_circle),
+         circle <- Core.get_circle!(circle.id) do
       render(conn, "show.json", circle: circle)
     end
   end
@@ -130,14 +131,18 @@ defmodule OmscoreWeb.CircleController do
   # If only bound permissions are found, restrict parent circle and circle to same body
   defp put_parent_bound(conn, circle, parent_circle) do
     with {:ok} <- circles_have_same_body([circle, parent_circle]),
-         {:ok, circle} <- Core.put_parent_circle(circle, parent_circle) do
+         {:ok, circle} <- Core.put_parent_circle(circle, parent_circle),
+         circle <- Core.get_circle!(circle.id) do
       render(conn, "show.json", circle: circle)
     end
   end
 
   def put_parent(conn, %{"parent_circle_id" => parent_circle_id}) do
     circle = conn.assigns.circle
-    parent_circle = Core.get_circle(parent_circle_id)
+    parent_circle = case parent_circle_id do
+      nil -> nil
+      parent_circle_id -> Core.get_circle(parent_circle_id)
+    end
 
     {match1, _} = Core.search_permission_list(conn.assigns.permissions, "put_parent", "circle")
     {match2, _} = Core.search_permission_list(conn.assigns.permissions, "put_parent", "bound_circle")
@@ -145,6 +150,7 @@ defmodule OmscoreWeb.CircleController do
     # Depending if any of the permissions was found, use a different implementation
     cond do
       match1 == :ok -> put_parent_free(conn, circle, parent_circle)
+      parent_circle == nil -> put_parent_free(conn, circle, nil)
       match2 == :ok -> put_parent_bound(conn, circle, parent_circle)
       true -> {:forbidden, "You don't have the permissions to put a parent circle"}
     end    
@@ -187,11 +193,16 @@ defmodule OmscoreWeb.CircleController do
     end
   end
 
-  def index_permissions(conn, _params) do
+  def index_my_permissions(conn, _params) do
     conn = is_circle_member(conn, conn.assigns.circle)
     conn = is_circle_admin(conn, conn.assigns.circle)
 
     render(conn, OmscoreWeb.PermissionView, "index.json", permissions: conn.assigns.permissions)
+  end
+
+  def index_permissions(conn, _params) do
+    permissions = Core.get_permissions_recursive(conn.assigns.circle)
+    render(conn, OmscoreWeb.PermissionView, "index.json", permissions: permissions)
   end
 
   def put_permissions(conn, %{"permissions" => permissions}) do

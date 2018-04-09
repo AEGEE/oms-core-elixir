@@ -194,7 +194,12 @@ defmodule Omscore.Core do
 
 
   # Update a circle
+  # Make sure the parent circle is updated separately
   def update_circle(%Circle{} = circle, attrs) do
+    attrs = attrs
+    |> Map.delete("parent_circle_id")
+    |> Map.delete(:parent_circle_id)
+
     circle
     |> Circle.changeset(attrs)
     |> Repo.update()
@@ -227,6 +232,7 @@ defmodule Omscore.Core do
 
   # Puts child circles for a circle
   # You should preload circles with find_circles if the data came from the user
+  # TODO: Doesn't check for loops yet!
   def put_child_circles(%Circle{} = circle, child_circles) do
     with {:ok} <- check_joinable_consistency(circle, child_circles),
         circle <- put_child_circles_unchecked(circle, child_circles) do
@@ -250,19 +256,10 @@ defmodule Omscore.Core do
     |> Repo.update()
   end
 
-  defp put_parent_circle_unchecked(circle, parent_circle) do
-    circle
-    |> Repo.preload([:parent_circle])
-    |> Circle.changeset(%{})
-    |> Ecto.Changeset.put_assoc(:parent_circle, parent_circle)
-    |> Repo.update()
-  end
-
   # Removes the parent circle for a circle
   def put_parent_circle(%Circle{} = circle, nil) do
     circle
-    |> Circle.changeset(%{})
-    |> Ecto.Changeset.put_change(:parent_circle_id, nil)
+    |> Circle.changeset(%{parent_circle_id: nil})
     |> Repo.update()
   end
 
@@ -270,11 +267,23 @@ defmodule Omscore.Core do
   # Returns {:ok, circle} or {:error, error-data}
   def put_parent_circle(%Circle{} = circle, %Circle{} = parent_circle) do
     with {:ok} <- check_joinable_consistency(parent_circle, [circle]) do
-      put_parent_circle_unchecked(circle, parent_circle)
+      circle
+      |> Circle.changeset(%{parent_circle_id: parent_circle.id})
+      |> Repo.update()
     end
   end
 
-  
+  # Checks if the parent circle actually is a parent of circle
+  def is_parent_recursive?(%Circle{} = circle, %Circle{} = parent_circle), do: is_parent_recursive?(circle.id, parent_circle.id)
+  def is_parent_recursive?(circle_id, parent_circle_id) when is_nil(circle_id) or is_nil(parent_circle_id), do: false
+  def is_parent_recursive?(circle_id, parent_circle_id) do
+    circle = get_circle(circle_id)
+    cond do
+      circle_id == parent_circle_id -> true
+      circle.parent_circle_id == parent_circle_id -> true
+      true -> is_parent_recursive?(circle.parent_circle_id, parent_circle_id)
+    end
+  end
 
   # Returns all permissions that are attached to this circle or any of its parent circles
   def get_permissions_recursive(%Circle{} = circle) do

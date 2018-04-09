@@ -21,10 +21,31 @@ defmodule Omscore.Core.Circle do
   @doc false
   def changeset(circle, attrs) do
     circle
-    |> cast(attrs, [:name, :description, :joinable])
+    |> cast(attrs, [:name, :description, :joinable, :parent_circle_id])
     |> validate_required([:name, :description, :joinable])
     |> validate_joinable_consistency()
+    |> validate_parent_circle()
   end
+
+  defp validate_parent_circle(%Ecto.Changeset{valid?: true} = changeset) do
+    p = get_field(changeset, :parent_circle_id)
+    if p != nil do
+      if p == get_field(changeset, :id) do
+        changeset
+        |> add_error(:parent_circle_id, "You can not assign the own circle as parent id")
+      else
+        if Omscore.Core.is_parent_recursive?(p, get_field(changeset, :id)) do
+          changeset
+          |> add_error(:parent_circle_id, "You can not create loops with parent circle assignments")
+        else
+          changeset
+        end
+      end
+    else
+      changeset
+    end
+  end
+  defp validate_parent_circle(changeset), do: changeset
 
   defp validate_joinable_consistency(%Ecto.Changeset{valid?: true} = changeset) do
     # If joinable was set to false or we don't have a parent, no need to check anything

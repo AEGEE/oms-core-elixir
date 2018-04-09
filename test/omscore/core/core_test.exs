@@ -380,6 +380,17 @@ defmodule Omscore.CoreTest do
       assert circle1.parent_circle_id == nil
     end
 
+    test "is_parent_recursive? checks if a circle is parent of another one" do
+      circle1 = circle_fixture()
+      circle2 = circle_fixture()
+      circle3 = circle_fixture()
+      assert {:ok, _} = Core.put_parent_circle(circle1, circle2)
+      assert {:ok, _} = Core.put_parent_circle(circle2, circle3)
+
+      assert Core.is_parent_recursive?(circle1, circle3) == true
+      assert Core.is_parent_recursive?(circle3, circle1) == false
+    end
+
     test "get_permissions_recursive/1 returns all permissions from the current circle and all parent circles" do
       circle1 = circle_fixture()
       circle2 = circle_fixture()
