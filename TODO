@@ -1,4 +1,4 @@
-Thoughs: What about scoping the single circle endpoints with a plug that automatically fetches the local permissions in case the circle is a bound circle? That would eliminate the need for all those duplicate routes...
+Thoughs: What about scoping the single circle endpoints with a plug that automatically fetches the local permissions in case the circle is a bound circle? That would eliminate the need for all those duplicate routes... Would mean that I would have to code all the routes that require distinction in the cond way like show_members but would make frontend development a lot easier.
 
 Circles
 o Put permission to circle

@@ -111,7 +111,7 @@ if Repo.all(Permission) == [] do
   Repo.insert!(%Permission{
     scope: "local",
     action: "view_members",
-    object: "bound_circle",
+    object: "circle",
     description: "View members of any circle in the body that you got this permission from"
   })
 
@@ -132,9 +132,16 @@ if Repo.all(Permission) == [] do
   Repo.insert!(%Permission{
     scope: "global", 
     action: "join",
-    object: "free_circle",
-    description: "Allows to join free circles which are joinable. Non-joinable circles can never be joined",
+    object: "circle",
+    description: "Allows to join circles which are joinable. Non-joinable circles can never be joined",
     always_assigned: true
+  })
+
+  Repo.insert!(%Permission{
+    scope: "local",
+    action: "join",
+    object: "circle",
+    description: "Allows you to join joinable circles in the body where you got the permission from"
   })
 
   Repo.insert!(%Permission{

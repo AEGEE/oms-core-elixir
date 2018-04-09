@@ -214,7 +214,7 @@ defmodule Omscore.Members do
 
   defp test_body_membership(circle, member) do
     if circle.body_id && !get_body_membership(circle.body_id, member.id) do
-      {:error, "A bound circle can only be joined by members of the body it is bound to"}
+      {:forbidden, "A bound circle can only be joined by members of the body it is bound to"}
     else
       {:ok}
     end

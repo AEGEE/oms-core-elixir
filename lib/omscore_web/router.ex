@@ -15,6 +15,10 @@ defmodule OmscoreWeb.Router do
     plug OmscoreWeb.BodyFetchPlug
   end
 
+  pipeline :fetch_circle do
+    plug OmscoreWeb.CircleFetchPlug
+  end
+
   scope "/api", OmscoreWeb do
     pipe_through :api
 
@@ -31,25 +35,25 @@ defmodule OmscoreWeb.Router do
 
     get "/circles", CircleController, :index
     post "/circles", CircleController, :create
-    get "/circles/:id", CircleController, :show
-    put "/circles/:id", CircleController, :update
-    delete "/circles/:id", CircleController, :delete
-    put "/circles/:id/parent", CircleController, :put_parent
-    get "/circles/:id/members", CircleController, :show_members
-    post "/circles/:id/members", CircleController, :join_circle
     put "/circles/:id/members/:membership_id", CircleController, :update_circle_membership
     delete "/circles/:id/members/:membership_id", CircleController, :delete_circle_membership
   end
 
-  scope "/api/body/:body_id", OmscoreWeb, as: :body do
+  scope "/api/circles/:circle_id", OmscoreWeb do
+    pipe_through [:api, :authorize, :fetch_circle]
+
+    get "/", CircleController, :show
+    put "/", CircleController, :update
+    delete "/", CircleController, :delete
+    put "/parent", CircleController, :put_parent
+    get "/members", CircleController, :show_members
+    post "/members", CircleController, :join_circle
+  end
+
+  scope "/api/bodies/:body_id", OmscoreWeb, as: :body do
     pipe_through [:api, :authorize, :fetch_body]
 
     get "/circles", CircleController, :index_bound
     post "/circles", CircleController, :create_bound
-    get "/circles/:id", CircleController, :show
-    put "/circles/:id", CircleController, :update
-    delete "/circles/:id", CircleController, :delete
-    put "/circles/:id/parent", CircleController, :put_parent
-    get "/circles/:id/members", CircleController, :show_members
   end
 end

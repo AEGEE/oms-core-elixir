@@ -7,13 +7,6 @@ defmodule OmscoreWeb.CircleController do
 
   action_fallback OmscoreWeb.FallbackController
 
-  defp is_free_circle(circle) do
-    case circle.body_id do
-      nil -> {:ok}
-      _ -> {:error, "This request can only be used on free circles"}
-    end
-  end
-
   def index(conn, _params) do
     with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "view", "circle") do
       circles = Core.list_free_circles()
@@ -32,39 +25,20 @@ defmodule OmscoreWeb.CircleController do
     end
   end
 
-  def show(conn, %{"id" => id}) do
+  def show(conn, _params) do
     with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "view", "circle") do
-      circle = Core.get_circle!(id) |> Omscore.Repo.preload([:body, :parent_circle, :child_circles])
+      circle = conn.assigns.circle |> Omscore.Repo.preload([:body, :parent_circle, :child_circles, :permissions])
       render(conn, "show.json", circle: circle)
     end
   end
 
-  # If the user has the free permission, no further checks need to be done
-  defp show_members_free(conn, circle) do
-    circle = circle |> Omscore.Repo.preload([circle_memberships: [:member]])
-    render(conn, "show_members.json", circle_memberships: circle.circle_memberships)
-  end
-
-  # For the bound permission, only viewing of circles in that body is allowed
-  defp show_members_bound(conn, circle) do
-    if circle.body_id == conn.assigns.body.id do
-      show_members_free(conn, circle)
-    else
-      {:forbidden, "With the bound permission you can only view members in the body through which you obtained the permission"}
-    end
-  end
-
-  def show_members(conn, %{"id" => id}) do
-    circle = Core.get_circle!(id) 
+  def show_members(conn, _params) do
+    circle = conn.assigns.circle
     conn = is_circle_member(conn, circle)
 
-    {match1, _} = Core.search_permission_list(conn.assigns.permissions, "view_members", "circle")
-    {match2, _} = Core.search_permission_list(conn.assigns.permissions, "view_members", "bound_circle")
-
-    cond do
-      match1 == :ok -> show_members_free(conn, circle)
-      match2 == :ok -> show_members_bound(conn, circle)
-      true -> {:forbidden, "You need the view_members permission to view members"}
+    with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "view_members", "circle") do
+      circle = circle |> Omscore.Repo.preload([circle_memberships: [:member]])
+      render(conn, "show_members.json", circle_memberships: circle.circle_memberships)
     end
   end
 
@@ -75,11 +49,10 @@ defmodule OmscoreWeb.CircleController do
     end
   end
 
-  def join_circle(conn, %{"id" => id}) do
-    circle = Core.get_circle!(id)
+  def join_circle(conn, _params) do
+    circle = conn.assigns.circle
 
-    with {:ok} <- is_free_circle(circle),
-         {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "join", "free_circle"),
+    with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "join", "circle"),
          {:ok, _} <- is_circle_joinable(circle),
          {:ok, _} <- Members.create_circle_membership(circle, conn.assigns.member) do
       render(conn, "success.json", msg: "You successfully joined the circle")
@@ -130,8 +103,8 @@ defmodule OmscoreWeb.CircleController do
     end
   end
 
-  def update(conn, %{"id" => id, "circle" => circle_params}) do
-    circle = Core.get_circle!(id)
+  def update(conn, %{"circle" => circle_params}) do
+    circle = conn.assigns.circle
     conn = is_circle_admin(conn, circle)
 
     with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "update", "circle"),
@@ -162,8 +135,8 @@ defmodule OmscoreWeb.CircleController do
     end
   end
 
-  def put_parent(conn, %{"id" => id, "parent_circle_id" => parent_circle_id}) do
-    circle = Core.get_circle!(id)
+  def put_parent(conn, %{"parent_circle_id" => parent_circle_id}) do
+    circle = conn.assigns.circle
     parent_circle = Core.get_circle(parent_circle_id)
 
     {match1, _} = Core.search_permission_list(conn.assigns.permissions, "put_parent", "circle")
@@ -177,8 +150,8 @@ defmodule OmscoreWeb.CircleController do
     end    
   end
 
-  def delete(conn, %{"id" => id}) do
-    circle = Core.get_circle!(id)
+  def delete(conn, _params) do
+    circle = conn.assigns.circle
     conn = is_circle_admin(conn, circle)
 
     with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "delete", "circle"),

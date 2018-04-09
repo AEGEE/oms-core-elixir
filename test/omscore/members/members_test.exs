@@ -14,7 +14,7 @@ defmodule Omscore.MembersTest do
 
     def member_fixture(attrs \\ %{}) do
       attrs = Enum.into(attrs, @valid_attrs)
-      {:ok, member} = Members.create_member(:rand.uniform(10000), attrs)
+      {:ok, member} = Members.create_member(:rand.uniform(1000000), attrs)
 
       member
     end
@@ -382,7 +382,7 @@ defmodule Omscore.MembersTest do
       {:ok, _} = Members.create_body_membership(body, member1)
 
       assert {:ok, _} = Members.create_circle_membership(circle, member1, @valid_attrs)
-      assert {:error, _} = Members.create_circle_membership(circle, member2, @valid_attrs)
+      assert {:forbidden, _} = Members.create_circle_membership(circle, member2, @valid_attrs)
     end
 
     test "create_circle_membership/1 prohibits duplicate membership" do

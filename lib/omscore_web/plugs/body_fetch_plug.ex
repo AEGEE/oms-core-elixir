@@ -3,8 +3,7 @@ defmodule OmscoreWeb.BodyFetchPlug do
 
   def init(default), do: default
 
-  # This plug gets all global permissions of the user, assuming the member was already fetched and stored in assigns
-  # Superadmins get all permissions in the system
+  # This plug fetches a body and extra assigned permissions to that body
   def call(%{path_params: %{"body_id" => body_id}} = conn, _) do
     body = Omscore.Core.get_body!(body_id)
 

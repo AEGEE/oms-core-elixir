@@ -94,7 +94,7 @@ defmodule OmscoreWeb.ConnCase do
       # Takes a map with permission attributes and creates a member, a circle and the permissions with the attributes and links them all together
       def create_member_with_permissions(permissions) when not(is_list(permissions)), do: create_member_with_permissions([permissions])
       def create_member_with_permissions(permissions) when is_list(permissions) do
-        id = :rand.uniform(100000)
+        id = :rand.uniform(1000000)
         member = member_fixture(%{user_id: id})
         circle = circle_fixture()
         token = create_token(%{id: id})

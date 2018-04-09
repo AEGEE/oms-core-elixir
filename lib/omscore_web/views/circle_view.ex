@@ -24,7 +24,8 @@ defmodule OmscoreWeb.CircleView do
       parent_circle_id: circle.parent_circle_id,
       body: Helper.render_assoc_one(circle.body, OmscoreWeb.BodyView, "body.json"),
       parent_circle: Helper.render_assoc_one(circle.parent_circle, CircleView, "circle.json"),
-      child_circles: Helper.render_assoc_many(circle.child_circles, CircleView, "circle.json")
+      child_circles: Helper.render_assoc_many(circle.child_circles, CircleView, "circle.json"),
+      permissions: Helper.render_assoc_many(circle.permissions, OmscoreWeb.PermissionView, "permission.json")
     }
   end
 end

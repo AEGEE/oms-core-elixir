@@ -53,6 +53,7 @@ defmodule OmscoreWeb.CircleControllerTest do
       assert Map.has_key?(res, "body")
       assert Map.has_key?(res, "parent_circle")
       assert Map.has_key?(res, "child_circles")
+      assert Map.has_key?(res, "permissions")
     end
   end
 
@@ -83,6 +84,21 @@ defmodule OmscoreWeb.CircleControllerTest do
       conn = put_req_header(conn, "x-auth-token", token)
 
       conn = get conn, circle_path(conn, :show_members, circle)
+      assert json_response(conn, 200)
+    end
+
+    test "shows members in your body", %{conn: conn} do
+      body = body_fixture()
+      circle1 = bound_circle_fixture(body)
+      circle2 = bound_circle_fixture(body)
+      permission = permission_fixture(%{action: "view_members", object: "circle", scope: "local"})
+      %{token: token, member: member} = create_member_with_permissions([])
+      conn = put_req_header(conn, "x-auth-token", token)
+      assert {:ok, _} = Omscore.Members.create_body_membership(body, member)
+      assert {:ok, _} = Omscore.Members.create_circle_membership(circle1, member)
+      assert {:ok, _} = Omscore.Core.put_circle_permissions(circle1, [permission])
+
+      conn = get conn, circle_path(conn, :show_members, circle2.id)
       assert json_response(conn, 200)
     end
   end
@@ -218,6 +234,31 @@ defmodule OmscoreWeb.CircleControllerTest do
       conn = put conn, circle_path(conn, :put_parent, circle), parent_circle_id: circle2.id
       assert json_response(conn, 403)
     end
+
+    test "allows to put a parent circle which is in the same body to a circle", %{conn: conn} do
+      body = body_fixture()
+      circle = bound_circle_fixture(body)
+      circle2 = bound_circle_fixture(body)
+      %{token: token} = create_member_with_permissions([%{action: "put_parent", object: "bound_circle"}, %{action: "view", object: "circle"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      conn = put conn, circle_path(conn, :put_parent, circle.id), parent_circle_id: circle2.id
+      assert json_response(conn, 200)
+
+      circle = Core.get_circle!(circle.id)
+      assert circle.parent_circle_id == circle2.id
+    end
+
+    test "prohibits to assign a circle as parent which is not in the body", %{conn: conn} do
+      body = body_fixture()
+      circle = bound_circle_fixture(body)
+      circle2 = circle_fixture()
+      %{token: token} = create_member_with_permissions([%{action: "put_parent", object: "bound_circle"}, %{action: "view", object: "circle"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      conn = put conn, circle_path(conn, :put_parent, circle.id), parent_circle_id: circle2.id
+      assert json_response(conn, 403)
+    end
   end
 
   describe "delete circle" do
@@ -265,7 +306,7 @@ defmodule OmscoreWeb.CircleControllerTest do
     setup [:create_circle]
 
     test "lets user join a joinable circle", %{conn: conn, circle: circle} do
-      %{token: token, member: member} = create_member_with_permissions([%{action: "join", object: "free_circle"}])
+      %{token: token, member: member} = create_member_with_permissions([%{action: "join", object: "circle"}])
       conn = put_req_header(conn, "x-auth-token", token)
 
       conn = post conn, circle_path(conn, :join_circle, circle)
@@ -280,10 +321,33 @@ defmodule OmscoreWeb.CircleControllerTest do
       assert Enum.any?(res, fn(x) -> x["member_id"] == member.id end)
     end
 
+    test "lets user join a joinable circle in his body", %{conn: conn} do
+      %{token: token, member: member} = create_member_with_permissions([%{action: "join", object: "circle"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      body = body_fixture()
+      circle = bound_circle_fixture(body, %{joinable: true})
+      assert {:ok, _} = Omscore.Members.create_body_membership(body, member)
+
+      conn = post conn, circle_path(conn, :join_circle, circle)
+      assert json_response(conn, 200)
+    end
+
     test "rejects joining a non-joinable circle", %{conn: conn} do
       {:ok, circle} = Core.create_circle(@create_attrs |> Map.put(:joinable, false))
-      %{token: token} = create_member_with_permissions([%{action: "join", object: "free_circle"}])
+      %{token: token} = create_member_with_permissions([%{action: "join", object: "circle"}])
       conn = put_req_header(conn, "x-auth-token", token)
+
+      conn = post conn, circle_path(conn, :join_circle, circle)
+      assert json_response(conn, 403)
+    end
+
+    test "rejects joining a circle in a different body", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "join", object: "circle"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      body = body_fixture()
+      circle = bound_circle_fixture(body, %{joinable: true})
 
       conn = post conn, circle_path(conn, :join_circle, circle)
       assert json_response(conn, 403)
@@ -293,7 +357,7 @@ defmodule OmscoreWeb.CircleControllerTest do
   describe "edit circle_membership" do
     test "lets circle_admin edit circle memberships", %{conn: conn} do
       %{token: token} = create_member_with_permissions([%{action: "create", object: "free_circle"}])
-      %{token: token2, member: member} = create_member_with_permissions([%{action: "join", object: "free_circle"}])
+      %{token: token2, member: member} = create_member_with_permissions([%{action: "join", object: "circle"}])
       conn = put_req_header(conn, "x-auth-token", token)
 
       # First member creates the circle and thus becomes circle admin
@@ -363,7 +427,7 @@ defmodule OmscoreWeb.CircleControllerTest do
   describe "delete circle_membership" do
     test "lets circle_admin delete circle memberships", %{conn: conn} do
       %{token: token} = create_member_with_permissions([%{action: "create", object: "free_circle"}])
-      %{token: token2, member: member} = create_member_with_permissions([%{action: "join", object: "free_circle"}])
+      %{token: token2, member: member} = create_member_with_permissions([%{action: "join", object: "circle"}])
       conn = put_req_header(conn, "x-auth-token", token)
 
       # First member creates the circle and thus becomes circle admin
@@ -478,100 +542,6 @@ defmodule OmscoreWeb.CircleControllerTest do
       assert {:ok, _} = Omscore.Members.create_body_membership(body, member)
 
       conn = post conn, body_circle_path(conn, :create_bound, body.id), circle: @create_attrs
-      assert json_response(conn, 403)
-    end
-  end
-
-  describe "double request controller" do
-    test "show also has a bound route", %{conn: conn} do
-      body = body_fixture()
-      circle = bound_circle_fixture(body)
-      %{token: token} = create_member_with_permissions([%{action: "view", object: "circle"}])
-      conn = put_req_header(conn, "x-auth-token", token)
-
-      conn = get conn, body_circle_path(conn, :show, body.id, circle.id)
-      assert json_response(conn, 200)
-    end
-
-    test "update also has a bound route", %{conn: conn} do
-      body = body_fixture()
-      circle = bound_circle_fixture(body)
-      %{token: token} = create_member_with_permissions([%{action: "update", object: "circle"}, %{action: "view", object: "circle"}])
-      conn = put_req_header(conn, "x-auth-token", token)
-
-      conn = put conn, body_circle_path(conn, :update, body.id, circle.id), circle: @update_attrs
-      assert json_response(conn, 200)
-    end
-
-    test "delete also has a bound route", %{conn: conn} do
-      body = body_fixture()
-      circle = bound_circle_fixture(body)
-      %{token: token} = create_member_with_permissions([%{action: "delete", object: "circle"}, %{action: "view", object: "circle"}])
-      conn = put_req_header(conn, "x-auth-token", token)
-
-      conn = delete conn, body_circle_path(conn, :delete, body.id, circle.id)
-      assert response(conn, 204)
-    end
-  end
-
-  describe "put parent bound" do
-    test "allows to put a parent circle which is in the same body to a circle", %{conn: conn} do
-      body = body_fixture()
-      circle = bound_circle_fixture(body)
-      circle2 = bound_circle_fixture(body)
-      %{token: token} = create_member_with_permissions([%{action: "put_parent", object: "bound_circle"}, %{action: "view", object: "circle"}])
-      conn = put_req_header(conn, "x-auth-token", token)
-
-      conn = put conn, body_circle_path(conn, :put_parent, body.id, circle.id), parent_circle_id: circle2.id
-      assert json_response(conn, 200)
-
-      circle = Core.get_circle!(circle.id)
-      assert circle.parent_circle_id == circle2.id
-    end
-
-    test "prohibits to assign a circle as parent which is not in the body", %{conn: conn} do
-      body = body_fixture()
-      circle = bound_circle_fixture(body)
-      circle2 = circle_fixture()
-      %{token: token} = create_member_with_permissions([%{action: "put_parent", object: "bound_circle"}, %{action: "view", object: "circle"}])
-      conn = put_req_header(conn, "x-auth-token", token)
-
-      conn = put conn, body_circle_path(conn, :put_parent, body.id, circle.id), parent_circle_id: circle2.id
-      assert json_response(conn, 403)
-    end
-  end
-
-  describe "show members bound" do
-    test "shows members in your body", %{conn: conn} do
-      body = body_fixture()
-      circle = bound_circle_fixture(body)
-
-      %{token: token, member: member} = create_member_with_permissions([%{action: "view_members", object: "bound_circle"}])
-      conn = put_req_header(conn, "x-auth-token", token)
-      assert {:ok, _} = Omscore.Members.create_body_membership(body, member)
-
-      member2 = member_fixture()
-      assert {:ok, _} = Omscore.Members.create_body_membership(body, member2)
-      assert {:ok, _} = Omscore.Members.create_circle_membership(circle, member2)
-
-      conn = get conn, body_circle_path(conn, :show_members, body.id, circle.id)
-      assert res = json_response(conn, 200)["data"]
-      assert is_list(res)
-      assert res |> Enum.any?(fn(x) -> x["member_id"] == member2.id end)
-    end
-
-    test "hack by passing a body where you have the permission to view a circle which is outside the body not possible", %{conn: conn} do
-      body = body_fixture()
-      circle1 = bound_circle_fixture(body)
-      circle2 = circle_fixture()
-      permission = permission_fixture(%{action: "view_members", object: "bound_circle", scope: "local"})
-      %{token: token, member: member} = create_member_with_permissions([])
-      conn = put_req_header(conn, "x-auth-token", token)
-      assert {:ok, _} = Omscore.Members.create_body_membership(body, member)
-      assert {:ok, _} = Omscore.Members.create_circle_membership(circle1, member)
-      assert {:ok, _} = Omscore.Core.put_circle_permissions(circle1, [permission])
-
-      conn = get conn, body_circle_path(conn, :show_members, body.id, circle2.id)
       assert json_response(conn, 403)
     end
   end

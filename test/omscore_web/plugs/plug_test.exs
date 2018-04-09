@@ -99,4 +99,27 @@ defmodule OmscoreWeb.PlugTest do
     assert conn.assigns.body.id == body.id
     assert conn.assigns.permissions |> Enum.any?(fn(x) -> x.id == permission.id end)
   end
+
+  test "circle_fetch_plug fetches the circle and in case of a bound circle updates permissions to include local permissions", %{conn: conn} do
+    %{token: token, member: member} = create_member_with_permissions(%{action: "some action", object: "some object"})
+    permission = permission_fixture(%{scope: "local", action: "some other action"})
+    body = body_fixture()
+    {:ok, _} = Omscore.Members.create_body_membership(body, member)
+    {:ok, circle} = Omscore.Core.create_circle(@circle_attrs, body)
+    {:ok, circle2} = Omscore.Core.create_circle(@circle_attrs, body)
+    {:ok, _} = Omscore.Core.put_circle_permissions(circle, [permission])
+    {:ok, _} = Omscore.Members.create_circle_membership(circle, member)
+
+    conn = conn
+    |> put_req_header("x-auth-token", token)
+    |> OmscoreWeb.AuthorizePlug.call(nil)
+    |> OmscoreWeb.MemberFetchPlug.call(nil)
+    |> OmscoreWeb.PermissionFetchPlug.call(nil)
+    |> Map.put(:path_params, %{"circle_id" => circle2.id})
+    |> OmscoreWeb.CircleFetchPlug.call(nil)
+
+    assert conn.assigns.circle
+    assert conn.assigns.circle.id == circle2.id
+    assert conn.assigns.permissions |> Enum.any?(fn(x) -> x.id == permission.id end)
+  end
 end
