@@ -175,9 +175,16 @@ defmodule Omscore.Core do
   def get_circle!(id), do: Repo.get!(Circle, id) |> Repo.preload([:permissions, :child_circles, :parent_circle])
   def get_circle(id), do: Repo.get(Circle, id)
 
+  defp clean_attrs(attrs) do
+    attrs
+    |> Map.delete("parent_circle_id")
+    |> Map.delete(:parent_circle_id)
+  end
 
   # Create a bound circle
   def create_circle(attrs, %Body{} = body) do
+    attrs = clean_attrs(attrs)
+
     %Circle{}
     |> Circle.changeset(attrs)
     |> Ecto.Changeset.put_assoc(:body, body)
@@ -187,6 +194,8 @@ defmodule Omscore.Core do
 
   # Creates a free circle
   def create_circle(attrs \\ %{}) do
+    attrs = clean_attrs(attrs)
+
     %Circle{}
     |> Circle.changeset(attrs)
     |> Repo.insert()
@@ -196,9 +205,7 @@ defmodule Omscore.Core do
   # Update a circle
   # Make sure the parent circle is updated separately
   def update_circle(%Circle{} = circle, attrs) do
-    attrs = attrs
-    |> Map.delete("parent_circle_id")
-    |> Map.delete(:parent_circle_id)
+    attrs = clean_attrs(attrs)
 
     circle
     |> Circle.changeset(attrs)

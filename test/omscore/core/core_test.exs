@@ -252,11 +252,21 @@ defmodule Omscore.CoreTest do
       assert circle.description == "some description"
       assert circle.joinable == true
       assert circle.name == "some name"
+      assert circle.parent_circle_id == nil
       assert !Ecto.assoc_loaded?(circle.permissions)
     end
 
     test "create_circle/1 with invalid data returns error changeset" do
       assert {:error, %Ecto.Changeset{}} = Core.create_circle(@invalid_attrs)
+    end
+
+    test "create_circle/1 ignores parent_circle_id" do
+      circle = circle_fixture()
+      assert {:ok, %Circle{} = circle} = Core.create_circle(@valid_attrs |> Map.put(:parent_circle_id, circle.id))
+      assert circle.description == "some description"
+      assert circle.joinable == true
+      assert circle.name == "some name"
+      assert circle.parent_circle_id == nil
     end
 
     test "update_circle/2 with valid data updates the circle" do

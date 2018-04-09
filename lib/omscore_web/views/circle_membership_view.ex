@@ -4,7 +4,7 @@ defmodule OmscoreWeb.CircleMembershipView do
   alias OmscoreWeb.Helper
 
   def render("show.json", %{circle_membership: circle_membership}) do
-    %{data: render_one(circle_membership, CircleMembershipView, "circle_membership.json")}
+    %{success: true, data: render_one(circle_membership, CircleMembershipView, "circle_membership.json")}
   end
 
   def render("circle_membership.json", %{circle_membership: circle_membership}) do
