@@ -396,7 +396,7 @@ defmodule OmscoreWeb.CircleControllerTest do
     end
 
     test "lets someone with permissions edit circle memberships", %{conn: conn} do
-      %{token: token} = create_member_with_permissions([%{action: "update_members", object: "free_circle"}])
+      %{token: token} = create_member_with_permissions([%{action: "update_members", object: "circle"}])
       conn = put_req_header(conn, "x-auth-token", token)
 
       circle = circle_fixture()
@@ -463,7 +463,7 @@ defmodule OmscoreWeb.CircleControllerTest do
     end
 
     test "lets someone with permissions delete circle memberships", %{conn: conn} do
-      %{token: token} = create_member_with_permissions([%{action: "delete_members", object: "free_circle"}])
+      %{token: token} = create_member_with_permissions([%{action: "delete_members", object: "circle"}])
       conn = put_req_header(conn, "x-auth-token", token)
 
       circle = circle_fixture()
@@ -543,6 +543,99 @@ defmodule OmscoreWeb.CircleControllerTest do
 
       conn = post conn, body_circle_path(conn, :create_bound, body.id), circle: @create_attrs
       assert json_response(conn, 403)
+    end
+  end
+
+  describe "index permissions" do
+    test "lists all permissions the user has in the circle", %{conn: conn} do
+      body = body_fixture()
+      circle = bound_circle_fixture(body)
+      circle2 = bound_circle_fixture(body)
+      permission = permission_fixture(%{scope: "local"})
+      %{token: token, member: member} = create_member_with_permissions([])
+      conn = put_req_header(conn, "x-auth-token", token)
+      assert {:ok, _} = Omscore.Members.create_body_membership(body, member)
+      assert {:ok, _} = Omscore.Members.create_circle_membership(circle, member)
+      assert {:ok, _} = Omscore.Core.put_circle_permissions(circle, [permission])
+
+      conn = get conn, circle_path(conn, :index_permissions, circle2.id)
+      assert res = json_response(conn, 200)["data"]
+      assert is_list(res)
+      assert Enum.any?(res, fn(x) -> x["id"] == permission.id end)
+    end
+  end
+
+  describe "put permissions" do
+    test "puts permissions to a circle", %{conn: conn} do
+      circle = circle_fixture()
+      permission1 = permission_fixture()
+      permission2 = permission_fixture()
+
+      %{token: token} = create_member_with_permissions([%{action: "put_permissions", object: "circle"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      attrs = [%{id: permission1.id}, %{id: permission2.id}]
+      conn = put conn, circle_path(conn, :put_permissions, circle.id), permissions: attrs
+      assert json_response(conn, 200)
+
+      circle = Omscore.Core.get_circle!(circle.id) |> Omscore.Repo.preload([:permissions])
+      assert Enum.any?(circle.permissions, fn(x) -> x.id == permission1.id end)
+      assert Enum.any?(circle.permissions, fn(x) -> x.id == permission2.id end)
+    end
+
+    test "also removes permissions from a circle", %{conn: conn} do
+      circle = circle_fixture()
+      permission1 = permission_fixture()
+      permission2 = permission_fixture()
+
+      %{token: token} = create_member_with_permissions([%{action: "put_permissions", object: "circle"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      attrs = [%{id: permission1.id}, %{id: permission2.id}]
+      conn = put conn, circle_path(conn, :put_permissions, circle.id), permissions: attrs
+      assert json_response(conn, 200)
+
+      circle = Omscore.Core.get_circle!(circle.id) |> Omscore.Repo.preload([:permissions])
+      assert Enum.any?(circle.permissions, fn(x) -> x.id == permission1.id end)
+      assert Enum.any?(circle.permissions, fn(x) -> x.id == permission2.id end)
+
+      conn = recycle(conn) |> put_req_header("x-auth-token", token)
+
+      conn = put conn, circle_path(conn, :put_permissions, circle.id), permissions: []
+      assert json_response(conn, 200)
+
+      circle = Omscore.Core.get_circle!(circle.id) |> Omscore.Repo.preload([:permissions])
+      assert circle.permissions == []
+    end
+
+    test "rejects request for unauthorized user", %{conn: conn} do
+      circle = circle_fixture()
+      permission1 = permission_fixture()
+      permission2 = permission_fixture()
+
+      %{token: token} = create_member_with_permissions([])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      attrs = [%{id: permission1.id}, %{id: permission2.id}]
+      conn = put conn, circle_path(conn, :put_permissions, circle.id), permissions: attrs
+      assert json_response(conn, 403)
+    end
+
+    @tag only: 1
+    test "leaves permissions unchanged in case of invalid data", %{conn: conn} do
+      circle = circle_fixture()
+      permission1 = permission_fixture()
+      permission2 = permission_fixture()
+
+      %{token: token} = create_member_with_permissions([%{action: "put_permissions", object: "circle"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      attrs = [%{id: permission1.id}, %{id: permission2.id}, %{id: -1}]
+      conn = put conn, circle_path(conn, :put_permissions, circle.id), permissions: attrs
+      assert json_response(conn, 404)
+
+      circle = Omscore.Core.get_circle!(circle.id) |> Omscore.Repo.preload([:permissions])
+      assert circle.permissions == []
     end
   end
 

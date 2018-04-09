@@ -22,9 +22,9 @@ defmodule Omscore.Core do
       end
     end)
 
-    case Enum.find(res, fn(x) -> x == nil end) do
-      nil -> {:ok, res}
-      _ -> {:error, "Invalid input data"}
+    case Enum.find(res, :not_found, fn(x) -> x == nil end) do
+      :not_found -> {:ok, res}
+      _ -> {:error, :not_found, "One of the permissions could not be found in the db"}
     end
   end
 

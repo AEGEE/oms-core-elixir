@@ -59,25 +59,25 @@ defmodule OmscoreWeb.CircleController do
     end
   end
 
-  def update_circle_membership(conn, %{"id" => id, "membership_id" => membership_id, "circle_membership" => circle_membership_attrs}) do
-    circle = Core.get_circle!(id)
+  def update_circle_membership(conn, %{"membership_id" => membership_id, "circle_membership" => circle_membership_attrs}) do
+    circle = conn.assigns.circle
     cm = Members.get_circle_membership!(membership_id)
 
     conn = is_circle_admin(conn, circle)
 
-    with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "update_members", "free_circle"),
+    with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "update_members", "circle"),
          {:ok, cm} <- Members.update_circle_membership(cm, circle_membership_attrs) do
       render(conn, OmscoreWeb.CircleMembershipView, "show.json", circle_membership: cm)
     end
   end
 
-  def delete_circle_membership(conn, %{"id" => id, "membership_id" => membership_id}) do
-    circle = Core.get_circle!(id)
+  def delete_circle_membership(conn, %{"membership_id" => membership_id}) do
+    circle = conn.assigns.circle
     cm = Members.get_circle_membership!(membership_id)
 
     conn = is_circle_admin(conn, circle)
 
-    with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "delete_members", "free_circle"),
+    with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "delete_members", "circle"),
          {:ok, _} <- Members.delete_circle_membership(cm) do
       send_resp(conn, :no_content, "")
     end
@@ -87,8 +87,8 @@ defmodule OmscoreWeb.CircleController do
   defp is_circle_admin(conn, circle) do
     admin_permissions = [%Core.Permission{scope: "circle", action: "update", object: "circle"}, 
       %Core.Permission{scope: "circle", action: "delete", object: "circle"},
-      %Core.Permission{scope: "circle", action: "update_members", object: "free_circle"},
-      %Core.Permission{scope: "circle", action: "delete_members", object: "free_circle"}]
+      %Core.Permission{scope: "circle", action: "update_members", object: "circle"},
+      %Core.Permission{scope: "circle", action: "delete_members", object: "circle"}]
     case Members.is_circle_admin(circle, conn.assigns.member) do
       {true, _} -> Plug.Conn.assign(conn, :permissions, conn.assigns.permissions ++ admin_permissions)
       {false, _} -> conn
@@ -184,6 +184,21 @@ defmodule OmscoreWeb.CircleController do
         |> put_status(:created)
         |> put_resp_header("location", circle_path(conn, :show, circle))
         |> render("show.json", circle: circle)
+    end
+  end
+
+  def index_permissions(conn, _params) do
+    conn = is_circle_member(conn, conn.assigns.circle)
+    conn = is_circle_admin(conn, conn.assigns.circle)
+
+    render(conn, OmscoreWeb.PermissionView, "index.json", permissions: conn.assigns.permissions)
+  end
+
+  def put_permissions(conn, %{"permissions" => permissions}) do
+    with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "put_permissions", "circle"),
+         {:ok, permissions} <- Core.find_permissions(permissions),
+         {:ok, circle} <- Core.put_circle_permissions(conn.assigns.circle, permissions) do
+      render(conn, "show.json", circle: circle)
     end
   end
 end

@@ -149,6 +149,17 @@ defmodule OmscoreWeb.PermissionControllerTest do
     end
   end
 
+  describe "index my permissions" do
+    test "lists all permissions", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "some weird", object: "permission"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+      conn = get conn, permission_path(conn, :index_permissions)
+      assert res = json_response(conn, 200)["data"]
+      assert is_list(res)
+      assert Enum.any?(res, fn(x) -> x["action"] == "some weird" && x["object"] == "permission" end)
+    end
+  end
+
   defp create_permission(_) do
     permission = fixture(:permission)
     {:ok, permission: permission}

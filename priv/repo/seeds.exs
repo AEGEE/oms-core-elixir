@@ -118,15 +118,29 @@ if Repo.all(Permission) == [] do
   Repo.insert!(%Permission{
     scope: "global",
     action: "update_members",
-    object: "free_circle",
-    description: "Update membership details of members of any free circle, even those that you are not in a circle_admin position in or even have member status. Should never be assigned as circle_admins automatically get this permission"
+    object: "circle",
+    description: "Update membership details of members of any circle, even those that you are not in a circle_admin position in or even have member status. Should never be assigned as circle_admins automatically get this permission"
+  })
+
+  Repo.insert!(%Permission{
+    scope: "local",
+    action: "update_members",
+    object: "circle",
+    description: "Update membership details of members of any circle in the body that you got this permission from, even those that you are not in a circle_admin position in or even have member status. Should never be assigned as circle_admins automatically get this permission"
   })
 
   Repo.insert!(%Permission{
     scope: "global",
     action: "delete_members",
-    object: "free_circle",
+    object: "circle",
     description: "Delete any member from any free circle, even those that you are not in a circle_admin position in or even have member status. Should never be assigned as circle_admins automatically get this permission"
+  })
+
+  Repo.insert!(%Permission{
+    scope: "local",
+    action: "update_members",
+    object: "circle",
+    description: "Delete any member from any circle in the body that you got this permission from, even those that you are not in a circle_admin position in or even have member status. Should never be assigned as circle_admins automatically get this permission"
   })
 
   Repo.insert!(%Permission{
@@ -149,5 +163,12 @@ if Repo.all(Permission) == [] do
     action: "create",
     object: "bound_circle",
     description: "Creating bound circles to the body the permission was granted in"
+  })
+
+  Repo.insert!(%Permission{
+    scope: "global",
+    action: "put_permissions",
+    object: "circle",
+    description: "Assign permission to any circle. This is effectively superadmin permission, as a user holding this can assign all permissions in the system to a circle where he is member in"
   })
 end

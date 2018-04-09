@@ -45,4 +45,8 @@ defmodule OmscoreWeb.PermissionController do
       send_resp(conn, :no_content, "")
     end
   end
+
+  def index_permissions(conn, _params) do
+    render(conn, "index.json", permissions: conn.assigns.permissions)
+  end
 end
