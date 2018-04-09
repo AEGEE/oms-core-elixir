@@ -1,6 +1,7 @@
 defmodule OmscoreWeb.BodyView do
   use OmscoreWeb, :view
   alias OmscoreWeb.BodyView
+  alias OmscoreWeb.Helper
 
   def render("index.json", %{bodies: bodies}) do
     %{data: render_many(bodies, BodyView, "body.json")}
@@ -17,6 +18,8 @@ defmodule OmscoreWeb.BodyView do
       phone: body.phone,
       address: body.address,
       description: body.description,
-      legacy_key: body.legacy_key}
+      legacy_key: body.legacy_key,
+      circles: Helper.render_assoc_many(body.circles, OmscoreWeb.CircleView, "circle.json")
+    }
   end
 end

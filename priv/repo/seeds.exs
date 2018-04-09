@@ -175,4 +175,41 @@ if Repo.all(Permission) == [] do
     object: "circle",
     description: "Assign permission to any circle. This is effectively superadmin permission, as a user holding this can assign all permissions in the system to a circle where he is member in"
   })
+
+  # Bodies
+  Repo.insert!(%Permission{
+    scope: "global",
+    action: "view",
+    object: "body",
+    description: "View body details, excluding the members list",
+    always_assigned: true
+  })
+
+  Repo.insert!(%Permission{
+    scope: "global",
+    action: "create",
+    object: "body",
+    description: "Create new bodies."
+  })
+
+  Repo.insert!(%Permission{
+    scope: "global",
+    action: "update",
+    object: "body",
+    description: "Update any body, even those that you are not member of. Try to use the local permission instead"
+  })
+
+  Repo.insert!(%Permission{
+    scope: "local",
+    action: "update",
+    object: "body",
+    description: "Update details of the body that you got the permission from. Might be good for boards but also allows changing the name"
+  })
+
+  Repo.insert!(%Permission{
+    scope: "global",
+    action: "delete",
+    object: "body",
+    description: "Delete a body."
+  })
 end

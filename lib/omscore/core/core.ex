@@ -191,7 +191,6 @@ defmodule Omscore.Core do
     |> Repo.insert()
   end
 
-
   # Creates a free circle
   def create_circle(attrs \\ %{}) do
     attrs = clean_attrs(attrs)
@@ -200,7 +199,6 @@ defmodule Omscore.Core do
     |> Circle.changeset(attrs)
     |> Repo.insert()
   end
-
 
   # Update a circle
   # Make sure the parent circle is updated separately
