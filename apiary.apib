@@ -1,0 +1,663 @@
+FORMAT: 1A
+HOST: http://polls.apiblueprint.org/
+
+# oms-core-elixir
+
+Oms-Core-Elixir is a drop-in replacement for oms-core which still doesn't work... 
+Requests might have permission requirements which you can read in [the wiki](https://oms-project.atlassian.net/wiki/spaces/OMSCORE/pages/169279489/oms-core-elixir). 
+Permissions are calculated on the fly and depending on the body context they are requested in.
+As usual in oms, the access token has to be sent in the x-auth-token header field.
+All routes are to be prefixed by /api
+
+# Group Permission-related requests
+
+Permissions are part of a simple CRUD API.
+
+## Permissions [/permissions]
+
+### List All Permissions [GET]
+
+Returns all permissions known to the system.
+Requires view:permission
+
++ Response 200 (application/json)
+
+        {
+            "success": true,
+            "data": [
+                {
+                    "scope": "global",
+                    "object": "permission",
+                    "id": 1,
+                    "description": "View permissions available in the system",
+                    "always_assigned": true,
+                    "action": "view"
+                },
+                {
+                    "scope": "global",
+                    "object": "permission",
+                    "id": 2,
+                    "description": "Create new permission objects which haven't been in the system yet, usually only good for microservices",
+                    "always_assigned": false,
+                    "action": "create"
+                }
+            ]
+        }
+        
+### Create a new permission [POST]
+
+Creates a new permission, usually only done by microservice which want to use the core permission system.
+Requires create:permission
+
++ Request (application/json)
+
+        {
+            "permission": {
+                "scope": "global",
+                "object": "permissions",
+                "description": "View permissions available in the system",
+                "always_assigned": true,
+                "action": "view"
+            }
+        }
+        
++ Response 200 (application/json)
+
+        {
+            "success": true,
+            "data": {
+                "scope": "global",
+                "object": "permission",
+                "id": 5,
+                "description": "View permissions available in the system",
+                "always_assigned": true,
+                "action": "view"
+            }
+        }
+
+
+## My Permissions [/my_permissions]
+
+### Get my global permissions [GET]
+
+Returns all permissions the user has globally. If you want to know permissions in a body or for a circle, use GET /bodies/:body_id/my_permissions or GET /circles/:circle_id/my_permissions
+
++ Response 200 (application/json)
+
+        {
+            "success": true,
+            "data": [
+                {
+                    "scope": "global",
+                    "object": "permission",
+                    "id": 1,
+                    "description": "View permissions available in the system",
+                    "always_assigned": true,
+                    "action": "view"
+                },
+                {
+                    "scope": "global",
+                    "object": "permission",
+                    "id": 2,
+                    "description": "Create new permission objects which haven't been in the system yet, usually only good for microservices",
+                    "always_assigned": false,
+                    "action": "create"
+                }
+            ]
+        }
+
+## Single Permission [/permissions/:permission_id]
+
+### Get a single permission [GET]
+
+Gets details about a single permission.
+Requires view:permission
+
++ Response 200 (application/json)
+
+        {
+            "success": true,
+            "data": {
+                "scope": "global",
+                "object": "permission",
+                "id": 1,
+                "description": "View permissions available in the system",
+                "always_assigned": true,
+                "action": "view"
+            }
+        }
+
+### Update a single permission [PUT]
+
+Updates the fields of a single permission.
+Requires update:permission
+
++ Request (application/json)
+
+        {
+            "permission": {
+                "scope": "global",
+                "object": "blabbery",
+                "description": "View permissions available in the system",
+                "always_assigned": true,
+                "action": "view"
+            }
+        }
+
++ Response 200 (application/jsoh)
+
+        {
+            "success": true,
+            "data": {
+                "scope": "global",
+                "object": "blabbery",
+                "id": 5,
+                "description": "View permissions available in the system",
+                "always_assigned": true,
+                "action": "view"
+            }
+        }
+
+### Delete a single permission [DELETE]
+
+Deletes a permission.
+Requires delete:permission
+
++ Response 204
+
+
+# Group Free Circle-related requests
+
+Free circles also more or less have a CRUD api, but also allow for members management
+
+## All Circles [/circles]
+
+### Get all free circles [GET]
+
+Lists all circles that are not bound to a body. Prefetches nothing, only the bare circle data and ids of parent circle and body.
+To view bound circles, use GET /bodies/:body_id/circles
+Requires view:circle
+
++ Response 200 (application/json)
+
+        {
+            "success": true,
+            "data": [
+                {
+                    "permissions": null,
+                    "parent_circle_id": null,
+                    "parent_circle": null,
+                    "name": "some name",
+                    "joinable": true,
+                    "id": 2,
+                    "description": "some description",
+                    "child_circles": null,
+                    "body_id": null,
+                    "body": null
+                }
+            ]
+        }
+
+### Create a circle [POST]
+
+Creates a new free circle. The user who creates it will automatically be assigned as circle_admin in that circle.
+Requires create:free_circle
+
++ Request (application/json)
+
+        { 
+            "circle": {
+                "name": "IT-interested people",
+                "description": "In this circle all people interested in IT are gathered",
+                "joinable": true
+            }
+        }
+
++ Response 201 (application/json)
+
+        {
+            "success": true,
+            "data": {
+                "parent_circle_id": null,
+                "parent_circle": null,
+                "name": "IT-interested people",
+                "joinable": true,
+                "id": 2,
+                "description": "In this circle all people interested in IT are gathered",
+                "body_id": null,
+                "body": null
+            }
+        }
+
+## Single Circle [/circle/:circle_id]
+
+### Get details to a single circle [GET]
+
+Returns details such as a prefetched parent circle, body, child circles and permissions. The permissions are only which are assigned directly to the circle, not the inherited ones from parent circles.
+Requires view:circle
+
++ Response 200 (application/json)
+
+        {
+            "success": true,
+            "data": {
+                "permissions": [],
+                "parent_circle_id": 2,
+                "parent_circle": {
+                    "permissions": null,
+                    "parent_circle_id": null,
+                    "parent_circle": null,
+                    "name": "some name",
+                    "joinable": true,
+                    "id": 2,
+                    "description": "some description",
+                    "child_circles": null,
+                    "body_id": null,
+                    "body": null
+                },
+                "name": "some name",
+                "joinable": true,
+                "id": 1,
+                "description": "some description",
+                "child_circles": [],
+                "body_id": 1,
+                "body": {
+                    "phone": "some phone",
+                    "name": "some name",
+                    "legacy_key": "some legacy_key",
+                    "id": 1,
+                    "email": "some email",
+                    "description": "some description",
+                    "address": "some address"
+                }
+            }
+        }
+
+### Update a single circle [POST]
+
+Update details of a single circle, meaning the joinable status in case that doesn't inflict the joinable consistency upwards, the name and the description.
+The body_id can not be edited, for this delete the circle and recreate it in the correct body.
+The parent_circle_id is also not updateable through this request, for updating the parent circle please use PUT /circles/:circle_id/parent.
+Requires update:circle
+
++ Request (application/json)
+
+        { 
+            "circle": {
+                "name": "IT-interested people",
+                "description": "In this circle all people interested in IT are gathered",
+                "joinable": true
+            }
+        }
+
++ Response 200 (application/json)
+
+        {
+            "success": true,
+            "data": {
+                "permissions": [],
+                "parent_circle_id": 2,
+                "parent_circle": {
+                    "permissions": null,
+                    "parent_circle_id": null,
+                    "parent_circle": null,
+                    "name": "some name",
+                    "joinable": true,
+                    "id": 2,
+                    "description": "some description",
+                    "child_circles": null,
+                    "body_id": null,
+                    "body": null
+                },
+                "name": "IT-interested people",
+                "joinable": true,
+                "id": 1,
+                "description": "In this circle all people interested in IT are gathered",
+                "child_circles": [],
+                "body_id": 1,
+                "body": {
+                    "phone": "some phone",
+                    "name": "some name",
+                    "legacy_key": "some legacy_key",
+                    "id": 1,
+                    "email": "some email",
+                    "description": "some description",
+                    "address": "some address"
+                }
+            }
+        }
+
+### Delete a single circle [DELETE]
+
+Deletes a circle and all its circle memberships and permission attachments. 
+Requires delete:circle
+
++ Response 204
+
+## Put the parent circle [/circles/:circle_id/parent]
+
+### Put the parent circle [PUT]
+
+Puts a circle as a parent circle. This request can be called with two permissions
+With put_parent:circle the user can put whatever circle he wants as a parent to this one
+With put_parent:bound_circle the user can only put parents that are in the same body as the edited circle.
+
++ Request (application/json)
+
+        { 
+            "parent_circle_id": 2
+        }
+
++ Response 200 (application/json)
+
+        {
+            "success": true,
+            "data": {
+                "permissions": [],
+                "parent_circle_id": 2,
+                "parent_circle": {
+                    "permissions": null,
+                    "parent_circle_id": null,
+                    "parent_circle": null,
+                    "name": "some name",
+                    "joinable": true,
+                    "id": 2,
+                    "description": "some description",
+                    "child_circles": null,
+                    "body_id": null,
+                    "body": null
+                },
+                "name": "IT-interested people",
+                "joinable": true,
+                "id": 1,
+                "description": "In this circle all people interested in IT are gathered",
+                "child_circles": [],
+                "body_id": 1,
+                "body": null
+            }
+        }
+
+## Circle members [/circles/:circle_id/members]
+
+### Get circle members [GET]
+
+Returns all circle_memberships in the circle.
+Requires view_members:circle
+
++ Response 200 (application/json)
+
+        {
+            "success": true,
+            "data": [
+                {
+                    "position": null,
+                    "member_id": 1,
+                    "member": {
+                        "user_id": 1,
+                        "seo_url": "31138974",
+                        "phone": "+1212345678",
+                        "last_name": "some last_name",
+                        "id": 1,
+                        "gender": "some gender",
+                        "first_name": "some first_name",
+                        "date_of_birth": "2010-04-17",
+                        "address": "some address",
+                        "about_me": "some about_me"
+                    },
+                    "id": 1,
+                    "circle_id": 1,
+                    "circle_admin": false,
+                    "circle": null
+                }
+            ]
+        }
+
+### Join a circle [POST]
+
+Joins a circle in case it is joinable.
+You don't need to post any data as you can not join another member at the moment.
+In case you want to join a bound circle you have to be member of the body
+Requires join:circle
+
++ Response 200 (application/json)
+
+        {
+            "success": true,
+            "data": "You successfully joined the circle"
+        }
+
+## Single circle membership [/circles/:circle_id/members/:membership_id]
+
+The membership id is the id of the circle membership, not the id of the member. In GET /circles/:circle_id/members it's on the first level.
+
+### Update single circle membership [PUT]
+
+Set the position and the circle_admin position of a member.
+Requires update_members:circle
+
++ Request (application/json)
+
+        {
+            "circle_membership": {
+                "position": "Some really nice position",
+                "circle_admin": true
+            }
+        }
+
++ Response 200 (application/jsoh)
+
+        {
+            "success": true,
+            "data": {
+                "position": "Some really nice position",
+                "member_id": 1,
+                "member": null,
+                "id": 2,
+                "circle_id": 2,
+                "circle_admin": true,
+                "circle": null
+            }
+        }
+
+### Delete single circle membership [DELETE]
+
+Deletes a membership and thus excludes the member from the circle.
+Requires delete_members:circle
+
++ Response 204
+
+
+## Get my permissions [/circles/:circle_id/my_permissions]
+### Get my permissions [GET]
+
+Returns all permissions the user has in that circle. This also includes global permissions and permissions obtained through a body in case the circle is bound.
+
++ Response 200 (application/json)
+
+        {
+            "success": true,
+            "data": [
+                {
+                    "scope": "global",
+                    "object": "permission",
+                    "id": 1,
+                    "description": "View permissions available in the system",
+                    "always_assigned": true,
+                    "action": "view"
+                },
+                {
+                    "scope": "global",
+                    "object": "permission",
+                    "id": 2,
+                    "description": "Create new permission objects which haven't been in the system yet, usually only good for microservices",
+                    "always_assigned": false,
+                    "action": "create"
+                }
+            ]
+        }
+
+## Circle permissions [/circles/:cirlce_id/permissions]
+
+### Get all circle permissions [GET]
+
+Gets all permissions that are directly or indirectly assigned to the circle. If you want to know only directly assigned permissions, use GET /circles/:circle_id
+
++ Response 200 (application/json)
+
+        {
+            "success": true,
+            "data": [
+                {
+                    "scope": "global",
+                    "object": "permission",
+                    "id": 1,
+                    "description": "View permissions available in the system",
+                    "always_assigned": true,
+                    "action": "view"
+                },
+                {
+                    "scope": "global",
+                    "object": "permission",
+                    "id": 2,
+                    "description": "Create new permission objects which haven't been in the system yet, usually only good for microservices",
+                    "always_assigned": false,
+                    "action": "create"
+                }
+            ]
+        }
+
+### Put circle permissions [PUT]
+
+Puts the permissions that are directly attached to a circle.
+Requires put_permissions:circle
+
++ Request (application/json)
+
+        {
+            "permissions": [
+                {"id": 1},
+                {"id": 2}
+            ]
+        }
+
++ Response 200 (application/json)
+
+        {
+            "success": true,
+            "data": {
+                "permissions": [
+                    {
+                        "scope": "global",
+                        "object": "permission",
+                        "id": 1,
+                        "description": "View permissions available in the system",
+                        "always_assigned": true,
+                        "action": "view"
+                    },
+                    {
+                        "scope": "global",
+                        "object": "permission",
+                        "id": 2,
+                        "description": "Create new permission objects which haven't been in the system yet, usually only good for microservices",
+                        "always_assigned": false,
+                        "action": "create"
+                    }
+                ],
+                "parent_circle_id": 2,
+                "parent_circle": {
+                    "permissions": null,
+                    "parent_circle_id": null,
+                    "parent_circle": null,
+                    "name": "some name",
+                    "joinable": true,
+                    "id": 2,
+                    "description": "some description",
+                    "child_circles": null,
+                    "body_id": null,
+                    "body": null
+                },
+                "name": "IT-interested people",
+                "joinable": true,
+                "id": 1,
+                "description": "In this circle all people interested in IT are gathered",
+                "child_circles": [],
+                "body_id": 1,
+                "body": {
+                    "phone": "some phone",
+                    "name": "some name",
+                    "legacy_key": "some legacy_key",
+                    "id": 1,
+                    "email": "some email",
+                    "description": "some description",
+                    "address": "some address"
+                }
+            }
+        }
+
+
+## Bound circles [/bodies/:body_id/circles]
+
+### Get all bound circles [GET]
+
+Returns all bound circles in the body.
+
++ Response 200 (application/json)
+
+        {
+            "success": true,
+            "data": [
+                {
+                    "permissions": null,
+                    "parent_circle_id": 2,
+                    "parent_circle": null,
+                    "name": "IT-interested people",
+                    "joinable": true,
+                    "id": 1,
+                    "description": "In this circle all people interested in IT are gathered",
+                    "child_circles": null,
+                    "body_id": 1,
+                    "body": null
+                }
+            ]
+        }
+
+### Create a bound circle [POST]
+
+Creates a circle bound to the body. You need to be member of the body to execute this.
+Requires create:bound_circle
+
++ Request (application/json)
+
+        {
+            "circle": {
+                "name": "outlaws",
+                "description": "really mean people",
+                "joinable": false,
+            }
+        }
+
++ Response 200 (application/json)
+
+        {
+            "success": true,
+            "data": {
+                "permissions": null,
+                "parent_circle_id": null,
+                "parent_circle": null,
+                "name": "outlaws",
+                "joinable": false,
+                "id": 3,
+                "description": "really mean people",
+                "child_circles": null,
+                "body_id": 1,
+                "body": {
+                    "phone": "some phone",
+                    "name": "some name",
+                    "legacy_key": "some legacy_key",
+                    "id": 1,
+                    "email": "some email",
+                    "description": "some description",
+                    "address": "some address"
+                }
+            }
+        }
