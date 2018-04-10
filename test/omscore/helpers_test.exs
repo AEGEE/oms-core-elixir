@@ -9,14 +9,14 @@ defmodule Omscore.HelpersTest do
   def create_many_members(id_range) do
     id_range
     |> Enum.map(fn(x) -> 
-      {:ok, member} = Members.create_member(x, @create_attrs)
+      {:ok, member} = Members.create_member(@create_attrs |> Map.put(:user_id, x))
       member
     end)
   end
 
   def member_fixture(attrs \\ %{}) do
     attrs = Enum.into(attrs, @create_attrs)
-    {:ok, member} = Members.create_member(:rand.uniform(1000000), attrs)
+    {:ok, member} = Members.create_member(attrs |> Map.put(:user_id, :rand.uniform(1000000)))
 
     member
   end

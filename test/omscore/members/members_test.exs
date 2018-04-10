@@ -8,13 +8,13 @@ defmodule Omscore.MembersTest do
 
     @permission_attrs %{action: "some action", description: "some description", object: "some object", scope: "global"}
 
-    @valid_attrs %{about_me: "some about_me", address: "some address", date_of_birth: ~D[2010-04-17], first_name: "some first_name", gender: "some gender", last_name: "some last_name", phone: "+1212345678"}
+    @valid_attrs %{about_me: "some about_me", address: "some address", date_of_birth: ~D[2010-04-17], first_name: "some first_name", gender: "some gender", last_name: "some last_name", phone: "+1212345678", user_id: 1}
     @update_attrs %{about_me: "some updated about_me", address: "some updated address", date_of_birth: ~D[2011-05-18], first_name: "some updated first_name", gender: "some updated gender", last_name: "some updated last_name", phone: "+1212345679", seo_url: "some_updated_seo_url", user_id: 43}
     @invalid_attrs %{about_me: nil, address: nil, date_of_birth: nil, first_name: nil, gender: nil, last_name: nil, phone: nil, seo_url: nil, user_id: nil}
 
     def member_fixture(attrs \\ %{}) do
       attrs = Enum.into(attrs, @valid_attrs)
-      {:ok, member} = Members.create_member(:rand.uniform(1000000), attrs)
+      {:ok, member} = Members.create_member(attrs |> Map.put(:user_id, :rand.uniform(1000000)))
 
       member
     end
@@ -44,7 +44,7 @@ defmodule Omscore.MembersTest do
     end
 
     test "create_member/1 with valid data creates a member" do
-      assert {:ok, %Member{} = member} = Members.create_member(1, @valid_attrs |> Map.put(:seo_url, "some_seo_url"))
+      assert {:ok, %Member{} = member} = Members.create_member(@valid_attrs |> Map.put(:seo_url, "some_seo_url"))
       assert member.about_me == "some about_me"
       assert member.address == "some address"
       assert member.date_of_birth == ~D[2010-04-17]
@@ -56,7 +56,7 @@ defmodule Omscore.MembersTest do
     end
 
     test "create_member/1 with invalid data returns error changeset" do
-      assert {:error, %Ecto.Changeset{}} = Members.create_member(1, @invalid_attrs)
+      assert {:error, %Ecto.Changeset{}} = Members.create_member(@invalid_attrs)
     end
 
     test "update_member/2 with valid data updates the member" do

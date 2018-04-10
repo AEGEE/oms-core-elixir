@@ -22,7 +22,7 @@ defmodule OmscoreWeb.Router do
   scope "/api", OmscoreWeb do
     pipe_through :api
 
-    resources "/members", MemberController, except: [:new, :edit, :index]
+    resources "/members", MemberController, except: [:new, :edit, :index, :create]
   end
 
   scope "/api/bodies/:body_id", OmscoreWeb, as: :body do
@@ -42,6 +42,7 @@ defmodule OmscoreWeb.Router do
     post "/bodies", BodyController, :create
 
     get "/members", MemberController, :index
+    post "/members", MemberController, :create
   end
 
   scope "/api/circles/:circle_id", OmscoreWeb do
@@ -53,6 +54,7 @@ defmodule OmscoreWeb.Router do
     put "/parent", CircleController, :put_parent
     get "/members", CircleController, :show_members
     post "/members", CircleController, :join_circle
+    delete "/members", CircleController, :delete_myself
     put "/members/:membership_id", CircleController, :update_circle_membership
     delete "/members/:membership_id", CircleController, :delete_circle_membership
     get "/my_permissions", CircleController, :index_my_permissions

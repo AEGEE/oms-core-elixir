@@ -17,8 +17,8 @@ defmodule OmscoreWeb.Helper do
     end
   end
 
-  defp to_integer(data) when is_integer(data), do: data
-  defp to_integer(data) when is_binary(data), do: String.to_integer(data)
+  def to_integer(data) when is_integer(data), do: data
+  def to_integer(data) when is_binary(data), do: String.to_integer(data)
 
 
   def paginate(query, %{"limit" => limit, "offset" => offset}) do
@@ -28,7 +28,8 @@ defmodule OmscoreWeb.Helper do
   end
   def paginate(query, _), do: query
 
-  # Builds a query in the
+  # Builds a query where the querystring is compared in ilike-fashion to each of the fields passed in attrs
+  # These where statements are joined together by ORs to return any result that somewhat matches the query
   def search(query, %{"query" => querystring}, attrs) do
     filters = attrs
     |> Enum.map(fn(x) -> {x, "%#{querystring}%"} end)

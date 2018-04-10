@@ -229,6 +229,21 @@ if Repo.all(Permission) == [] do
 
   Repo.insert!(%Permission{
     scope: "global",
+    action: "delete_members", 
+    object: "body",
+    description: "Delete the membership status of any member in any body. Use the local permission for this if possible"
+  })
+
+  Repo.insert!(%Permission{
+    scope: "local",
+    action: "delete_members",
+    object: "body",
+    description: "Delete membership status from members in the body that you got this permission from."
+  })
+
+  # Join requests
+  Repo.insert!(%Permission{
+    scope: "global",
     action: "create",
     object: "join_request",
     description: "Allows users to request joining a body. Without these permissions the joining body process would be disabled",
@@ -247,5 +262,34 @@ if Repo.all(Permission) == [] do
     action: "view",
     object: "join_request",
     description: "View join requests to any body in the system. This could disclose a bigger portion of the members database and thus should be assigned carefully"
+  })
+
+  Repo.insert!(%Permission{
+    scope: "global",
+    action: "process",
+    object: "join_request",
+    description: "Process join requests in any body of the system, even those that you are not affiliated with."
+  })
+
+  Repo.insert!(%Permission{
+    scope: "local",
+    action: "process",
+    object: "join_request",
+    description: "Process join requests in the body that you got the permission from"
+  })
+
+  # Members
+  Repo.insert!(%Permission{
+    scope: "global",
+    action: "view",
+    object: "members",
+    description: "View all members in the system. Assign this role to trusted persons only to avoid disclosure"
+  })
+
+  Repo.insert!(%Permission{
+    scope: "global",
+    action: "create",
+    object: "members",
+    description: "Create members to the system. This is usually only assigned to the login microservice"
   })
 end

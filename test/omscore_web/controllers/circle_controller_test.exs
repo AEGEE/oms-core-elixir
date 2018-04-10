@@ -531,6 +531,29 @@ defmodule OmscoreWeb.CircleControllerTest do
     end
   end
 
+  describe "delete own circle membership" do
+    test "deletes own circle membership", %{conn: conn} do
+      circle = circle_fixture()
+      %{token: token, member: member} = create_member_with_permissions([])
+      conn = put_req_header(conn, "x-auth-token", token)
+      assert {:ok, cm} = Omscore.Members.create_circle_membership(circle, member)
+
+      conn = delete conn, circle_path(conn, :delete_myself, circle.id)
+      assert response(conn, 204)
+
+      assert_raise Ecto.NoResultsError, fn -> Omscore.Members.get_circle_membership!(cm.id) end
+    end
+
+    test "fails if not member of the circle", %{conn: conn} do
+      circle = circle_fixture()
+      %{token: token} = create_member_with_permissions([])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      conn = delete conn, circle_path(conn, :delete_myself, circle.id)
+      assert json_response(conn, 404)
+    end
+  end
+
   describe "index bound" do
     test "lists bound circles", %{conn: conn} do
       body = body_fixture()

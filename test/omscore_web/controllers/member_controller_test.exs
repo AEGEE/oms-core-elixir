@@ -9,14 +9,14 @@ defmodule OmscoreWeb.MemberControllerTest do
   @invalid_attrs %{about_me: nil, address: nil, date_of_birth: nil, first_name: nil, gender: nil, last_name: nil, phone: nil, seo_url: nil, user_id: nil}
 
   def fixture(:member) do
-    {:ok, member} = Members.create_member(1, @create_attrs)
+    {:ok, member} = Members.create_member(@create_attrs)
     member
   end
 
   def create_many_members(id_range) do
     id_range
     |> Enum.map(fn(x) -> 
-      {:ok, member} = Members.create_member(x, @create_attrs)
+      {:ok, member} = Members.create_member(@create_attrs |> Map.put(:user_id, x))
       member
     end)
   end
@@ -56,12 +56,11 @@ defmodule OmscoreWeb.MemberControllerTest do
       assert Enum.count(res) == 10
     end
 
-    @tag only: 1
     test "searches the result if query is passed", %{conn: conn} do
       %{token: token} = create_member_with_permissions([%{action: "view", object: "member"}])
       conn = put_req_header(conn, "x-auth-token", token)
 
-      #create_many_members(0..100)
+      create_many_members(0..100)
 
       conn = get conn, member_path(conn, :index), query: "some really exotic query that definitely doesn't match any member at all"
       assert json_response(conn, 200)["data"] == []
@@ -78,6 +77,9 @@ defmodule OmscoreWeb.MemberControllerTest do
 
   describe "create member" do
     test "renders member when data is valid", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "create", object: "member"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
       conn = post conn, member_path(conn, :create), member: @create_attrs
       assert %{"id" => id} = json_response(conn, 201)["data"]
 
@@ -91,12 +93,23 @@ defmodule OmscoreWeb.MemberControllerTest do
         "gender" => "some gender",
         "last_name" => "some last_name",
         "phone" => "+1212345678",
-        "user_id" => 1})
+        "user_id" => 42})
     end
 
     test "renders errors when data is invalid", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "create", object: "member"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
       conn = post conn, member_path(conn, :create), member: @invalid_attrs
       assert json_response(conn, 422)["errors"] != %{}
+    end
+
+    test "rejects the request to unauthorized user", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      conn = post conn, member_path(conn, :create), member: @create_attrs
+      assert json_response(conn, 403)
     end
   end
 
@@ -118,7 +131,7 @@ defmodule OmscoreWeb.MemberControllerTest do
         "last_name" => "some updated last_name",
         "phone" => "+1212345679",
         "seo_url" => "some_updated_seo_url",
-        "user_id" => 1}
+        "user_id" => 42}
     end
 
     test "renders errors when data is invalid", %{conn: conn, member: member} do

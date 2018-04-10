@@ -46,7 +46,7 @@ defmodule OmscoreWeb.ConnCase do
       @member_attrs %{about_me: "some about_me", address: "some address", date_of_birth: ~D[2010-04-17], first_name: "some first_name", gender: "some gender", last_name: "some last_name", phone: "+1212345678", user_id: 3}
       def member_fixture(attrs \\ %{}) do
         attrs = Enum.into(attrs, @member_attrs)
-        {:ok, member} = Omscore.Members.create_member(attrs.user_id, attrs)
+        {:ok, member} = Omscore.Members.create_member(attrs)
 
         member
       end

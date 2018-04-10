@@ -83,6 +83,19 @@ defmodule OmscoreWeb.CircleController do
     end
   end
 
+  defp is_circle_membership_nil(nil), do: {:error, :not_found, "You are not member of this circle"}
+  defp is_circle_membership_nil(_), do: {:ok}
+
+  def delete_myself(conn, _params) do
+    circle = conn.assigns.circle
+    cm = Members.get_circle_membership(circle, conn.assigns.member)
+
+    with {:ok} <- is_circle_membership_nil(cm),
+         {:ok, _} <- Members.delete_circle_membership(cm) do
+      send_resp(conn, :no_content, "")       
+    end
+  end
+
   # When being circle admin in the circle or any of the parent circles, updating is permitted
   defp is_circle_admin(conn, circle) do
     admin_permissions = [%Core.Permission{scope: "circle", action: "update", object: "circle"}, 

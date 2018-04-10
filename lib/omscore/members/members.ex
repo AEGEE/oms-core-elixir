@@ -24,15 +24,18 @@ defmodule Omscore.Members do
   def get_member_by_userid(userid), do: Repo.get_by(Member, %{user_id: userid})
 
   # Creates a member
-  def create_member(user_id, attrs \\ %{}) when is_integer(user_id) do
+  def create_member(attrs) do
     %Member{}
     |> Member.changeset(attrs)
-    |> Ecto.Changeset.put_change(:user_id, user_id)
     |> Repo.insert()
   end
 
   # Updates a member
   def update_member(%Member{} = member, attrs) do
+    attrs = attrs
+    |> Map.delete("user_id")
+    |> Map.delete(:user_id)
+
     member
     |> Member.changeset(attrs)
     |> Repo.update()
