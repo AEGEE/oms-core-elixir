@@ -4,7 +4,7 @@ defmodule OmscoreWeb.MemberControllerTest do
   alias Omscore.Members
   alias Omscore.Members.Member
 
-  @create_attrs %{about_me: "some about_me", address: "some address", date_of_birth: ~D[2010-04-17], first_name: "some first_name", gender: "some gender", last_name: "some last_name", phone: "+1212345678", seo_url: "some_seo_url", user_id: 42}
+  @create_attrs %{about_me: "some about_me", address: "some address", date_of_birth: ~D[2010-04-17], first_name: "some first_name", gender: "some gender", last_name: "some last_name", phone: "+1212345678", user_id: 42}
   @update_attrs %{about_me: "some updated about_me", address: "some updated address", date_of_birth: ~D[2011-05-18], first_name: "some updated first_name", gender: "some updated gender", last_name: "some updated last_name", phone: "+1212345679", seo_url: "some_updated_seo_url", user_id: 43}
   @invalid_attrs %{about_me: nil, address: nil, date_of_birth: nil, first_name: nil, gender: nil, last_name: nil, phone: nil, seo_url: nil, user_id: nil}
 
@@ -13,14 +13,66 @@ defmodule OmscoreWeb.MemberControllerTest do
     member
   end
 
+  def create_many_members(id_range) do
+    id_range
+    |> Enum.map(fn(x) -> 
+      {:ok, member} = Members.create_member(x, @create_attrs)
+      member
+    end)
+  end
+
   setup %{conn: conn} do
     {:ok, conn: put_req_header(conn, "accept", "application/json")}
   end
 
   describe "index" do
     test "lists all members", %{conn: conn} do
+      %{token: token, member: member} = create_member_with_permissions([%{action: "view", object: "member"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
       conn = get conn, member_path(conn, :index)
+      assert json_response(conn, 200)["data"] |> Enum.any?(fn(x) -> x["id"] == member.id end)
+    end
+
+    test "lists all members with data", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "view", object: "member"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      members = create_many_members(0..100)
+
+      conn = get conn, member_path(conn, :index)
+      assert res = json_response(conn, 200)["data"]
+      assert members |> Enum.all?(fn(x) -> Enum.find(res, fn(y) -> x.id == y["id"] end) != nil end)
+    end
+
+    test "paginates the request if pagination data is passed", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "view", object: "member"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      create_many_members(0..100)
+
+      conn = get conn, member_path(conn, :index), limit: 10, offset: 0
+      assert res = json_response(conn, 200)["data"]
+      assert Enum.count(res) == 10
+    end
+
+    @tag only: 1
+    test "searches the result if query is passed", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "view", object: "member"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      #create_many_members(0..100)
+
+      conn = get conn, member_path(conn, :index), query: "some really exotic query that definitely doesn't match any member at all"
       assert json_response(conn, 200)["data"] == []
+    end
+
+    test "rejects the request to unauthorized user", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      conn = get conn, member_path(conn, :index)
+      assert json_response(conn, 403)
     end
   end
 
@@ -30,7 +82,7 @@ defmodule OmscoreWeb.MemberControllerTest do
       assert %{"id" => id} = json_response(conn, 201)["data"]
 
       conn = get conn, member_path(conn, :show, id)
-      assert json_response(conn, 200)["data"] == %{
+      assert json_response(conn, 200)["data"] |> map_inclusion(%{
         "id" => id,
         "about_me" => "some about_me",
         "address" => "some address",
@@ -39,8 +91,7 @@ defmodule OmscoreWeb.MemberControllerTest do
         "gender" => "some gender",
         "last_name" => "some last_name",
         "phone" => "+1212345678",
-        "seo_url" => "some_seo_url",
-        "user_id" => 1}
+        "user_id" => 1})
     end
 
     test "renders errors when data is invalid", %{conn: conn} do

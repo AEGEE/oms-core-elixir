@@ -1,5 +1,5 @@
 defmodule OmscoreWeb.Helper do
-  require Ecto.Query
+  import Ecto.Query
 
   def render_assoc_one(model, view, template, assigns \\ %{}) do
     cond do
@@ -17,37 +17,26 @@ defmodule OmscoreWeb.Helper do
     end
   end
 
-  defp paginate_limit(query, limit) do
-    if limit do
-      query
-      |> Ecto.Query.limit(^String.to_integer(limit))
-    else
-      query
-    end
-  end
+  defp to_integer(data) when is_integer(data), do: data
+  defp to_integer(data) when is_binary(data), do: String.to_integer(data)
 
-  defp paginate_offset(query, offset) do
-    if offset do
-      query
-      |> Ecto.Query.offset(^String.to_integer(offset))
-    else
-      query
-    end
-  end
 
-  def paginate(query, params) do
+  def paginate(query, %{"limit" => limit, "offset" => offset}) do
     query
-    |> paginate_limit(params["limit"])
-    |> paginate_offset(params["offset"])
+    |> Ecto.Query.limit(^to_integer(limit))
+    |> Ecto.Query.offset(^to_integer(offset))
   end
+  def paginate(query, _), do: query
 
-  def search(query, params) do
-    querystring = params["query"]
-    if querystring do
-      query
-      |> Ecto.Query.where([p], ilike(p.name, ^"%#{querystring}%"))
-    else
-      query
-    end
+  # Builds a query in the
+  def search(query, %{"query" => querystring}, attrs) do
+    filters = attrs
+    |> Enum.map(fn(x) -> {x, "%#{querystring}%"} end)
+
+    Enum.reduce(filters, query, fn {key, value}, query ->
+      from q in query, or_where: ilike(field(q, ^key), ^value)
+    end)
   end
+  def search(query, _params, _attrs), do: query
+
 end

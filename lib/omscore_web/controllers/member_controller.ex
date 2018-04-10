@@ -1,14 +1,17 @@
 defmodule OmscoreWeb.MemberController do
   use OmscoreWeb, :controller
 
+  alias Omscore.Core
   alias Omscore.Members
   alias Omscore.Members.Member
 
   action_fallback OmscoreWeb.FallbackController
 
-  def index(conn, _params) do
-    members = Members.list_members()
-    render(conn, "index.json", members: members)
+  def index(conn, params) do
+    with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "view", "member") do
+      members = Members.list_members(params)
+      render(conn, "index.json", members: members)
+    end
   end
 
   def create(conn, %{"member" => member_params}) do

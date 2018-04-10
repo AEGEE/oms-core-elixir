@@ -8,10 +8,14 @@ defmodule Omscore.Members do
 
   alias Omscore.Members.Member
   alias Omscore.Core.Circle
+  alias OmscoreWeb.Helper
 
   # Returns all members
-  def list_members do
-    Repo.all(Member)
+  def list_members(params \\ %{}) do
+    from(u in Member, order_by: [:last_name, :first_name])
+    |> Helper.paginate(params)
+    |> Helper.search(params, [:first_name, :last_name])
+    |> Repo.all
   end
 
   # Gets a single member
@@ -78,15 +82,18 @@ defmodule Omscore.Members do
   # Get all join requests for a body
   def list_join_requests(body, outstanding_only \\ false) do
     query = if outstanding_only do
-      from u in JoinRequest, where: u.body_id == ^body.id and not(u.approved)
+      from u in JoinRequest, where: u.body_id == ^body.id and not(u.approved), preload: [:member]
     else
-      from u in JoinRequest, where: u.body_id == ^body.id
+      from u in JoinRequest, where: u.body_id == ^body.id, preload: [:member]
     end 
     Repo.all(query)
   end
 
   # Get a single join request by id
   def get_join_request!(id), do: Repo.get!(JoinRequest, id)
+  # Get a single join request by body id and members id
+  def get_join_request(%Omscore.Core.Body{} = body, %Member{} = member), do: get_join_request(body.id, member.id)
+  def get_join_request(body_id, member_id), do: Repo.get_by(JoinRequest, %{body_id: body_id, member_id: member_id})
 
   # Creates a join request
   def create_join_request(%Omscore.Core.Body{} = body, %Member{} = member, attrs \\ %{}) do
@@ -107,7 +114,7 @@ defmodule Omscore.Members do
       |> Repo.update!()
 
       case create_body_membership(join_request.body, join_request.member) do
-        {:ok, membership} -> {:ok, membership}
+        {:ok, membership} -> membership # Repo.transaction will wrap it in an {:ok, bm} tuple
         {:error, msg} -> Repo.rollback(msg)
       end
     end
@@ -115,7 +122,7 @@ defmodule Omscore.Members do
 
   # Rejecting a join request means just deleting it
   def reject_join_request(%JoinRequest{} = join_request) do
-    join_request |> Repo.delete!
+    join_request |> Repo.delete
   end
 
   
@@ -124,6 +131,8 @@ defmodule Omscore.Members do
   #def get_body_membership!(id), do: Repo.get(BodyMembership, id)
   def get_body_membership(%Omscore.Core.Body{} = body, %Member{} = member), do: get_body_membership(body.id, member.id)
   def get_body_membership(body_id, member_id), do: Repo.get_by(BodyMembership, %{body_id: body_id, member_id: member_id})
+
+  def get_body_membership!(body_membership_id), do: Repo.get!(BodyMembership, body_membership_id)
 
   # Creates a membership with a body
   # Should not be used directly, only by tests and approve_join_request
@@ -135,6 +144,9 @@ defmodule Omscore.Members do
     |> Repo.insert()
   end
 
+  def delete_body_membership(%BodyMembership{} = bm) do
+    Repo.delete(bm)
+  end
 
 
   alias Omscore.Members.CircleMembership

@@ -38,7 +38,7 @@ defmodule OmscoreWeb.CircleController do
 
     with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "view_members", "circle") do
       circle = circle |> Omscore.Repo.preload([circle_memberships: [:member]])
-      render(conn, "show_members.json", circle_memberships: circle.circle_memberships)
+      render(conn, OmscoreWeb.CircleMembershipView, "index.json", circle_memberships: circle.circle_memberships)
     end
   end
 

@@ -1,6 +1,7 @@
 defmodule OmscoreWeb.JoinRequestView do
   use OmscoreWeb, :view
   alias OmscoreWeb.JoinRequestView
+  alias OmscoreWeb.Helper
 
   def render("index.json", %{join_requests: join_requests}) do
     %{data: render_many(join_requests, JoinRequestView, "join_request.json")}
@@ -13,6 +14,10 @@ defmodule OmscoreWeb.JoinRequestView do
   def render("join_request.json", %{join_request: join_request}) do
     %{id: join_request.id,
       motivation: join_request.motivation,
-      approved: join_request.approved}
+      approved: join_request.approved,
+      member_id: join_request.member_id,
+      body_id: join_request.body_id,
+      member: Helper.render_assoc_one(join_request.member, OmscoreWeb.MemberView, "member.json"),
+      body: Helper.render_assoc_one(join_request.body, OmscoreWeb.BodyView, "body.json")}
   end
 end

@@ -14,15 +14,7 @@ defmodule OmscoreWeb.ErrorView do
     %{errors: %{detail: Phoenix.Controller.status_message_from_template(template)}}
   end
 
-  def render("404.json", %{msg: msg}) do
-    %{success: false, error: msg}
-  end
-
-  def render("403.json", %{msg: msg}) do
-    %{success: false, error: msg}
-  end
-
-  def render("500.json", %{msg: msg}) do
+  def render("error.json", %{msg: msg}) do
     %{success: false, error: msg}
   end
 

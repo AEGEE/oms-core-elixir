@@ -212,4 +212,40 @@ if Repo.all(Permission) == [] do
     object: "body",
     description: "Delete a body."
   })
+
+  Repo.insert!(%Permission{
+    scope: "global",
+    action: "view_members",
+    object: "body",
+    description: "View the members of any body in the system. Be careful with assigning this permission as it means basically disclosing the complete members list to persons holding it"
+  })
+
+  Repo.insert!(%Permission{
+    scope: "local",
+    action: "view_members",
+    object: "body",
+    description: "View the members in the body that you got that permission from"
+  })
+
+  Repo.insert!(%Permission{
+    scope: "global",
+    action: "create",
+    object: "join_request",
+    description: "Allows users to request joining a body. Without these permissions the joining body process would be disabled",
+    always_assigned: true
+  })
+
+  Repo.insert!(%Permission{
+    scope: "local",
+    action: "view",
+    object: "join_request",
+    description: "View join request to the body you got this permission from"
+  })
+  
+  Repo.insert!(%Permission{
+    scope: "global",
+    action: "view",
+    object: "join_request",
+    description: "View join requests to any body in the system. This could disclose a bigger portion of the members database and thus should be assigned carefully"
+  })
 end

@@ -19,6 +19,18 @@ defmodule OmscoreWeb.PlugTest do
     assert conn.assigns.user.superadmin == @user_attrs.superadmin
   end
 
+  test "init functions of all the plug exist and do nothing", %{conn: conn} do
+    copy = conn
+    conn
+    |> OmscoreWeb.AuthorizePlug.init
+    |> OmscoreWeb.MemberFetchPlug.init
+    |> OmscoreWeb.PermissionFetchPlug.init
+    |> OmscoreWeb.BodyFetchPlug.init
+    |> OmscoreWeb.CircleFetchPlug.init
+
+    assert conn == copy
+  end
+
   test "auth plug rejects an invalid access token", %{conn: conn} do
     # This token is expired
     token = "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJPTVMiLCJlbWFpbCI6InNvbWVAZW1haWwuY29tIiwiZXhwIjoxNTIyNjU5MjUyLCJpYXQiOjE1MjI2NTkxNTIsImlzcyI6Ik9NUyIsImp0aSI6IjJiMWFmNTY4LTY4MWYtNGVlMC04ZWQyLWU2YzQxMzUwZmQ1OSIsIm5hbWUiOiJzb21lIG5hbWUiLCJuYmYiOjE1MjI2NTkxNTEsInN1YiI6IjMiLCJzdXBlcmFkbWluIjpmYWxzZSwidHlwIjoiYWNjZXNzIn0.jCxBvQqYOBsQiGm5WRnrcCx4PV0hlPsCYP9zC84K5R00en-3uUwfwe3YR6IA8Hpy5fkRlHNBsDfZQCOm8ORubQ"

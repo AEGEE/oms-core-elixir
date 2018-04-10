@@ -154,6 +154,113 @@ defmodule OmscoreWeb.BodyControllerTest do
     end
   end
 
+  describe "view body members" do
+    setup [:create_body]
+
+    test "shows all members in the body", %{conn: conn, body: body} do
+      member = member_fixture()
+      assert {:ok, _} = Omscore.Members.create_body_membership(body, member)
+
+      %{token: token} = create_member_with_permissions([%{action: "view_members", object: "body"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      conn = get conn, body_body_path(conn, :show_members, body.id)
+      assert res = json_response(conn, 200)["data"]
+
+      assert Enum.any?(res, fn(x) -> x["member_id"] == member.id end)
+    end
+
+    test "rejects request to someone without permissions", %{conn: conn, body: body} do
+      member = member_fixture()
+      assert {:ok, _} = Omscore.Members.create_body_membership(body, member)
+
+      %{token: token} = create_member_with_permissions([])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      conn = get conn, body_body_path(conn, :show_members, body.id)
+      assert json_response(conn, 403)
+    end
+  end
+
+  describe "delete body members" do
+    setup [:create_body]
+
+    test "deletes a member from a body", %{conn: conn, body: body} do
+      member = member_fixture()
+      assert {:ok, bm} = Omscore.Members.create_body_membership(body, member)
+
+      %{token: token} = create_member_with_permissions([%{action: "delete_member", object: "body"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      conn = delete conn, body_body_path(conn, :delete_member, body.id, bm.id)
+      assert response(conn, 204)
+
+      assert Omscore.Members.get_body_membership(body, member) == nil
+    end
+
+    test "rejects on missing permissions", %{conn: conn, body: body} do
+      member = member_fixture()
+      assert {:ok, bm} = Omscore.Members.create_body_membership(body, member)
+
+      %{token: token} = create_member_with_permissions([])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      conn = delete conn, body_body_path(conn, :delete_member, body.id, bm.id)
+      assert json_response(conn, 403)
+    end
+
+    test "also removes join requests on deletion", %{conn: conn, body: body} do
+      member = member_fixture()
+      assert {:ok, bm} = Omscore.Members.create_body_membership(body, member)
+      assert {:ok, join_request} = Omscore.Members.create_join_request(body, member, %{motivation: "bla"})
+
+      %{token: token} = create_member_with_permissions([%{action: "delete_member", object: "body"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      conn = delete conn, body_body_path(conn, :delete_member, body.id, bm.id)
+      assert response(conn, 204)
+
+      assert_raise Ecto.NoResultsError, fn -> Omscore.Members.get_join_request!(join_request.id) end
+    end
+  end
+
+  describe "leave body" do
+    setup [:create_body]
+
+    test "deletes yourself from the body", %{conn: conn, body: body} do
+      %{token: token, member: member} = create_member_with_permissions([])
+      conn = put_req_header(conn, "x-auth-token", token)
+      assert {:ok, _} = Omscore.Members.create_body_membership(body, member)
+
+      conn = delete conn, body_body_path(conn, :delete_myself, body.id)
+      assert response(conn, 204)
+
+      assert Omscore.Members.get_body_membership(body, member) == nil
+    end
+
+    test "gives an error if you attempt to delete yourself from a body you are not member of", %{conn: conn, body: body} do
+      %{token: token} = create_member_with_permissions([])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      conn = delete conn, body_body_path(conn, :delete_myself, body.id)
+      assert json_response(conn, 404)
+    end
+
+    test "also removes join requests on deletion", %{conn: conn, body: body} do
+      %{token: token, member: member} = create_member_with_permissions([])
+      conn = put_req_header(conn, "x-auth-token", token)      
+      assert {:ok, _} = Omscore.Members.create_body_membership(body, member)
+      assert {:ok, join_request} = Omscore.Members.create_join_request(body, member, %{motivation: "bla"})
+
+      
+
+      conn = delete conn, body_body_path(conn, :delete_myself, body.id)
+      assert response(conn, 204)
+
+      assert_raise Ecto.NoResultsError, fn -> Omscore.Members.get_join_request!(join_request.id) end
+    end
+  end
+
   defp create_body(_) do
     body = fixture(:body)
     {:ok, body: body}

@@ -205,6 +205,13 @@ defmodule Omscore.MembersTest do
       assert new_request.motivation == join_request.motivation
     end
 
+    test "get_join_request/2 returns the join_request with given body and member" do
+      {join_request, body, member} = join_request_fixture()
+      assert new_request = Members.get_join_request(body, member)
+      assert new_request.id == join_request.id
+      assert new_request.motivation == join_request.motivation
+    end
+
     test "create_join_request/3 with valid data creates a join_request" do
       body = body_fixture()
       member = member_fixture()
@@ -225,16 +232,17 @@ defmodule Omscore.MembersTest do
     test "reject_join_request/1 deletes a join request" do
       {join_request, _body, _member} = join_request_fixture()
 
-      Members.reject_join_request(join_request)
+      assert {:ok, _} = Members.reject_join_request(join_request)
       assert_raise Ecto.NoResultsError, fn -> Members.get_join_request!(join_request.id) end
     end
 
     test "approve_join_request/1 approves a join request and creates a body membership" do
       {join_request, body, member} = join_request_fixture()
 
-      assert {:ok, _body_membership} = Members.approve_join_request(join_request)
+      assert {:ok, body_membership} = Members.approve_join_request(join_request)
       assert join_request = Members.get_join_request!(join_request.id)
       assert join_request.approved == true
+      assert Members.get_body_membership!(body_membership.id)
       assert Omscore.Core.get_body_members(body) |> Enum.any?(fn(x) -> x.id == member.id end)
     end
 
@@ -266,6 +274,22 @@ defmodule Omscore.MembersTest do
       assert {:ok, _} = Members.create_body_membership(body, member1)
       assert %BodyMembership{} = Members.get_body_membership(body, member1)
       assert nil == Members.get_body_membership(body, member2)
+    end
+
+    test "get_body_membership/1 returns a body membership if existing" do
+      member = member_fixture()
+      body = body_fixture()
+      assert {:ok, bm} = Members.create_body_membership(body, member)
+      assert bm.id == Members.get_body_membership!(bm.id).id
+      assert_raise Ecto.NoResultsError, fn -> Members.get_body_membership!(-1) end
+    end
+
+    test "delete_body_membership/1 deletes a body membership" do
+      member = member_fixture()
+      body = body_fixture()
+      assert {:ok, bm} = Members.create_body_membership(body, member)
+      assert {:ok, _} = Members.delete_body_membership(bm)
+      assert nil == Members.get_body_membership(body, member)
     end
   end
 
