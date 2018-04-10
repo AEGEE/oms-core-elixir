@@ -713,7 +713,6 @@ defmodule OmscoreWeb.CircleControllerTest do
       assert json_response(conn, 403)
     end
 
-    @tag only: 1
     test "leaves permissions unchanged in case of invalid data", %{conn: conn} do
       circle = circle_fixture()
       permission1 = permission_fixture()

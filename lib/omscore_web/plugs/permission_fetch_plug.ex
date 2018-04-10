@@ -5,6 +5,7 @@ defmodule OmscoreWeb.PermissionFetchPlug do
 
   # This plug gets all global permissions of the user, assuming the member was already fetched and stored in assigns
   # Superadmins get all permissions in the system
+  # This could be a nice spot for performance optimizations
   def call(conn, _) do
     if conn.assigns.user.superadmin do
       conn

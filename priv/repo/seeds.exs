@@ -282,14 +282,35 @@ if Repo.all(Permission) == [] do
   Repo.insert!(%Permission{
     scope: "global",
     action: "view",
-    object: "members",
-    description: "View all members in the system. Assign this role to trusted persons only to avoid disclosure"
+    object: "member",
+    description: "View all members in the system. Assign this role to trusted persons only to avoid disclosure. For local scope, use view_members:body"
+  })
+
+  Repo.insert!(%Permission{
+    scope: "global",
+    action: "view_full",
+    object: "member",
+    description: "View all details of any member in the system. Assign this role to trusted persons only to avoid disclosure."
   })
 
   Repo.insert!(%Permission{
     scope: "global",
     action: "create",
-    object: "members",
+    object: "member",
     description: "Create members to the system. This is usually only assigned to the login microservice"
+  })
+
+  Repo.insert!(%Permission{
+    scope: "global",
+    action: "update",
+    object: "member",
+    description: "Update any member in the system. Don't assign this as any member can update his own profile anyways."
+  })
+
+  Repo.insert!(%Permission{
+    scope: "global",
+    action: "delete",
+    object: "member",
+    description: "Remove an account from the system. Don't assign this as any member can delete his own account anyways."
   })
 end

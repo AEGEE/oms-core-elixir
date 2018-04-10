@@ -19,11 +19,6 @@ defmodule OmscoreWeb.Router do
     plug OmscoreWeb.CircleFetchPlug
   end
 
-  scope "/api", OmscoreWeb do
-    pipe_through :api
-
-    resources "/members", MemberController, except: [:new, :edit, :index, :create]
-  end
 
   scope "/api", OmscoreWeb do
     pipe_through [:api, :authorize]
@@ -38,6 +33,12 @@ defmodule OmscoreWeb.Router do
 
     get "/members", MemberController, :index
     post "/members", MemberController, :create
+    get "/members/me", MemberController, :show_me
+    put "/members/me", MemberController, :update_me
+    delete "/members/me", MemberController, :delete_me
+    get "/members/:id", MemberController, :show
+    put "/members/:id", MemberController, :update
+    delete "/members/:id", MemberController, :delete
   end
 
   scope "/api/circles/:circle_id", OmscoreWeb do
