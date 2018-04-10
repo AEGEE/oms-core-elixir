@@ -18,7 +18,7 @@ alias Omscore.Repo
 
 # Create test-data so it's possible to experiment with the api without having to boot up the whole system
 if Mix.env() == :dev && Repo.all(Member) == [] do
-  {:ok, member} = Members.create_member(1, %{about_me: "some about_me", address: "some address", date_of_birth: ~D[2010-04-17], first_name: "some first_name", gender: "some gender", last_name: "some last_name", phone: "+1212345678"})
+  {:ok, member} = Members.create_member(%{about_me: "some about_me", address: "some address", date_of_birth: ~D[2010-04-17], first_name: "some first_name", gender: "some gender", last_name: "some last_name", phone: "+1212345678", user_id: 1})
   {:ok, body} = Core.create_body(%{address: "some address", description: "some description", email: "some email", legacy_key: "some legacy_key", name: "some name", phone: "some phone"})
   {:ok, circle} = Core.create_circle(%{description: "some description", joinable: true, name: "some name"}, body)
   {:ok, circle2} = Core.create_circle(%{description: "some description", joinable: true, name: "some name"})

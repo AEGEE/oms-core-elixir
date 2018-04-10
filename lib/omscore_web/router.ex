@@ -25,11 +25,6 @@ defmodule OmscoreWeb.Router do
     resources "/members", MemberController, except: [:new, :edit, :index, :create]
   end
 
-  scope "/api/bodies/:body_id", OmscoreWeb, as: :body do
-    pipe_through [:api]
-    resources "/join_requests", JoinRequestController, except: [:new, :edit, :show, :index, :create]
-  end
-
   scope "/api", OmscoreWeb do
     pipe_through [:api, :authorize]
     resources "/permissions", PermissionController, except: [:new, :edit]
