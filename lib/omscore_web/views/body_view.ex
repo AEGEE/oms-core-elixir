@@ -4,11 +4,11 @@ defmodule OmscoreWeb.BodyView do
   alias OmscoreWeb.Helper
 
   def render("index.json", %{bodies: bodies}) do
-    %{data: render_many(bodies, BodyView, "body.json")}
+    %{success: true, data: render_many(bodies, BodyView, "body.json")}
   end
 
   def render("show.json", %{body: body}) do
-    %{data: render_one(body, BodyView, "body.json")}
+    %{success: true, data: render_one(body, BodyView, "body.json")}
   end
 
   def render("body.json", %{body: body}) do

@@ -90,4 +90,8 @@ defmodule OmscoreWeb.BodyController do
       send_resp(conn, :no_content, "")       
     end
   end
+
+  def my_permissions(conn, _params) do
+    render(conn, OmscoreWeb.PermissionView, "index.json", permissions: conn.assigns.permissions)
+  end
 end

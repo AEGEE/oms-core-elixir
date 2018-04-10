@@ -70,6 +70,7 @@ defmodule OmscoreWeb.Router do
     delete "/members/:membership_id", BodyController, :delete_member
     delete "/members", BodyController, :delete_myself
     post "/members", JoinRequestController, :create
+    get "/my_permissions", BodyController, :my_permissions
 
     get "/join_requests", JoinRequestController, :index
     get "/join_requests/:id", JoinRequestController, :show

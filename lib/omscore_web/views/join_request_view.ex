@@ -4,11 +4,11 @@ defmodule OmscoreWeb.JoinRequestView do
   alias OmscoreWeb.Helper
 
   def render("index.json", %{join_requests: join_requests}) do
-    %{data: render_many(join_requests, JoinRequestView, "join_request.json")}
+    %{success: true, data: render_many(join_requests, JoinRequestView, "join_request.json")}
   end
 
   def render("show.json", %{join_request: join_request}) do
-    %{data: render_one(join_request, JoinRequestView, "join_request.json")}
+    %{success: true, data: render_one(join_request, JoinRequestView, "join_request.json")}
   end
 
   def render("join_request.json", %{join_request: join_request}) do

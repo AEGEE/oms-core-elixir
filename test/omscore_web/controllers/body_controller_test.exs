@@ -261,6 +261,19 @@ defmodule OmscoreWeb.BodyControllerTest do
     end
   end
 
+  describe "my permissions" do
+    setup [:create_body]
+
+    test "returns all permissions the user has in the body", %{conn: conn, body: body} do
+      %{token: token} = create_member_with_permissions([%{action: "some cool action"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      conn = get conn, body_body_path(conn, :my_permissions, body.id)
+      assert res = json_response(conn, 200)["data"]
+      assert Enum.any?(res, fn(x) -> x["action"] == "some cool action" end)  
+    end
+  end
+
   defp create_body(_) do
     body = fixture(:body)
     {:ok, body: body}

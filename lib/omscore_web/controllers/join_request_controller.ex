@@ -53,6 +53,7 @@ defmodule OmscoreWeb.JoinRequestController do
   def process(conn, %{"id" => id, "approved" => false}) do
     join_request = Members.get_join_request!(id)
      with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "process", "join_request"),
+          {:ok} <- validate_unapproved(join_request),
           {:ok, _} <- Members.reject_join_request(join_request) do
       send_resp(conn, :no_content, "")
     end

@@ -6,11 +6,11 @@ defmodule OmscoreWeb.ErrorViewTest do
 
   test "renders 404.json" do
     assert render(OmscoreWeb.ErrorView, "404.json", []) ==
-           %{errors: %{detail: "Not Found"}}
+           %{success: false, errors: %{detail: "Not Found"}}
   end
 
   test "renders 500.json" do
     assert render(OmscoreWeb.ErrorView, "500.json", []) ==
-           %{errors: %{detail: "Internal Server Error"}}
+           %{success: false, errors: %{detail: "Internal Server Error"}}
   end
 end

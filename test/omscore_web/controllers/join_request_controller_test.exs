@@ -148,6 +148,23 @@ defmodule OmscoreWeb.JoinRequestControllerTest do
       assert json_response(conn, 422)
     end
 
+    test "does not allow rejecting a previously approved join request", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "process", object: "join_request"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+      
+      member = member_fixture()
+      body = body_fixture()
+      assert {:ok, jr} = Members.create_join_request(body, member, %{motivation: "no motivation"})
+
+      conn = post conn, body_join_request_path(conn, :process, body.id, jr.id), approved: true
+      assert json_response(conn, 200)
+
+      conn = recycle(conn) |> put_req_header("x-auth-token", token)
+
+      conn = post conn, body_join_request_path(conn, :process, body.id, jr.id), approved: false
+      assert json_response(conn, 422)
+    end
+
     test "rejects a join request by deleting it", %{conn: conn} do
       %{token: token} = create_member_with_permissions([%{action: "process", object: "join_request"}])
       conn = put_req_header(conn, "x-auth-token", token)
@@ -174,6 +191,23 @@ defmodule OmscoreWeb.JoinRequestControllerTest do
       assert_raise Phoenix.ActionClauseError, fn ->
         post conn, body_join_request_path(conn, :process, body.id, jr.id), approved: 18
       end
+    end
+
+    test "rejects missing permissions", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([])
+      conn = put_req_header(conn, "x-auth-token", token)
+      
+      member = member_fixture()
+      body = body_fixture()
+      assert {:ok, jr} = Members.create_join_request(body, member, %{motivation: "no motivation"})
+
+      conn = post conn, body_join_request_path(conn, :process, body.id, jr.id), approved: false
+      assert response(conn, 403)
+
+      conn = recycle(conn) |> put_req_header("x-auth-token", token)
+      
+      conn = post conn, body_join_request_path(conn, :process, body.id, jr.id), approved: true
+      assert response(conn, 403)
     end
   end
 end

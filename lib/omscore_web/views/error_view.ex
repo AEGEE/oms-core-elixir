@@ -11,7 +11,7 @@ defmodule OmscoreWeb.ErrorView do
   # the template name. For example, "404.json" becomes
   # "Not Found".
   def template_not_found(template, _assigns) do
-    %{errors: %{detail: Phoenix.Controller.status_message_from_template(template)}}
+    %{success: false, errors: %{detail: Phoenix.Controller.status_message_from_template(template)}}
   end
 
   def render("error.json", %{msg: msg}) do

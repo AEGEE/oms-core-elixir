@@ -23,6 +23,6 @@ defmodule Omscore.Core.Body do
   def changeset(body, attrs) do
     body
     |> cast(attrs, [:name, :email, :phone, :address, :description, :legacy_key])
-    |> validate_required([:name, :email, :phone, :address, :description, :legacy_key])
+    |> validate_required([:name, :legacy_key])
   end
 end
