@@ -27,6 +27,7 @@ defmodule OmscoreWeb.PlugTest do
     |> OmscoreWeb.PermissionFetchPlug.init
     |> OmscoreWeb.BodyFetchPlug.init
     |> OmscoreWeb.CircleFetchPlug.init
+    |> OmscoreWeb.MemberPermissionPlug.init
 
     assert conn == copy
   end
@@ -133,5 +134,62 @@ defmodule OmscoreWeb.PlugTest do
     assert conn.assigns.circle
     assert conn.assigns.circle.id == circle2.id
     assert conn.assigns.permissions |> Enum.any?(fn(x) -> x.id == permission.id end)
+  end
+
+  test "member permission plug fetches permissions the own member got through any of the bodies of the foreign members", %{conn: conn} do
+    %{token: token, member: member1} = create_member_with_permissions([])
+    permission = permission_fixture(%{scope: "local"})
+    body = body_fixture()
+    member2 = member_fixture()
+    circle = bound_circle_fixture(body)
+
+    assert {:ok, _} = Omscore.Members.create_body_membership(body, member1)
+    assert {:ok, _} = Omscore.Members.create_body_membership(body, member2)
+    assert {:ok, _} = Omscore.Core.put_circle_permissions(circle, [permission])
+    assert {:ok, _} = Omscore.Members.create_circle_membership(circle, member1)
+
+    conn = conn
+    |> put_req_header("x-auth-token", token)
+    |> OmscoreWeb.AuthorizePlug.call([])
+    |> OmscoreWeb.MemberFetchPlug.call([])
+    |> OmscoreWeb.PermissionFetchPlug.call([])
+    |> Map.put(:path_params, %{"member_id" => member2.id})
+    |> OmscoreWeb.MemberPermissionPlug.call([])
+
+    assert conn.assigns.target_member
+    assert conn.assigns.target_member.id == member2.id
+    assert Enum.any?(conn.assigns.permissions, fn(x) -> x.id == permission.id end)
+  end
+
+  test "member permission plug adds some constant permissions if requesting myself", %{conn: conn} do
+    %{token: token, member: member} = create_member_with_permissions([])
+
+    conn = conn
+    |> put_req_header("x-auth-token", token)
+    |> OmscoreWeb.AuthorizePlug.call([])
+    |> OmscoreWeb.MemberFetchPlug.call([])
+    |> OmscoreWeb.PermissionFetchPlug.call([])
+    |> Map.put(:path_params, %{"member_id" => member.id})
+    |> OmscoreWeb.MemberPermissionPlug.call([])
+
+    assert conn.assigns.target_member
+    assert conn.assigns.target_member == conn.assigns.member
+    assert Enum.any?(conn.assigns.permissions, fn(x) -> x.action == "view_full" && x.object == "member" end)
+    assert Enum.any?(conn.assigns.permissions, fn(x) -> x.action == "update" && x.object == "member" end)
+    assert Enum.any?(conn.assigns.permissions, fn(x) -> x.action == "delete" && x.object == "member" end)
+  end
+
+  test "raises when trying to fetch unknown member", %{conn: conn} do
+    %{token: token} = create_member_with_permissions([])
+
+    assert_raise Ecto.NoResultsError, fn ->
+        conn
+        |> put_req_header("x-auth-token", token)
+        |> OmscoreWeb.AuthorizePlug.call([])
+        |> OmscoreWeb.MemberFetchPlug.call([])
+        |> OmscoreWeb.PermissionFetchPlug.call([])
+        |> Map.put(:path_params, %{"member_id" => -1})
+        |> OmscoreWeb.MemberPermissionPlug.call([])
+    end
   end
 end

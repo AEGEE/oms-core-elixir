@@ -287,10 +287,24 @@ if Repo.all(Permission) == [] do
   })
 
   Repo.insert!(%Permission{
+    scope: "local",
+    action: "view",
+    object: "members",
+    description: "View basic information about all members in the body. This does not allow you to perform a members listing, you might however hold the list body_memberships permission"
+  })
+
+  Repo.insert!(%Permission{
     scope: "global",
     action: "view_full",
     object: "member",
     description: "View all details of any member in the system. Assign this role to trusted persons only to avoid disclosure."
+  })
+
+  Repo.insert!(%Permission{
+    scope: "local",
+    action: "view_full",
+    object: "member",
+    description: "View all details of any member in the body that you got this permission from"
   })
 
   Repo.insert!(%Permission{
@@ -308,9 +322,23 @@ if Repo.all(Permission) == [] do
   })
 
   Repo.insert!(%Permission{
+    scope: "local",
+    action: "update",
+    object: "member",
+    description: "Update any member in the body you got this permission from. Notice that member information is global and several bodies might have the permission to access the same member. Also don't assign it when not necessary, the member can update his own profile anyways."
+  })
+
+  Repo.insert!(%Permission{
     scope: "global",
     action: "delete",
     object: "member",
     description: "Remove an account from the system. Don't assign this as any member can delete his own account anyways."
+  })
+
+  Repo.insert!(%Permission{
+    scope: "local",
+    action: "delete",
+    object: "member",
+    description: "Delete any member in your body from the system. This allows to also delete members that are in other bodies and have a quarrel in that one body with the board admin, so be careful in granting this permission. The member can delete his own profile anyways"
   })
 end
