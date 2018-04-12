@@ -38,7 +38,7 @@ defmodule OmscoreWeb.MemberPermissionPlug do
   # Assumes member a was already fetched by a previous plug and stored in conn.assigns.member
   # Stores member b in target_member
   def call(%{path_params: %{"member_id" => member_id}} = conn, _) do
-    if to_string(conn.assigns.member.id) == to_string(member_id) || "me" == to_string(member_id) do
+    if to_string(conn.assigns.member.id) == to_string(member_id) || "me" == to_string(member_id) || to_string(conn.assigns.member.seo_url) == to_string(member_id) do
       process_myself(conn)
     else
       process_foreign(conn, member_id)

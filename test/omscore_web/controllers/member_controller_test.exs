@@ -176,6 +176,32 @@ defmodule OmscoreWeb.MemberControllerTest do
       assert res == json_response(conn, 200)["data"]
     end
 
+    test "passing my own seo_url redirects to myself", %{conn: conn} do
+      %{token: token, member: member} = create_member_with_permissions([])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      conn = get conn, member_path(conn, :show, member.id)
+      assert res = json_response(conn, 200)["data"]
+
+      conn = recycle(conn) |> put_req_header("x-auth-token", token)
+
+      conn = get conn, member_path(conn, :show, member.seo_url)
+      assert res == json_response(conn, 200)["data"]
+    end    
+
+    test "passing an seo_url redirects to the member with that id", %{conn: conn, member: member} do
+      %{token: token} = create_member_with_permissions([%{action: "view", object: "member"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      conn = get conn, member_path(conn, :show, member.id)
+      assert res = json_response(conn, 200)["data"]
+
+      conn = recycle(conn) |> put_req_header("x-auth-token", token)
+
+      conn = get conn, member_path(conn, :show, member.seo_url)
+      assert res == json_response(conn, 200)["data"]
+    end
+
     test "shows restricted member data when having restricted permission to view that member", %{conn: conn, member: member} do
       %{token: token} = create_member_with_permissions([%{action: "view", object: "member"}])
       conn = put_req_header(conn, "x-auth-token", token)
