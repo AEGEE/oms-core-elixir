@@ -14,6 +14,12 @@ defmodule OmscoreWeb.MemberController do
     end
   end
 
+  def create(conn, %{"member" => member_params, "only_validate" => true}) do
+    with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "create", "member") do
+      Members.validate_create_member(member_params)
+    end
+  end
+
   def create(conn, %{"member" => member_params}) do
     with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "create", "member"),
          {:ok, %Member{} = member} <- Members.create_member(member_params) do
@@ -57,6 +63,36 @@ defmodule OmscoreWeb.MemberController do
       match1 == :ok -> show_full(conn, member)
       match2 == :ok -> show_restricted(conn, member)
       true -> {match2, msg}
+    end
+  end
+
+  defp load_member(user_id, conn_member) when not(is_nil(user_id)) do
+    if user_id == conn_member.user_id do
+      {:ok, conn_member}
+    else
+      case Omscore.Members.get_member_by_userid(user_id) do
+        nil -> {:error, "User has no member object"}
+        member -> {:ok, member}
+      end
+    end
+  end
+
+  defp parse_token(token) do
+    case Omscore.Guardian.resource_from_token(token, typ: "access") do
+      {:ok, user, _claims} -> {:ok, user}
+      {:error, _} -> {:error, :unprocessable_entity, "Could not decode provided token"}
+    end
+  end
+
+  # Fetch the member from the token and then pass it through the rest of the pipe towards the show request
+  # Permission checking is done in the rest of the pipe
+  def show_by_token(conn, %{"token" => token}) do
+    with {:ok, user} <- parse_token(token),
+         {:ok, member} <- load_member(user.id, conn.assigns.member) do
+      conn
+      |> Map.put(:path_params, Map.put(conn.path_params, "member_id", member.id))
+      |> OmscoreWeb.MemberPermissionPlug.call([])
+      |> show(%{})
     end
   end
 

@@ -35,4 +35,10 @@ defmodule OmscoreWeb.FallbackController do
     |> put_status(:forbidden)
     |> render(OmscoreWeb.ErrorView, "error.json", msg: message)
   end
+
+  def call(conn, {:ok, message}) do
+    conn
+    |> put_status(:ok)
+    |> render(OmscoreWeb.ErrorView, "success.json", msg: message)
+  end
 end

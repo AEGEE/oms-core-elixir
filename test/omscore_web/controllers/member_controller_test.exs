@@ -112,6 +112,40 @@ defmodule OmscoreWeb.MemberControllerTest do
       conn = post conn, member_path(conn, :create), member: @create_attrs
       assert json_response(conn, 403)
     end
+
+    test "only validates but not creates a member if only_validate query param is passed", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "create", object: "member"}, %{action: "view", object: "member"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      before_count = Omscore.Repo.all(Members.Member) |> Enum.count
+
+      conn = post conn, member_path(conn, :create), member: @create_attrs, only_validate: true
+      assert json_response(conn, 200)["data"]["valid"] == true
+
+      after_count = Omscore.Repo.all(Members.Member) |> Enum.count
+      assert before_count == after_count
+    end
+
+    test "only_validate also checks for user_id uniqueness", %{conn: conn} do
+      %{token: token, member: member} = create_member_with_permissions([%{action: "create", object: "member"}, %{action: "view", object: "member"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      conn = post conn, member_path(conn, :create), member: Map.put(@create_attrs, :user_id, member.user_id), only_validate: true
+      assert json_response(conn, 422)
+    end
+
+    test "returns validation error on only_validate request with invalid data", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "create", object: "member"}, %{action: "view", object: "member"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      before_count = Omscore.Repo.all(Members.Member) |> Enum.count
+
+      conn = post conn, member_path(conn, :create), member: @invalid_attrs, only_validate: true
+      assert json_response(conn, 422)
+
+      after_count = Omscore.Repo.all(Members.Member) |> Enum.count
+      assert before_count == after_count
+    end
   end
 
   describe "show member" do
@@ -150,7 +184,7 @@ defmodule OmscoreWeb.MemberControllerTest do
       conn = put_req_header(conn, "x-auth-token", token)
 
       conn = get conn, member_path(conn, :show, member.id)
-      assert res = json_response(conn, 200)["data"]
+      assert res = json_response(conn, 200)["data"] 
 
       assert res["id"] == member.id
       assert res["first_name"] == member.first_name
@@ -167,6 +201,35 @@ defmodule OmscoreWeb.MemberControllerTest do
 
       conn = get conn, member_path(conn, :show, member.id)
       assert json_response(conn, 403)
+    end
+
+    test "show by token shows another member by the token", %{conn: conn} do
+      %{token: token1} = create_member_with_permissions([%{action: "view_full", object: "member"}])
+      %{token: token2, member: member2} = create_member_with_permissions([])
+      conn = put_req_header(conn, "x-auth-token", token1)
+
+      conn = get conn, member_path(conn, :show_by_token), token: token2
+      assert res = json_response(conn, 200)["data"]
+
+      assert res["id"] == member2.id
+    end
+
+    test "show by token shows the own member by the token", %{conn: conn} do
+      %{token: token, member: member} = create_member_with_permissions([])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      conn = get conn, member_path(conn, :show_by_token), token: token
+      assert res = json_response(conn, 200)["data"]
+
+      assert res["id"] == member.id
+    end
+
+    test "errors on invalid token", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      conn = get conn, member_path(conn, :show_by_token), token: "some invalid token"
+      assert json_response(conn, 422)
     end
   end
 

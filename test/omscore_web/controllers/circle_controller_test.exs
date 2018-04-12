@@ -43,7 +43,7 @@ defmodule OmscoreWeb.CircleControllerTest do
       assert Enum.all?(circles, fn(x) -> x["body_id"] == nil end)
     end
 
-     test "lists all circles with data", %{conn: conn} do
+    test "lists all circles with data", %{conn: conn} do
       %{token: token} = create_member_with_permissions([%{action: "view", object: "circle"}])
       conn = put_req_header(conn, "x-auth-token", token)
 
