@@ -38,6 +38,11 @@ defmodule Omscore.MembersTest do
       assert Members.get_member!(member.id) == member
     end
 
+    test "get_member!/1 returns the member with given seo_url" do
+      member = member_fixture()
+      assert Members.get_member!(member.seo_url) == member
+    end
+
     test "get_member_by_userid/1 returns the member with given userid" do
       member = member_fixture()
       assert Members.get_member_by_userid(member.user_id) == member

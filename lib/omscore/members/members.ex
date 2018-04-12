@@ -18,8 +18,14 @@ defmodule Omscore.Members do
     |> Repo.all
   end
 
-  # Gets a single member
-  def get_member!(id), do: Repo.get!(Member, id)
+  # Gets a single member by either his seo_url or his id
+  def get_member!(id) when is_integer(id), do: Repo.get!(Member, id)
+  def get_member!(query) do
+    case Integer.parse(query) do
+      {id, ""} -> get_member!(id)
+      _ -> Repo.get_by(Member, seo_url: query)
+    end
+ end
 
   def get_member_by_userid(userid), do: Repo.get_by(Member, %{user_id: userid})
 
