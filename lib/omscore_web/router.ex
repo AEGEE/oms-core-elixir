@@ -39,7 +39,7 @@ defmodule OmscoreWeb.Router do
     post "/members", MemberController, :create
 
     # Compatibility request to the old core
-    get "/tokens/user", MemberController, :show_by_token
+    post "/tokens/user", MemberController, :show_by_token
   end
 
   scope "/api/members/:member_id", OmscoreWeb do

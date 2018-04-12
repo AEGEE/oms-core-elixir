@@ -163,6 +163,19 @@ defmodule OmscoreWeb.MemberControllerTest do
       assert Enum.any?(res["circles"], fn(x) -> x["id"] == circle.id end)
     end
 
+    test "passing me as member_id redirects to myself", %{conn: conn} do
+      %{token: token, member: member} = create_member_with_permissions([])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      conn = get conn, member_path(conn, :show, member.id)
+      assert res = json_response(conn, 200)["data"]
+
+      conn = recycle(conn) |> put_req_header("x-auth-token", token)
+
+      conn = get conn, member_path(conn, :show, "me")
+      assert res == json_response(conn, 200)["data"]
+    end
+
     test "shows restricted member data when having restricted permission to view that member", %{conn: conn, member: member} do
       %{token: token} = create_member_with_permissions([%{action: "view", object: "member"}])
       conn = put_req_header(conn, "x-auth-token", token)
@@ -208,7 +221,7 @@ defmodule OmscoreWeb.MemberControllerTest do
       %{token: token2, member: member2} = create_member_with_permissions([])
       conn = put_req_header(conn, "x-auth-token", token1)
 
-      conn = get conn, member_path(conn, :show_by_token), token: token2
+      conn = post conn, member_path(conn, :show_by_token), token: token2
       assert res = json_response(conn, 200)["data"]
 
       assert res["id"] == member2.id
@@ -218,7 +231,7 @@ defmodule OmscoreWeb.MemberControllerTest do
       %{token: token, member: member} = create_member_with_permissions([])
       conn = put_req_header(conn, "x-auth-token", token)
 
-      conn = get conn, member_path(conn, :show_by_token), token: token
+      conn = post conn, member_path(conn, :show_by_token), token: token
       assert res = json_response(conn, 200)["data"]
 
       assert res["id"] == member.id
@@ -228,7 +241,7 @@ defmodule OmscoreWeb.MemberControllerTest do
       %{token: token} = create_member_with_permissions([])
       conn = put_req_header(conn, "x-auth-token", token)
 
-      conn = get conn, member_path(conn, :show_by_token), token: "some invalid token"
+      conn = post conn, member_path(conn, :show_by_token), token: "some invalid token"
       assert json_response(conn, 422)
     end
   end

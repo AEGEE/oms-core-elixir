@@ -1,6 +1,7 @@
 o Inform loginservice of member deletion
 x Member data validation request
-o Compatibility requests
-o Data seeding
+x Compatibility requests
+x Data seeding
+o Get member by seo_url
 
 Idea towards cross-service auth: each service can create his own access tokens which are just cryptographically verified, not whether they were actually handed out by the loginservice. So when a service wants something directly from another service without user interaction, it could generate himself a token to do so...
