@@ -7,9 +7,9 @@ defmodule OmscoreWeb.CircleController do
 
   action_fallback OmscoreWeb.FallbackController
 
-  def index(conn, _params) do
+  def index(conn, params) do
     with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "view", "circle") do
-      circles = Core.list_free_circles()
+      circles = Core.list_free_circles(params)
       render(conn, "index.json", circles: circles)
     end
   end
@@ -180,9 +180,9 @@ defmodule OmscoreWeb.CircleController do
   end
 
 
-  def index_bound(conn, _params) do
+  def index_bound(conn, params) do
     with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "view", "circle") do
-      circles = Core.list_bound_circles(conn.assigns.body)
+      circles = Core.list_bound_circles(conn.assigns.body, params)
       render(conn, "index.json", circles: circles)
     end
   end

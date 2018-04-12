@@ -21,6 +21,13 @@ defmodule Omscore.HelpersTest do
     member
   end
 
+  def member_fixture_ex(attrs) do
+    attrs = Enum.into(attrs, @create_attrs)
+    {:ok, member} = Members.create_member(attrs)
+
+    member
+  end
+
   describe "search" do
     test "searches case-insensitively in passed fields" do
       member1 = member_fixture(%{first_name: "Hans", last_name: "Peter"})
@@ -40,6 +47,26 @@ defmodule Omscore.HelpersTest do
 
       assert !Enum.any?(res, fn(x) -> x.id == member1.id end)
       assert Enum.any?(res, fn(x) -> x.id == member2.id end)
+    end
+
+    @tag only: 1
+    test "combines gracefully with a previous where clause" do
+      member1 = member_fixture_ex(%{first_name: "Hans", last_name: "Peter", user_id: 1})
+      member_fixture_ex(%{first_name: "Hans", last_name: "Gollum", user_id: 2})
+      member_fixture_ex(%{first_name: "Hans", last_name: "Sonstewer", user_id: 3})
+
+      res = from(u in Members.Member, where: u.user_id != 1)
+      |> Helper.search(%{"query" => "hans"}, [:first_name])
+      |> Repo.all
+
+      assert Enum.count(res) == 2
+      assert !Enum.any?(res, fn(x) -> x.id == member1.id end)
+
+      res = from(u in Members.Member, where: u.user_id != 1)
+      |> Helper.search(%{"query" => "peter"}, [:first_name, :last_name])
+      |> Repo.all
+
+      assert res == []
     end
   end
 

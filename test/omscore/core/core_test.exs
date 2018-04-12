@@ -110,10 +110,20 @@ defmodule Omscore.CoreTest do
       assert Enum.at(permission_list, 0).scope == "global"
     end
 
-    test "search_permission/1 finds permissions" do
+    test "search_permission_list/3 finds permissions" do
       permission_list = [permission_fixture()] ++ [permission_fixture(@update_attrs)]
       assert {:ok, res} = Core.search_permission_list(permission_list, @valid_attrs.action, @valid_attrs.object)
       assert res.scope == @valid_attrs.scope
+      assert {:forbidden, _} = Core.search_permission_list(permission_list, "weird action", "even weirder object")
+    end
+
+    test "search_permission_list/4 also finds permissions" do
+      permission1 = permission_fixture(%{scope: "local"})
+      permission2 = permission_fixture(%{scope: "global"})
+      permission_list = [permission1, permission2]
+      assert {:ok, res} = Core.search_permission_list(permission_list, @valid_attrs.action, @valid_attrs.object, "local")
+      assert res.scope == "local"
+      assert {:forbidden, _} = Core.search_permission_list(permission_list, @valid_attrs.action, @valid_attrs.object, "omniuberglobal")
     end
   end
 

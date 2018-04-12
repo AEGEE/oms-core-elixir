@@ -30,13 +30,15 @@ defmodule OmscoreWeb.Helper do
 
   # Builds a query where the querystring is compared in ilike-fashion to each of the fields passed in attrs
   # These where statements are joined together by ORs to return any result that somewhat matches the query
-  def search(query, %{"query" => querystring}, attrs) do
-    filters = attrs
-    |> Enum.map(fn(x) -> {x, "%#{querystring}%"} end)
-
-    Enum.reduce(filters, query, fn {key, value}, query ->
-      from q in query, or_where: ilike(field(q, ^key), ^value)
+  # TODO Somehow join where queries in brackets...
+  def search(query, %{"query" => querystring}, attrs) when length(attrs) != 0 do
+    # Construct a where clause to match each of the given fields ORed together
+    # We will also end up with an OR false in it but that shouldn't do any harm
+    where_query = Enum.reduce(attrs, false, fn (key, where_query) -> 
+      dynamic([q], ilike(field(q, ^key), ^"%#{querystring}%") or ^where_query)
     end)
+
+    from q in query, where: ^where_query
   end
   def search(query, _params, _attrs), do: query
 

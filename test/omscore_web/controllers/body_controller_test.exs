@@ -13,6 +13,10 @@ defmodule OmscoreWeb.BodyControllerTest do
     body
   end
 
+  def create_many_bodies(range) do
+    Enum.map(range, fn(_x) -> body_fixture() end)
+  end
+
   setup %{conn: conn} do
     Omscore.Repo.delete_all(Core.Permission)
 
@@ -25,6 +29,38 @@ defmodule OmscoreWeb.BodyControllerTest do
       conn = put_req_header(conn, "x-auth-token", token)
 
       conn = get conn, body_path(conn, :index)
+      assert json_response(conn, 200)["data"] == []
+    end
+
+    test "lists all bodies with data", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "view", object: "body"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      bodies = create_many_bodies(0..100)
+
+      conn = get conn, body_path(conn, :index)
+      assert res = json_response(conn, 200)["data"]
+      assert bodies |> Enum.all?(fn(x) -> Enum.find(res, fn(y) -> x.id == y["id"] end) != nil end)
+    end
+
+    test "paginates the request if pagination data is passed", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "view", object: "body"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      create_many_bodies(0..100)
+
+      conn = get conn, body_path(conn, :index), limit: 10, offset: 0
+      assert res = json_response(conn, 200)["data"]
+      assert Enum.count(res) == 10
+    end
+
+    test "searches the result if query is passed", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "view", object: "body"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      create_many_bodies(0..100)
+
+      conn = get conn, body_path(conn, :index), query: "some really exotic query that definitely doesn't match any member at all"
       assert json_response(conn, 200)["data"] == []
     end
 

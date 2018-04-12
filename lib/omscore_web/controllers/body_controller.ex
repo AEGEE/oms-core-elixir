@@ -7,9 +7,9 @@ defmodule OmscoreWeb.BodyController do
 
   action_fallback OmscoreWeb.FallbackController
 
-  def index(conn, _params) do
+  def index(conn, params) do
     with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "view", "body") do
-      bodies = Core.list_bodies()
+      bodies = Core.list_bodies(params)
       render(conn, "index.json", bodies: bodies)
     end
   end

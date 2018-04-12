@@ -13,6 +13,14 @@ defmodule OmscoreWeb.CircleControllerTest do
     circle
   end
 
+  def create_many_circles(range) do
+    Enum.map(range, fn(_) -> circle_fixture() end)
+  end
+
+  def create_many_bound_circles(body, range) do
+    Enum.map(range, fn(_) -> bound_circle_fixture(body) end)
+  end
+
   setup %{conn: conn} do
     Omscore.Repo.delete_all(Omscore.Core.Permission) # So no auto-assigned permission can ruin testing without permissions
 
@@ -24,6 +32,8 @@ defmodule OmscoreWeb.CircleControllerTest do
       %{token: token} = create_member_with_permissions([%{action: "view", object: "circle"}])
       conn = put_req_header(conn, "x-auth-token", token)
 
+      circle_fixture()
+
       body = body_fixture()
       bound_circle_fixture(body)
 
@@ -31,6 +41,38 @@ defmodule OmscoreWeb.CircleControllerTest do
       circles = json_response(conn, 200)["data"]
       assert is_list(circles)
       assert Enum.all?(circles, fn(x) -> x["body_id"] == nil end)
+    end
+
+     test "lists all circles with data", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "view", object: "circle"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      circles = create_many_circles(0..30)
+
+      conn = get conn, circle_path(conn, :index)
+      assert res = json_response(conn, 200)["data"]
+      assert circles |> Enum.all?(fn(x) -> Enum.find(res, fn(y) -> x.id == y["id"] end) != nil end)
+    end
+
+    test "paginates the request if pagination data is passed", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "view", object: "circle"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      create_many_circles(0..30)
+
+      conn = get conn, circle_path(conn, :index), limit: 10, offset: 0
+      assert res = json_response(conn, 200)["data"]
+      assert Enum.count(res) == 10
+    end
+
+    test "searches the result if query is passed", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "view", object: "circle"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      create_many_circles(0..30)
+
+      conn = get conn, circle_path(conn, :index), query: "some really exotic query that definitely doesn't match any object at all"
+      assert json_response(conn, 200)["data"] == []
     end
 
     test "request rejected for unauthorized user", %{conn: conn} do
@@ -567,6 +609,41 @@ defmodule OmscoreWeb.CircleControllerTest do
       assert res = json_response(conn, 200)["data"]
       assert Enum.any?(res, fn(x) -> x["id"] == circle.id end)
       assert !Enum.any?(res, fn(x) -> x["id"] == circle2.id end)
+    end
+
+    test "lists all bound circles with data", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "view", object: "circle"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      body = body_fixture()
+      circles = create_many_bound_circles(body, 0..30)
+
+      conn = get conn, body_circle_path(conn, :index_bound, body.id)
+      assert res = json_response(conn, 200)["data"]
+      assert circles |> Enum.all?(fn(x) -> Enum.find(res, fn(y) -> x.id == y["id"] end) != nil end)
+    end
+
+    test "paginates the request if pagination data is passed", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "view", object: "circle"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      body = body_fixture()
+      create_many_bound_circles(body, 0..30)
+
+      conn = get conn, body_circle_path(conn, :index_bound, body.id), limit: 10, offset: 0
+      assert res = json_response(conn, 200)["data"]
+      assert Enum.count(res) == 10
+    end
+
+    test "searches the result if query is passed", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "view", object: "circle"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      body = body_fixture()
+      create_many_bound_circles(body, 0..30)
+
+      conn = get conn, body_circle_path(conn, :index_bound, body.id), query: "some really exotic query that definitely doesn't match any object at all"
+      assert json_response(conn, 200)["data"] == []
     end
   end
 

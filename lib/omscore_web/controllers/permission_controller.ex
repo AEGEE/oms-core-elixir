@@ -6,9 +6,9 @@ defmodule OmscoreWeb.PermissionController do
 
   action_fallback OmscoreWeb.FallbackController
 
-  def index(conn, _params) do
+  def index(conn, params) do
     with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "view", "permission") do
-      permissions = Core.list_permissions()
+      permissions = Core.list_permissions(params)
       render(conn, "index.json", permissions: permissions)
     end
   end

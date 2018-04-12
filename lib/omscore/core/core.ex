@@ -29,8 +29,11 @@ defmodule Omscore.Core do
   end
 
   # Returns all existing permissions
-  def list_permissions do
-    Repo.all(Permission)
+  def list_permissions(params \\ %{}) do
+    from(u in Permission, order_by: [:object, :action, :scope])
+    |> OmscoreWeb.Helper.paginate(params)
+    |> OmscoreWeb.Helper.search(params, [:object, :action, :scope])
+    |> Repo.all()
   end
 
   # Returns all always assigned permissions
@@ -109,12 +112,21 @@ defmodule Omscore.Core do
       res -> {:ok, res}
     end
   end
+  def search_permission_list(permission_list, action, object, scope) do
+    case Enum.find(permission_list, fn(x) -> x.action == action && x.object == object && x.scope == scope end) do
+      nil -> {:forbidden, "Permission " <> scope <> ":" <> action <> ":" <> object <> " required but not granted to you"}
+      res -> {:ok, res}
+    end
+  end
 
   alias Omscore.Core.Body
 
   # Returns all bodies
-  def list_bodies do
-    Repo.all(Body)
+  def list_bodies(params \\ %{}) do
+    from(u in Body, order_by: [:name])
+    |> OmscoreWeb.Helper.paginate(params)
+    |> OmscoreWeb.Helper.search(params, [:name, :legacy_key])
+    |> Repo.all
   end
 
   # Gets a single body, circles preloaded
@@ -159,16 +171,21 @@ defmodule Omscore.Core do
   end
 
   # List all circles which are not bound to a body
-  def list_free_circles do
-    query = from u in Circle, where: is_nil(u.body_id)
-    Repo.all(query)
+  def list_free_circles(params \\ %{}) do
+    from(u in Circle, where: is_nil(u.body_id), order_by: :name)
+    |> OmscoreWeb.Helper.paginate(params)
+    |> OmscoreWeb.Helper.search(params, [:name])
+    |> Repo.all
   end
 
   # List all circles for a body
-  def list_bound_circles(%Body{} = body), do: list_bound_circles(body.id)
-  def list_bound_circles(body_id) do
-    query = from u in Circle, where: u.body_id == ^body_id
-    Repo.all(query)
+  def list_bound_circles(body, params \\ %{}), do: list_bound_circles_(body, params)
+  def list_bound_circles_(%Body{} = body, params), do: list_bound_circles_(body.id, params)
+  def list_bound_circles_(body_id, params) do
+    from(u in Circle, where: u.body_id == ^body_id, order_by: :name)
+    |> OmscoreWeb.Helper.paginate(params)
+    |> OmscoreWeb.Helper.search(params, [:name])
+    |> Repo.all
   end
 
   # Get a single circle

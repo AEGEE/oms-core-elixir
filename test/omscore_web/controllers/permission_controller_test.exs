@@ -13,6 +13,10 @@ defmodule OmscoreWeb.PermissionControllerTest do
     permission
   end
 
+  def create_many_permissions(range) do
+    Enum.map(range, fn(_) -> permission_fixture() end)
+  end
+
   setup %{conn: conn} do
     Omscore.Repo.delete_all(Permission) # So no auto-assigned permissions can ruin testing without permissions
 
@@ -28,6 +32,38 @@ defmodule OmscoreWeb.PermissionControllerTest do
 
       conn = get conn, permission_path(conn, :index)
       assert json_response(conn, 200)["data"] |> Enum.any?(fn(x) -> x["id"] == permission.id end)
+    end
+
+    test "lists all permissions with data", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "view", object: "permission"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      permissions = create_many_permissions(0..30)
+
+      conn = get conn, permission_path(conn, :index)
+      assert res = json_response(conn, 200)["data"]
+      assert permissions |> Enum.all?(fn(x) -> Enum.find(res, fn(y) -> x.id == y["id"] end) != nil end)
+    end
+
+    test "paginates the request if pagination data is passed", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "view", object: "permission"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      create_many_permissions(0..30)
+
+      conn = get conn, permission_path(conn, :index), limit: 10, offset: 0
+      assert res = json_response(conn, 200)["data"]
+      assert Enum.count(res) == 10
+    end
+
+    test "searches the result if query is passed", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "view", object: "permission"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      create_many_permissions(0..30)
+
+      conn = get conn, permission_path(conn, :index), query: "some really exotic query that definitely doesn't match any object at all"
+      assert json_response(conn, 200)["data"] == []
     end
 
     test "rejects request to unauthorized user", %{conn: conn} do
