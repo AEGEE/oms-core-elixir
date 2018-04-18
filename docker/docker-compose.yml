@@ -23,8 +23,8 @@ services:
             JWT_ISSUER: OMS
             JWT_SECRET_KEY_FILE: /run/secrets/jwt_key
             DB_HOST: postgres-oms-core-elixir
-#        secrets:
-#            - jwt_key
+        secrets:
+            - jwt_key
 
 
     postgres-oms-core-elixir:
@@ -49,12 +49,6 @@ services:
             - "traefik.enable=true"
             - "registry.status=status.json"
             - "registry.modules=getModules.json"
-
-
-#secrets:
-#    jwt_key:
-#        external: true
-
 
 volumes:
     postgres-oms-core-elixir:
