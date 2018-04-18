@@ -12,8 +12,8 @@ services:
         expose:
             - "4000"
         labels:
-            - "traefik.frontend.rule=HostRegexp:{domain:[a-z0-9.]+};PathPrefix:/services/oms-core-elixir;PathPrefixStrip:/services/oms-core-elixir"
-            - "traefik.frontend.priority=100"
+            - "traefik.frontend.rule=HostRegexp:{domain:[a-z0-9.]+};PathPrefix:/services/oms-core-elixir/api;PathPrefixStrip:/services/oms-core-elixir/api"
+            - "traefik.frontend.priority=101"
             - "traefik.port=4000"
             - "traefik.backend=oms-core-elixir"
             - "traefik.enable=true"
@@ -36,6 +36,19 @@ services:
         environment:
             POSTGRES_USER: postgres
             POSTGRES_PASSWORD: postgres
+
+    oms-core-elixir-nginx:
+        image: nginx:alpine
+        volumes:
+            - ./$PATH_OMS_CORE_ELIXIR/../frontend/:/usr/share/nginx/html:ro
+        labels:
+            - "traefik.frontend.rule=HostRegexp:{domain:[a-z0-9.]+};PathPrefix:/services/oms-core-elixir;PathPrefixStrip:/services/oms-core-elixir"
+            - "traefik.frontend.priority=100"
+            - "traefik.port=80"
+            - "traefik.backend=oms-core-elixir-frontend"
+            - "traefik.enable=true"
+            - "registry.status=status.json"
+            - "registry.modules=getModules.json"
 
 
 #secrets:

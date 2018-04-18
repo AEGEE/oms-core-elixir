@@ -49,7 +49,6 @@ defmodule Omscore.HelpersTest do
       assert Enum.any?(res, fn(x) -> x.id == member2.id end)
     end
 
-    @tag only: 1
     test "combines gracefully with a previous where clause" do
       member1 = member_fixture_ex(%{first_name: "Hans", last_name: "Peter", user_id: 1})
       member_fixture_ex(%{first_name: "Hans", last_name: "Gollum", user_id: 2})

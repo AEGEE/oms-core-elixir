@@ -24,7 +24,7 @@ defmodule OmscoreWeb.Router do
   end
 
 
-  scope "/api", OmscoreWeb do
+  scope "/", OmscoreWeb do
     pipe_through [:api, :authorize]
     resources "/permissions", PermissionController, except: [:new, :edit]
     get "/my_permissions", PermissionController, :index_permissions
@@ -42,7 +42,7 @@ defmodule OmscoreWeb.Router do
     post "/tokens/user", MemberController, :show_by_token
   end
 
-  scope "/api/members/:member_id", OmscoreWeb do
+  scope "/members/:member_id", OmscoreWeb do
     pipe_through [:api, :authorize, :fetch_member]
 
     get "/", MemberController, :show
@@ -50,7 +50,7 @@ defmodule OmscoreWeb.Router do
     delete "/", MemberController, :delete
   end
 
-  scope "/api/circles/:circle_id", OmscoreWeb do
+  scope "/circles/:circle_id", OmscoreWeb do
     pipe_through [:api, :authorize, :fetch_circle]
 
     get "/", CircleController, :show
@@ -67,7 +67,7 @@ defmodule OmscoreWeb.Router do
     put "/permissions", CircleController, :put_permissions
   end
 
-  scope "/api/bodies/:body_id", OmscoreWeb, as: :body do
+  scope "/bodies/:body_id", OmscoreWeb, as: :body do
     pipe_through [:api, :authorize, :fetch_body]
 
     get "/circles", CircleController, :index_bound

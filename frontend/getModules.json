@@ -1,0 +1,10 @@
+{
+  "name": "OMS Core",
+  "code": "oms-core-elixir",
+  "pages": [{
+    "name": "Dashboard",
+    "code": "dashboard",
+    "module_link": "loggedIn/dashboard/dashboard.js",
+    "icon": "fa fa-wrench"
+  }]
+}
