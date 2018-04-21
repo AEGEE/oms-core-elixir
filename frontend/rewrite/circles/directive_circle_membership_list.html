@@ -1,0 +1,52 @@
+<ul class="registered-users-list clearfix">
+  <li ng-repeat="circle_member in vm.circle_members">
+    <a ui-sref="app.profile({id: circle_member.member.seo_url})">
+      <img src="assets/img/user-5.jpg" alt="profile pic" />
+      <h4 class="username text-ellipsis">
+        {{ circle_member.member.first_name }} {{ circle_member.member.last_name }}
+        <small ng-show="circle_member.circle_admin">Circle admin</small>
+        <small ng-show="circle_member.position">{{ circle_member.position }}</small>
+      </h4>
+    </a>
+    <button type="button" ng-click="vm.editMembership(circle_member)" class="btn btn-warn"><i class="fa fa-pencil"></i></button>
+    <button type="button" ng-click="vm.deleteMembership(circle_member)" class="btn btn-danger"><i class="fa fa-minus"></i></button>
+  </li>
+</ul>
+<span ng-show="!vm.circle_members.length">No members in this circle</span>
+
+
+
+
+
+<!-- #modal-dialog -->
+<div class="modal fade" id="editCMModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title">Edit circle membership</h4>
+            </div>
+            <div class="alert alert-danger" ng-show="vm.errors.message">
+                Errors, the backend responded: {{ vm.errors.message }}
+            </div>
+            <form name="cmForm" ng-submit="vm.saveForm()" class="margin-bottom-0" novalidate>
+                <div class="modal-body">
+                    <div class="form-group m-b-20">
+                        <label for="position">Position</label>
+                        <input type="text" id="position" class="form-control" ng-model="vm.edited_cm.position" placeholder="Position description" required/>
+                        <p class="label label-danger" ng-show="vm.errors.position">{{ vm.errors.position }}</p>
+                    </div>
+                    <div class="form-group m-b-20">
+                        <label for="admin">Circle admin</label>
+                        <input type="checkbox" id="admin" class="form-control" ng-model="vm.edited_cm.circle_admin" placeholder="Admin Role"/>
+                        <p class="label label-danger" ng-show="vm.errors.circle_admin">{{ vm.errors.circle_admin }}</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <!--<button class="btn btn-sm btn-danger" data-dismiss="modal"><i class="fa fa-ban"></i> Close</button>-->
+                    <button class="btn btn-sm btn-success" type="submit"><i class="fa fa-save"></i> Save membership</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

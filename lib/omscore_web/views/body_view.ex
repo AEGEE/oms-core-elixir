@@ -13,6 +13,7 @@ defmodule OmscoreWeb.BodyView do
 
   def render("body.json", %{body: body}) do
     %{id: body.id,
+      seo_url: body.id, # TODO Implement SEO-URLs for bodies
       name: body.name,
       email: body.email,
       phone: body.phone,

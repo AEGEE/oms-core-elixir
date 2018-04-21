@@ -32,7 +32,7 @@ defmodule Omscore.Core do
   def list_permissions(params \\ %{}) do
     from(u in Permission, order_by: [:object, :action, :scope])
     |> OmscoreWeb.Helper.paginate(params)
-    |> OmscoreWeb.Helper.search(params, [:object, :action, :scope])
+    |> OmscoreWeb.Helper.search(params, [:object, :action, :scope, :description])
     |> Repo.all()
   end
 

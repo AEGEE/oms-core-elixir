@@ -22,7 +22,6 @@ defmodule OmscoreWeb.AuthorizePlug do
     else
       {:error, msg} -> 
         conn
-        |> put_status(:forbidden)
         |> put_resp_content_type("application/json")
         |> send_resp(401, Poison.encode!(%{success: false, error: "Invalid access token", msg: to_string(msg)}))
         |> halt

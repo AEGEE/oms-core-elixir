@@ -2,8 +2,11 @@
 {
     'use strict';
 
+    const baseUrl = baseUrlRepository['oms-core-elixir'];
+    const apiUrl = `${baseUrl}api`;
+
     angular
-        .module('app.body_management', [])
+        .module('app.bodies', [])
         .config(config)
         .directive('bodytile', TileDirective)
         .controller('BodyListingController', BodyListingController)
@@ -14,22 +17,22 @@
     {
         // State
          $stateProvider
-            .state('app.body_management', {
-                url: '/body_management',
+            .state('app.bodies', {
+                url: '/bodies',
                 data: {'pageTitle': 'All Bodies'},
                 views   : {
                     'pageContent@app': {
-                        templateUrl: 'modules/rewrite/body_management/list.html',
+                        templateUrl: baseUrl + '/rewrite/bodies/list.html',
                         controller: 'BodyListingController as vm'
                     }
                 }
             })
-            .state('app.body_management.single', {
-                url: '/body_management/:id',
+            .state('app.bodies.single', {
+                url: '/bodies/:id',
                 data: {'pageTitle': 'Body Details'},
                 views   : {
                     'pageContent@app': {
-                        templateUrl: 'modules/rewrite/body_management/single.html',
+                        templateUrl: baseUrl + '/rewrite/bodies/single.html',
                         controller: 'BodySingleController as vm'
                     }
                 }
@@ -42,7 +45,7 @@
             scope: {
                 body: '='
             },
-            templateUrl: 'modules/rewrite/body_management/directive_bodytile.html'
+            templateUrl: baseUrl + '/rewrite/bodies/directive_bodytile.html'
         };
     }
 

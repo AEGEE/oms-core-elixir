@@ -17,6 +17,7 @@ defmodule OmscoreWeb.CircleView do
 
   def render("circle.json", %{circle: circle}) do
     %{id: circle.id,
+      seo_url: circle.id, # TODO implement SEO-URLs for circles
       name: circle.name,
       description: circle.description,
       joinable: circle.joinable,

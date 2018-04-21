@@ -90,13 +90,13 @@ defmodule OmscoreWeb.PermissionControllerTest do
       |> put_req_header("x-auth-token", token)
 
       conn = get conn, permission_path(conn, :show, id)
-      assert json_response(conn, 200)["data"] == %{
+      assert json_response(conn, 200)["data"] |> map_inclusion(%{
         "id" => id,
         "action" => "some action",
         "description" => "some description",
         "object" => "some object",
         "scope" => "global",
-        "always_assigned" => false}
+        "always_assigned" => false})
     end
 
     test "renders errors when data is invalid", %{conn: conn} do
@@ -131,13 +131,13 @@ defmodule OmscoreWeb.PermissionControllerTest do
       |> put_req_header("x-auth-token", token)
 
       conn = get conn, permission_path(conn, :show, id)
-      assert json_response(conn, 200)["data"] == %{
+      assert json_response(conn, 200)["data"] |> map_inclusion(%{
         "id" => id,
         "action" => "some updated action",
         "description" => "some updated description",
         "object" => "some updated object",
         "scope" => "local",
-        "always_assigned" => true}
+        "always_assigned" => true})
     end
 
     test "renders errors when data is invalid", %{conn: conn, permission: permission} do

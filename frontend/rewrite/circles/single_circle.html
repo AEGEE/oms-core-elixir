@@ -12,25 +12,82 @@
   <div class="row">
     <div class="col-sm-6">Body</div>
     <div class="col-sm-6">
-      <span ng-show="vm.circle.body_id"><a ui-sref="app.body_management.single({id: vm.circle.body_id})">{{ vm.circle.body_id }}</a></span>
-      <span ng-show="!vm.circle.body_id">This circle is not associated to a body</span>
+      <span ng-show="vm.circle.body"><a ui-sref="app.bodies.single({id: vm.circle.body.seo_url})">{{ vm.circle.body.name }}</a></span>
+      <span ng-show="!vm.circle.body">This circle is not associated to a body</span>
     </div>
   </div>
   <div class="row">
-    <div class="col-sm-6">Parent circle</div>
+    <div class="col-sm-6">Joinable</div>
     <div class="col-sm-6">
-      <span ng-show="vm.circle.parent_circle"><a ui-sref="app.circles.single({id: vm.circle.parent_id})">{{ vm.circle.parent_circle.name }}</a></span>
-      <span ng-show="!vm.circle.parent_circle">This circle is a toplevel circle</span>
-    </div>  
+      <span ng-show="vm.circle.joinable && vm.cirle.body">This circle can be joined by anyone in {{ vm.circle.body.name }}</span>
+      <span ng-show="vm.circle.joinable && !vm.circle.body">This circle can be joined by any member</span>
+      <span ng-show="!vm.circle.joinable">Joining this circle is currently not possible</span>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-6">Parent circle <a href="javascript:;" ng-click="vm.editParentCircle = !vm.editParentCircle"><i class="fa fa-pencil"></i></a></div>
+    <div class="col-sm-6">
+      <span ng-show="vm.circle.parent_circle"><a ui-sref="app.circles.single({id: vm.circle.parent_circle.seo_url})">{{ vm.circle.parent_circle.name }}</a> <a href="javascript:;" ng-click="vm.setParentCircle({originalObject: {id: null}})"><i class="fa fa-minus"></i></a></span>
+      <span ng-show="!vm.circle.parent_circle && !vm.editParentCircle">This circle is a toplevel circle</span>
+      <span ng-if="vm.editParentCircle">
+        <angucomplete-alt 
+          id="parentCircleTypeahead" 
+          placeholder="Type to set parent circle" 
+          pause="50" 
+          selected-object="vm.setParentCircle" 
+          remote-api-handler="vm.fetchCircles" 
+          title-field="name" 
+          description-field="description" 
+          minlength="1" 
+          input-class="form-control form-control-small"> 
+        </angucomplete-alt>
+      </span>
+    </div>
   </div>
   <div class="row">
     <div class="col-sm-6">Child circles</div>
     <div class="col-sm-6">
-      <ul>
-        <li ng-repeat="child in vm.circle.children_circles">
-          <a ui-sref="app.circles.single({id: child.id})">{{ child.name }}</a>
+      <ul ng-show="vm.circle.child_circles.length">
+        <li ng-repeat="child in vm.circle.child_circles">
+          <a ui-sref="app.circles.single({id: child.seo_url})">{{ child.name }}</a>
         </li>
       </ul>
+      <span ng-show="!vm.circle.child_circles.length">No child circles found</span>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-6">Attached permissions <a href="javascript:;" ng-click="vm.editPermissions = !vm.editPermissions"><i class="fa fa-pencil"></i></a></div>
+    <div class="col-sm-6">
+      <ul ng-show="vm.circle.permissions.length">
+        <li ng-repeat="permission in vm.circle.permissions">
+          {{ permission.scope }}:{{ permission.action }}:{{ permission.object }} <a ng-show="vm.editPermissions" href="javascript:;" ng-click="vm.deletePermission(permission)"><i class="fa fa-minus"></i></a>
+        </li>
+      </ul>
+      <span ng-show="vm.editPermissions">
+        <angucomplete-alt 
+            id="editPermissionsTypeahead" 
+            placeholder="Type to add permission" 
+            pause="50" 
+            selected-object="vm.addPermission" 
+            remote-api-handler="vm.fetchPermissions" 
+            title-field="combined" 
+            description-field="description" 
+            minlength="1" 
+            input-class="form-control form-control-small"> 
+          </angucomplete-alt>
+      </span>
+      <span ng-show="!vm.circle.permissions.length && !vm.editPermissions">No permissions directly attached</span>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-6">Inherited permissions<br /><small>All permissions from parent circles also apply to this circles members</small></div>
+    <div class="col-sm-6">
+      <ul ng-show="vm.inherited_permissions.length">
+        <li ng-repeat="permission in vm.inherited_permissions">
+          {{ permission.scope }}:{{ permission.action }}:{{ permission.object }}
+        </li>
+      </ul>
+      <span ng-show="!vm.inherited_permissions.length">No permissions inherited</span>
     </div>
   </div>
 </div>
@@ -38,30 +95,13 @@
 <hr />
 
 <div class="m-b-10">
-  <div class="input-group">
-    <span class="input-group-addon"><i class="fa fa-search"></i> Search members</span>
-    <input type="text" class="form-control" placeholder="Type anything" ng-model="vm.query" ng-change="vm.resetData()" />
-  </div>
-  <button type="button" class="btn btn-primary" ng-click="vm.recursive=true; vm.resetData();" ng-show="!vm.recursive">Enable recursive view</button>
-<button type="button" class="btn btn-primary" ng-click="vm.recursive=false; vm.resetData();" ng-show="vm.recursive">Disable recursive view</button>
-
+  <button type="button" class="btn btn-primary" ng-click="vm.showMembers=true" ng-show="!vm.showMembers">Show Members</button>
+  <button type="button" class="btn btn-primary" ng-click="vm.joinCircle()">Join Circle</button>
+  <button type="button" class="btn btn-warn" ng-click="vm.editCircle()">Edit Circle</button>
+  <button type="button" class="btn btn-danger" ng-click="vm.deleteCircle()">Delete Circle</button>
 </div>
 
 
-<div infinite-scroll="vm.loadNextPage()" infinite-scroll-disabled="vm.infiniteScroll.block" infinite-scroll-distance="1">
-  <ul class="registered-users-list clearfix">
-    <li ng-repeat="user in vm.infiniteScroll.data">
-      <a ui-sref="app.profile({id: user.id})">
-        <img src="assets/img/user-5.jpg" alt="profile pic" />
-        <h4 class="username text-ellipsis">{{ user.first_name }} {{ user.last_name }}</h4>
-      </a>
-    </li>
-  </ul>
-</div>
+<listcirclememberships ng-if="vm.showMembers" url="vm.membersUrl"></listcirclememberships>
 
-<p ng-show="vm.infiniteScroll.data.length === 0 && !vm.infiniteScroll.busy">
-  No members found in the circle that match the current search
-</p>
-<p ng-show="vm.infiniteScroll.busy">
-  Searching...
-</p>
+<ng-include src="vm.baseUrl + 'rewrite/circles/edit_circle_form.html'"></ng-include>

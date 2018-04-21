@@ -101,9 +101,9 @@ defmodule OmscoreWeb.ConnCase do
 
         permissions = Enum.map(permissions, fn(x) -> permission_fixture(x) end)
         Omscore.Core.put_circle_permissions(circle, permissions)
-        Omscore.Members.create_circle_membership(circle, member)
+        {:ok, cm} = Omscore.Members.create_circle_membership(circle, member)
 
-        %{token: token, member: member, circle: circle, permissions: permissions}
+        %{token: token, member: member, circle: circle, permissions: permissions, circle_membership: cm}
       end
 
       # The default endpoint for testing

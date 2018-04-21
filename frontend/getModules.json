@@ -5,6 +5,23 @@
     "name": "Dashboard",
     "code": "dashboard",
     "module_link": "loggedIn/dashboard/dashboard.js",
-    "icon": "fa fa-wrench"
-  }]
+    "icon": "fa fa-desktop"
+  }, {
+    "name": "Members",
+    "code": "members",
+    "module_link": "loggedIn/users/users.js",
+    "icon": "fa fa-user"
+  }, {
+    "name": "Bodies",
+    "code": "bodies",
+    "module_link": "rewrite/bodies/bodies.js",
+    "icon": "fa fa-flag"
+  }, {
+    "name": "Circles",
+    "code": "circles",
+    "module_link": "rewrite/circles/circles.js",
+    "icon": "fa fa-circle"
+  }],
+  "js": ["loggedIn/profile/profile.js"],
+  "modules": ["app.profile"]
 }

@@ -2,8 +2,11 @@
 {
     'use strict';
 
+    const baseUrl = baseUrlRepository['oms-core-elixir'];
+    const apiUrl = `${baseUrl}api`;
+
     angular
-        .module('app.users', [])
+        .module('app.members', [])
         .config(config)
         .directive('userpreview', UserPreviewDirective)
         .directive('omsSimpleUser', SimpleUserDirective)
@@ -14,12 +17,12 @@
     {
         // State
          $stateProvider
-            .state('app.users', {
-                url: '/users',
-                data: {'pageTitle': 'Users'},
+            .state('app.members', {
+                url: '/members',
+                data: {'pageTitle': 'Members'},
                 views   : {
                     'pageContent@app': {
-                        templateUrl: 'modules/loggedIn/users/users.html',
+                        templateUrl: baseUrl + 'loggedIn/users/users.html',
                         controller: 'UserController as vm'
                     }
                 }
@@ -32,7 +35,7 @@
             scope: {
                 user: '='
             },
-            templateUrl: 'modules/loggedIn/users/directive_userpreview.html'
+            templateUrl: baseUrl + 'loggedIn/users/directive_userpreview.html'
         };
     }
 
@@ -44,7 +47,7 @@
                 if(!value)
                     return;
                 $http({
-                    url: '/api/users/' + value,
+                    url: 'services/oms-loginservice/api/users/' + value,
                     method: 'GET'
                 }).then(function(response) {
                     scope.fetched_user=response.data.data;
@@ -56,7 +59,7 @@
         }
 
         return {
-            templateUrl: 'modules/loggedIn/users/directive_simple_user.html',
+            templateUrl: baseUrl + 'loggedIn/users/directive_simple_user.html',
             restrict: 'E',
             scope: {
                 userid: '@'
@@ -73,10 +76,10 @@
 
 
         vm.injectParams = (params) => {
-            params.name = vm.query
+            params.query = vm.query
             return params;
         }
-        infiniteScroll($http, vm, '/api/users', vm.injectParams);
+        infiniteScroll($http, vm, apiUrl + '/members', vm.injectParams);
     }
 
 })();

@@ -571,6 +571,14 @@ defmodule OmscoreWeb.CircleControllerTest do
       conn = delete conn, circle_path(conn, :delete_circle_membership, circle.id, cm.id)
       assert json_response(conn, 403)
     end
+
+    test "allows deleting own circle membership", %{conn: conn} do
+      %{token: token, circle_membership: cm, circle: circle} = create_member_with_permissions([])
+      conn = put_req_header(conn, "x-auth-token", token)
+      
+      conn = delete conn, circle_path(conn, :delete_circle_membership, circle.id, cm.id)
+      assert response(conn, 204)
+    end
   end
 
   describe "delete own circle membership" do

@@ -341,6 +341,7 @@ if Mix.env() == :dev && Repo.all(Member) == [] do
   {:ok, microservice_circle} = Core.create_circle(%{description: "This circle grants permissions to the system itself. Don't tinker with it or you might break the system.", joinable: false, name: "Microservices"})
   {:ok, circle} = Core.create_circle(%{description: "basically doing nothing", joinable: false, name: "Board AEGEE-Dresden"}, body)
   {:ok, circle2} = Core.create_circle(%{description: "This is the toplevel circle for all boards in the system", joinable: false, name: "General board circle"})
+  {:ok, _} = Core.create_circle(%{description: "IT-interested people in the system", joinable: true, name: "IT interest group"})
   {:ok, _} = Members.create_circle_membership(microservice_circle, microservice_member)
   {:ok, _} = Members.create_body_membership(body, member)
   {:ok, _} = Members.create_circle_membership(circle, member)

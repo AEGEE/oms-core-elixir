@@ -77,7 +77,13 @@ defmodule OmscoreWeb.CircleController do
 
     conn = is_circle_admin(conn, circle)
 
-    with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "delete_members", "circle"),
+    permissions = if cm.member_id == conn.assigns.member.id do
+      conn.assigns.permissions ++ [%Core.Permission{scope: "circle_membership", action: "delete_members", object: "circle"}]
+    else
+      conn.assigns.permissions
+    end
+
+    with {:ok, _} <- Core.search_permission_list(permissions, "delete_members", "circle"),
          {:ok, _} <- Members.delete_circle_membership(cm) do
       send_resp(conn, :no_content, "")
     end
