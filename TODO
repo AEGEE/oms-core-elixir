@@ -4,7 +4,7 @@ x Compatibility requests
 x Data seeding
 x Get member by seo_url
 
-o Permission search for local:create:circle returns result
-o Return all circles request
+x Permission search for local:create:circle returns result
+o Return all circles when requesting /circles?all=true
 
 Idea towards cross-service auth: each service can create his own access tokens which are just cryptographically verified, not whether they were actually handed out by the loginservice. So when a service wants something directly from another service without user interaction, it could generate himself a token to do so...

@@ -27,7 +27,7 @@
   <div class="row">
     <div class="col-sm-6">Parent circle <a href="javascript:;" ng-click="vm.editParentCircle = !vm.editParentCircle"><i class="fa fa-pencil"></i></a></div>
     <div class="col-sm-6">
-      <span ng-show="vm.circle.parent_circle"><a ui-sref="app.circles.single({id: vm.circle.parent_circle.seo_url})">{{ vm.circle.parent_circle.name }}</a> <a href="javascript:;" ng-click="vm.setParentCircle({originalObject: {id: null}})"><i class="fa fa-minus"></i></a></span>
+      <span ng-show="vm.circle.parent_circle"><a ui-sref="app.circles.single({id: vm.circle.parent_circle.seo_url})">{{ vm.circle.parent_circle.name }}</a> <a href="javascript:;" ng-click="vm.setParentCircle({originalObject: {id: null}})" ng-show="vm.editParentCircle"><i class="fa fa-minus"></i></a></span>
       <span ng-show="!vm.circle.parent_circle && !vm.editParentCircle">This circle is a toplevel circle</span>
       <span ng-if="vm.editParentCircle">
         <angucomplete-alt 

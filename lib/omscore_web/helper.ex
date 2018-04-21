@@ -28,6 +28,14 @@ defmodule OmscoreWeb.Helper do
   end
   def paginate(query, _), do: query
 
+  # Builds a query where the querystring is split into several parts
+  # Each of these parts is then matched individually to all fields, however all parts need to match to something
+  def search(query, %{"query" => querystring}, attrs, split_on) when length(attrs) != 0 and is_binary(split_on) and byte_size(split_on) != 0 do
+    String.split(querystring, split_on, trim: true)
+    |> Enum.reduce(query, fn(x, acc) -> search(acc, %{"query" => x}, attrs) end)
+  end
+  def search(query, _params, attrs, split_on) when length(attrs) != 0 and is_binary(split_on) and byte_size(split_on) != 0, do: query
+
   # Builds a query where the querystring is compared in ilike-fashion to each of the fields passed in attrs
   # These where statements are joined together by ORs to return any result that somewhat matches the query
   # TODO Somehow join where queries in brackets...
@@ -40,6 +48,6 @@ defmodule OmscoreWeb.Helper do
 
     from q in query, where: ^where_query
   end
-  def search(query, _params, _attrs), do: query
+  def search(query, _params, attrs) when length(attrs) != 0, do: query
 
 end

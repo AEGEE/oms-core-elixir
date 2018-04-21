@@ -66,6 +66,18 @@ defmodule OmscoreWeb.PermissionControllerTest do
       assert json_response(conn, 200)["data"] == []
     end
 
+    test "searches the result if a splittable query is passed", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "view", object: "permission"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      permission = permission_fixture(%{action: "weirdweirdaction", object: "evenweirderobject"})
+      
+      conn = get conn, permission_path(conn, :index), query: "weirdweirdaction:evenweirderobject"
+      assert res = json_response(conn, 200)["data"]
+      assert Enum.count(res) == 1
+      assert Enum.any?(res, fn(x) -> x["id"] == permission.id end)
+    end
+
     test "rejects request to unauthorized user", %{conn: conn} do
       %{token: token} = create_member_with_permissions([])
       conn = put_req_header(conn, "x-auth-token", token)

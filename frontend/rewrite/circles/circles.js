@@ -250,6 +250,7 @@
           showSuccess("Parent circle modified successfully");
           vm.circle = res.data.data;
           vm.loadInheritedPermissions();
+          $scope.$broadcast('angucomplete-alt:clearInput', 'parentCircleTypeahead');
         }).catch((error) => {
           showError(error);
         })

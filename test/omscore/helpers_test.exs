@@ -67,6 +67,28 @@ defmodule Omscore.HelpersTest do
 
       assert res == []
     end
+
+    test "normal search does not search combined in fields" do
+      member_fixture(%{first_name: "Hans", last_name: "Peter"})
+      
+      res = from(u in Members.Member)
+      |> Helper.search(%{"query" => "hans peter"}, [:first_name, :last_name])
+      |> Repo.all
+
+      assert res == []
+    end
+
+    test "split search splits the search on a specified char" do
+      member = member_fixture(%{first_name: "Hans", last_name: "Peter"})
+      member_fixture(%{first_name: "Hans", last_name: "Wurst"})
+      member_fixture(%{first_name: "Hans", last_name: "Blöd"})
+      
+      res = from(u in Members.Member)
+      |> Helper.search(%{"query" => "hans peter"}, [:first_name, :last_name], " ")
+      |> Repo.all
+
+      assert res == [member]
+    end
   end
 
   describe "paginate" do
