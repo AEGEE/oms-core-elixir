@@ -32,7 +32,7 @@ defmodule Omscore.Core do
   def list_permissions(params \\ %{}) do
     from(u in Permission, order_by: [:object, :action, :scope])
     |> OmscoreWeb.Helper.paginate(params)
-    |> OmscoreWeb.Helper.search(params, [:object, :action, :scope, :description], ":")
+    |> OmscoreWeb.Helper.search(params, [:object, :action, :scope], ":")
     |> Repo.all()
   end
 
@@ -165,9 +165,11 @@ defmodule Omscore.Core do
   alias Omscore.Core.Circle
 
   # List all circles
-  # TODO gaginate
-  def list_circles do
-    Repo.all(Circle)
+  def list_circles(params \\ %{}) do
+    from(u in Circle, order_by: :name)
+    |> OmscoreWeb.Helper.paginate(params)
+    |> OmscoreWeb.Helper.search(params, [:name])
+    |> Repo.all
   end
 
   # List all circles which are not bound to a body

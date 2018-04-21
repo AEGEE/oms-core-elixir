@@ -80,9 +80,11 @@
     // Data
     var vm = this;
     vm.query = "";
+    vm.all = false;
 
     vm.injectParams = (params) => {
-      params.query = vm.query
+      params.query = vm.query;
+      params.all = vm.all;
       return params;
     }
     infiniteScroll($http, vm, apiUrl + $scope.url, vm.injectParams);

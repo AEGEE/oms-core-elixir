@@ -5,6 +5,8 @@
       <span class="input-group-addon"><i class="fa fa-search"></i> Search</span>
       <input type="text" class="form-control" placeholder="Type anything" ng-model="vm.query" ng-change="vm.resetData()" />
     </div>
+    <button type="button" ng-show="!vm.all" ng-click="vm.all=true; vm.resetData();" class="btn btn-primary">Show also bound circles</button>
+    <button type="button" ng-show="vm.all" ng-click="vm.all=false; vm.resetData();" class="btn btn-primary">Show only free circles</button>
   </div>
 </div>
 

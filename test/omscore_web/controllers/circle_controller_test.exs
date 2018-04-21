@@ -28,6 +28,22 @@ defmodule OmscoreWeb.CircleControllerTest do
   end
 
   describe "index" do
+    test "lists all circles", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "view", object: "circle"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      circle1 = circle_fixture()
+
+      body = body_fixture()
+      circle2 = bound_circle_fixture(body)
+
+      conn = get conn, circle_path(conn, :index), all: true
+      circles = json_response(conn, 200)["data"]
+      assert is_list(circles)
+      assert Enum.any?(circles, fn(x) -> x["id"] == circle1.id end)
+      assert Enum.any?(circles, fn(x) -> x["id"] == circle2.id end)
+    end
+
     test "lists all free circles", %{conn: conn} do
       %{token: token} = create_member_with_permissions([%{action: "view", object: "circle"}])
       conn = put_req_header(conn, "x-auth-token", token)

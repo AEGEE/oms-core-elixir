@@ -7,6 +7,13 @@ defmodule OmscoreWeb.CircleController do
 
   action_fallback OmscoreWeb.FallbackController
 
+  def index(conn, %{"all" => all} = params) when all == true or all == "true" do
+    with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "view", "circle") do
+      circles = Core.list_circles(params)
+      render(conn, "index.json", circles: circles)
+    end
+  end
+
   def index(conn, params) do
     with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "view", "circle") do
       circles = Core.list_free_circles(params)
