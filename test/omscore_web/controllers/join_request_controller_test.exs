@@ -209,5 +209,18 @@ defmodule OmscoreWeb.JoinRequestControllerTest do
       conn = post conn, body_join_request_path(conn, :process, body.id, jr.id), approved: true
       assert response(conn, 403)
     end
+
+    test "rejects a join request from another body than the one which was preloaded", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "process", object: "join_request"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+      
+      member = member_fixture()
+      body1 = body_fixture()
+      body2 = body_fixture()
+      assert {:ok, jr} = Members.create_join_request(body1, member, %{motivation: "no motivation"})
+
+      conn = post conn, body_join_request_path(conn, :process, body2.id, jr.id), approved: true
+      assert json_response(conn, 404)
+    end
   end
 end

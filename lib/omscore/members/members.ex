@@ -110,6 +110,7 @@ defmodule Omscore.Members do
 
   # Get a single join request by id
   def get_join_request!(id), do: Repo.get!(JoinRequest, id)
+  
   # Get a single join request by body id and members id
   def get_join_request(%Omscore.Core.Body{} = body, %Member{} = member), do: get_join_request(body.id, member.id)
   def get_join_request(body_id, member_id), do: Repo.get_by(JoinRequest, %{body_id: body_id, member_id: member_id})
@@ -261,6 +262,18 @@ defmodule Omscore.Members do
   # Deletes a circle membership
   def delete_circle_membership(%CircleMembership{} = circle_membership) do
     Repo.delete(circle_membership)
+  end
+
+  def delete_all_circle_memberships(circle_memberships) do
+    error = circle_memberships 
+    |> Enum.map(fn(x) -> delete_circle_membership(x) end)
+    |> Enum.find(nil, fn(x) -> Kernel.elem(x, 0) != :ok end)
+
+    if error == nil do
+      {:ok, circle_memberships}
+    else
+      error
+    end
   end
 
   # Creates a CircleMembership changeset

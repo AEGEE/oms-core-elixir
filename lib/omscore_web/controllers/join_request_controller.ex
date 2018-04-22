@@ -29,8 +29,17 @@ defmodule OmscoreWeb.JoinRequestController do
 
   def show(conn, %{"id" => id}) do
     join_request = Members.get_join_request!(id) |> Omscore.Repo.preload([:body, :member])
-    with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "view", "join_request") do
+    with {:ok} <- validate_same_body(join_request, conn.assigns.body),
+         {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "view", "join_request") do
       render(conn, "show.json", join_request: join_request)
+    end
+  end
+
+  defp validate_same_body(%JoinRequest{} = join_request, %Core.Body{} = body) do
+    if join_request.body_id == body.id do
+      {:ok}
+    else
+      {:error, :not_found}
     end
   end
 
@@ -43,7 +52,8 @@ defmodule OmscoreWeb.JoinRequestController do
 
   def process(conn, %{"id" => id, "approved" => true}) do
     join_request = Members.get_join_request!(id)
-    with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "process", "join_request"),
+    with {:ok} <- validate_same_body(join_request, conn.assigns.body),
+         {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "process", "join_request"),
          {:ok} <- validate_unapproved(join_request),
          {:ok, body_membership} <- Members.approve_join_request(join_request) do
       render(conn, OmscoreWeb.BodyMembershipView, "show.json", body_membership: body_membership)
@@ -52,7 +62,8 @@ defmodule OmscoreWeb.JoinRequestController do
 
   def process(conn, %{"id" => id, "approved" => false}) do
     join_request = Members.get_join_request!(id)
-     with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "process", "join_request"),
+     with {:ok} <- validate_same_body(join_request, conn.assigns.body),
+          {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "process", "join_request"),
           {:ok} <- validate_unapproved(join_request),
           {:ok, _} <- Members.reject_join_request(join_request) do
       send_resp(conn, :no_content, "")

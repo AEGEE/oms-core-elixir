@@ -435,6 +435,14 @@ defmodule Omscore.MembersTest do
       assert_raise Ecto.NoResultsError, fn -> Members.get_circle_membership!(circle_membership.id) end
     end
 
+    test "delete_all_circle_memberships/1 deletes all passed circle memberships" do
+      {circle_membership1, _, _} = circle_membership_fixture()
+      {circle_membership2, _, _} = circle_membership_fixture()
+      assert {:ok, _} = Members.delete_all_circle_memberships([circle_membership1, circle_membership2])
+      assert_raise Ecto.NoResultsError, fn -> Members.get_circle_membership!(circle_membership1.id) end
+      assert_raise Ecto.NoResultsError, fn -> Members.get_circle_membership!(circle_membership2.id) end
+    end
+
     test "change_circle_membership/1 returns a circle_membership changeset" do
       {circle_membership, _, _} = circle_membership_fixture()
       assert %Ecto.Changeset{} = Members.change_circle_membership(circle_membership)

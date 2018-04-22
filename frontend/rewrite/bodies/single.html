@@ -1,3 +1,5 @@
+<h1 class="page-header">{{ vm.body.name }}</h1>
+
 <div class="row">
 	<div class="col-sm-3">Logo still not implemented</div>
 	<div class="col-sm-9">
@@ -27,29 +29,72 @@
 				<td>{{ vm.body.name }}</td>
 			</tr>
 			<tr>
-				<td>Type</td>
-				<td>{{ vm.body.type.name }}</td>
-			</tr>
-			<tr>
 				<td>Address</td>
 				<td>
-					{{ vm.body.address.street }}&nbsp;{{ vm.body.address.city }}<br>
-					{{ vm.body.address.zipcode }}&nbsp;{{ vm.body.address.country.name }}
+					{{ vm.body.address }}
 				</td>
 			</tr>
 		</table>
 	</div>
 </div>
 
-<a ui-sref="app.body_management" class="btn btn-white">Back to overview</a>
-<button class="btn btn-white" type="button" ng-click="vm.showBodyModal()" ng-if="vm.permissions.edit_body">Edit Details</button>
-<a ui-sref="app.my_bodies.edit_circles" class="btn btn-white" ng-if="vm.permissions.edit_circles">Edit Circles</a>
-<button class="btn btn-white" type="button" ng-if="vm.permissions.request_join">Request to join</button>
+<button class="btn btn-primary" type="button" ng-click="vm.createCircle()">Create Circle</button>
+<button class="btn btn-primary" type="button" ng-click="vm.joinBody()">Request to join</button>
+<button class="btn btn-warning" type="button" ng-click="vm.showBodyModal()">Edit Details</button>
+<button class="btn btn-danger" type="button" ng-click="vm.deleteBody()">Delete Body</button>
 
 <hr />
 
-<div class="row" ng-repeat="circle in vm.body.circles">
-	<circlepanel circle="circle"></circlepanel>
-</div>
+<div class="row">
+	<div class="col-lg-6">
+		<h3>Bound circles</h3>
 
-<ng-include src="'modules/rewrite/body_management/edit_body_form.html'"></ng-include>
+		<listcircles url="'/bodies/' + vm.body.seo_url + '/circles'" ng-if="vm.body.seo_url"></listcircles>
+	</div>
+	<div class="col-lg-6">
+		<h3 ng-show="vm.showMembersState!='join_requests'">Members</h3>
+		<h3 ng-show="vm.showMembersState=='join_requests'">Join Requests</h3>
+
+		<button type="button" class="btn btn-white" ng-click="vm.showMembersState='members'; vm.loadMembers();">Show Members</button>
+		<button type="button" class="btn btn-white" ng-click="vm.showMembersState='join_requests'; vm.loadJoinRequests();">Show Join Requests</button>
+
+		<span ng-show="vm.showMembersState == 'members'">
+			<ul class="registered-users-list clearfix">
+			  <li ng-repeat="body_membership in vm.body_members">
+			    <a ui-sref="app.profile({id: body_membership.member.seo_url})">
+			      <img src="assets/img/user-5.jpg" alt="profile pic" />
+			      <h4 class="username text-ellipsis">
+			        {{ body_membership.member.first_name }} {{ body_membership.member.last_name }}
+			      </h4>
+			    </a>
+			    <button type="button" ng-click="vm.deleteMembership(body_membership)" class="btn btn-danger"><i class="fa fa-minus"></i></button>
+			  </li>
+			</ul>
+			<span ng-show="!vm.body_members.length">No members in this body</span>
+		</span>
+
+		<span ng-show="vm.showMembersState == 'join_requests'">
+			<ul class="registered-users-list clearfix">
+			  <li ng-repeat="join_request in vm.join_requests">
+			    <a ui-sref="app.profile({id: join_request.member.seo_url})">
+			      <img src="assets/img/user-5.jpg" alt="profile pic" />
+			      <h4 class="username text-ellipsis">
+			        {{ join_request.member.first_name }} {{ join_request.member.last_name }}
+			        <small ng-show="!join_request.approved">{{ join_request.motivation }}</small>
+			        <small ng-show="join_request.approved">Approved</small>
+			      </h4>
+			    </a>
+			    <span ng-show="!join_request.approved">
+				    <button type="button" ng-click="vm.processJoinRequest(join_request, false)" class="btn btn-danger"><i class="fa fa-minus"></i></button>
+				    <button type="button" ng-click="vm.processJoinRequest(join_request, true)" class="btn btn-primary"><i class="fa fa-plus"></i></button>
+				  </span>
+			  </li>
+			</ul>
+			<span ng-show="!vm.join_requests.length">No join requests in this body</span>
+		</span>
+
+	</div>
+</div>
+<ng-include src="vm.baseUrl + 'rewrite/bodies/edit_body_form.html'"></ng-include>
+<ng-include src="vm.baseUrl + 'rewrite/bodies/join_request_form.html'"></ng-include>
+<ng-include src="vm.baseUrl + 'rewrite/circles/edit_circle_form.html'"></ng-include>

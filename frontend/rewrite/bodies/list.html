@@ -4,20 +4,19 @@
 <h1 class="page-header">Bodies overview</h1>
 
 <div class="row">
-	<div class="row">
-		<div class="input-group">
-			<span class="input-group-addon"><i class="fa fa-search"></i>Search</span>
-			<input type="text" class="form-control" placeholder="Type any keywords" ng-model="vm.query" ng-change="vm.resetData()" />
-		</div>
+	<button type="button" class="btn btn-primary" ng-if="vm.permissions.create_body" ng-click="vm.showBodyModal()">Create new body</button>
+	<div class="pull-left">
+		<label class="checkbox-inline" ng-repeat="type in vm.body_types">
+			<input type="checkbox" ng-model="type.filter_active" ng-change="vm.resetData()" />
+			{{ type.name }}
+		</label>
 	</div>
-	<div class="row">
-		<button type="button" class="btn btn-white pull-left" ng-if="vm.permissions.create_body" ng-click="vm.showBodyModal()">Create new body</button>
-		<div class="pull-left">
-			<label class="checkbox-inline" ng-repeat="type in vm.body_types">
-				<input type="checkbox" ng-model="type.filter_active" ng-change="vm.resetData()" />
-				{{ type.name }}
-			</label>
-		</div>
+</div>
+
+<div class="row">
+	<div class="input-group">
+		<span class="input-group-addon"><i class="fa fa-search"></i>Search</span>
+		<input type="text" class="form-control" placeholder="Type any keywords" ng-model="vm.query" ng-change="vm.resetData()" />
 	</div>
 </div>
 
@@ -38,4 +37,4 @@
 
 
 
-<ng-include src="'modules/rewrite/body_management/edit_body_form.html'"></ng-include>
+<ng-include src="vm.baseUrl + 'rewrite/bodies/edit_body_form.html'"></ng-include>

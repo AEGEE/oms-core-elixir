@@ -217,14 +217,14 @@ if Repo.all(Permission) == [] do
 
   Repo.insert!(%Permission{
     scope: "global",
-    action: "delete_members", 
+    action: "delete_member", 
     object: "body",
     description: "Delete the membership status of any member in any body. Use the local permission for this if possible"
   })
 
   Repo.insert!(%Permission{
     scope: "local",
-    action: "delete_members",
+    action: "delete_member",
     object: "body",
     description: "Delete membership status from members in the body that you got this permission from."
   })
@@ -351,7 +351,7 @@ if Mix.env() == :dev && Repo.all(Member) == [] do
   {:ok, permission2} = Repo.all(Permission) |> Core.search_permission_list("view", "join_request", "local")
   {:ok, permission3} = Repo.all(Permission) |> Core.search_permission_list("process", "join_request", "local")
   {:ok, permission4} = Repo.all(Permission) |> Core.search_permission_list("view_members", "body", "local")
-  {:ok, permission5} = Repo.all(Permission) |> Core.search_permission_list("delete_members", "body", "local")
+  {:ok, permission5} = Repo.all(Permission) |> Core.search_permission_list("delete_member", "body", "local")
   {:ok, _} = Core.put_circle_permissions(microservice_circle, [permission0])
   {:ok, _} = Core.put_circle_permissions(circle2, [permission1, permission2, permission3, permission4, permission5])
   {:ok, token, _} = Omscore.Guardian.encode_and_sign(%{id: 1}, %{name: "some name", email: "some@email.com", superadmin: true}, token_type: "access", ttl: {100, :weeks})

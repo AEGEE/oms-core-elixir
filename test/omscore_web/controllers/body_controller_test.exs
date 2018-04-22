@@ -258,6 +258,21 @@ defmodule OmscoreWeb.BodyControllerTest do
 
       assert_raise Ecto.NoResultsError, fn -> Omscore.Members.get_join_request!(join_request.id) end
     end
+
+    test "also removes circle memberships on deletion", %{conn: conn, body: body} do
+      member = member_fixture()
+      assert {:ok, bm} = Omscore.Members.create_body_membership(body, member)
+      circle = bound_circle_fixture(body);
+      assert {:ok, cm} = Omscore.Members.create_circle_membership(circle, member)
+
+      %{token: token} = create_member_with_permissions([%{action: "delete_member", object: "body"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+      
+      conn = delete conn, body_body_path(conn, :delete_member, body.id, bm.id)
+      assert response(conn, 204)
+
+      assert_raise Ecto.NoResultsError, fn -> Omscore.Members.get_circle_membership!(cm.id) end
+    end
   end
 
   describe "leave body" do

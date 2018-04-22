@@ -65,11 +65,13 @@ defmodule OmscoreWeb.BodyController do
   end
 
   def delete_member(conn, %{"membership_id" => membership_id}) do
-    bm = Members.get_body_membership!(membership_id)
+    bm = Members.get_body_membership!(membership_id) |> Omscore.Repo.preload([:member])
     jr = Members.get_join_request(bm.body_id, bm.member_id)
+    cms = Members.list_circle_memberships(bm.member, conn.assigns.body)
     with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "delete_member", "body"),
          {:ok, _} <- Members.delete_body_membership(bm),
-         {:ok} <- delete_join_request(jr) do
+         {:ok} <- delete_join_request(jr),
+         {:ok, _} <- Members.delete_all_circle_memberships(cms) do
       send_resp(conn, :no_content, "")
     end
   end
@@ -83,11 +85,9 @@ defmodule OmscoreWeb.BodyController do
 
   def delete_myself(conn, _params) do
     bm = Members.get_body_membership(conn.assigns.body, conn.assigns.member)
-    jr = Members.get_join_request(conn.assigns.body, conn.assigns.member)
-    with {:ok} <- check_membership_nil(bm),
-         {:ok, _} <- Members.delete_body_membership(bm),
-         {:ok} <- delete_join_request(jr) do
-      send_resp(conn, :no_content, "")       
+    with {:ok} <- check_membership_nil(bm) do
+      conn = Plug.Conn.assign(conn, :permissions, conn.assigns.permissions ++ [%Core.Permission{scope: "body_membership", action: "delete_member", object: "body"}])
+      delete_member(conn, %{"membership_id" => bm.id});
     end
   end
 

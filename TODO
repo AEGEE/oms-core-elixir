@@ -6,5 +6,6 @@ x Get member by seo_url
 
 x Permission search for local:create:circle returns result
 x Return all circles when requesting /circles?all=true
+o Adjust error format to oms standarts
 
 Idea towards cross-service auth: each service can create his own access tokens which are just cryptographically verified, not whether they were actually handed out by the loginservice. So when a service wants something directly from another service without user interaction, it could generate himself a token to do so...

@@ -57,7 +57,8 @@
     return {
       restrict: 'E',
       scope: {
-        url: '=url'
+        url: '=url',
+        all: '=all'
       },
       templateUrl: baseUrl + 'rewrite/circles/directive_circle_list.html',
       controller: 'ListCirclesController as vm'
@@ -80,19 +81,20 @@
     // Data
     var vm = this;
     vm.query = "";
-    vm.all = false;
 
     vm.injectParams = (params) => {
       params.query = vm.query;
-      params.all = vm.all;
+      params.all = $scope.all;
       return params;
     }
     infiniteScroll($http, vm, apiUrl + $scope.url, vm.injectParams);
 
-    
+    $scope.$watch('all', (newValue, oldValue) => {
+      vm.resetData();
+    }, true);
   }
 
-  function CirclesController($http) {
+  function CirclesController($http, $scope) {
     var vm = this;
     vm.baseUrl = baseUrl;
 

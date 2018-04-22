@@ -1,7 +1,12 @@
 
 <h1 class="page-header">Circles listing</h1>
-<button type="button" ng-click="vm.createCircle()" class="btn btn-primary">Create Circle</button>
 
-<listcircles url="'/circles'"></listcircles>
+<div class="row">
+  <button type="button" ng-click="vm.createCircle()" class="btn btn-primary">Create Circle</button>
+  <button type="button" ng-show="!vm.all" ng-click="vm.all=true;" class="btn btn-white">Show also bound circles</button>
+  <button type="button" ng-show="vm.all" ng-click="vm.all=false;" class="btn btn-white">Show only free circles</button>
+</div>
+
+<listcircles url="'/circles'" all="vm.all"></listcircles>
 
 <ng-include src="vm.baseUrl + 'rewrite/circles/edit_circle_form.html'"></ng-include>
