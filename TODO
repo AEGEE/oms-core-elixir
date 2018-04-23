@@ -6,7 +6,7 @@ x Get member by seo_url
 
 x Permission search for local:create:circle returns result
 x Return all circles when requesting /circles?all=true
-o Adjust error format to oms standarts
+x Adjust error format to oms standarts
 x Allow creating bound circles without being member of the body
 o Request to assign members to a circle
 

@@ -51,8 +51,10 @@ defmodule OmscoreWeb.ConnCase do
         member
       end
 
+      def permission_fixture(), do: permission_fixture(%{object: Kernel.inspect(:rand.uniform(100000000))})
+
       @permission_attrs %{action: "some action", description: "some description", object: "some object", scope: "global"}
-      def permission_fixture(attrs \\ %{}) do
+      def permission_fixture(attrs) do
         {:ok, permission} =
           attrs
           |> Enum.into(@permission_attrs)
@@ -99,7 +101,17 @@ defmodule OmscoreWeb.ConnCase do
         circle = circle_fixture()
         token = create_token(%{id: id})
 
-        permissions = Enum.map(permissions, fn(x) -> permission_fixture(x) end)
+        permissions = permissions
+        |> Enum.map(fn(x) -> {Omscore.Core.get_permission(x[:scope] || "global", x[:action] || "some action", x[:object] || "some object"), x} end)
+        |> Enum.map(fn({obj, x}) -> 
+          if obj == nil do 
+            {permission_fixture(x), x}
+          else
+            {obj, x}
+          end
+        end)
+        |> Enum.map(fn({obj, x}) -> obj end)
+
         Omscore.Core.put_circle_permissions(circle, permissions)
         {:ok, cm} = Omscore.Members.create_circle_membership(circle, member)
 

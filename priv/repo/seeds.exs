@@ -129,7 +129,7 @@ if Repo.all(Permission) == [] do
 
   Repo.insert!(%Permission{
     scope: "local",
-    action: "update_members",
+    action: "delete_members",
     object: "circle",
     description: "Delete any member from any circle in the body that you got this permission from, even those that you are not in a circle_admin position in or even have member status. Should never be assigned as circle_admins automatically get this permission"
   })
@@ -348,10 +348,11 @@ if Mix.env() == :dev && Repo.all(Member) == [] do
   {:ok, microservice_circle} = Core.create_circle(%{description: "This circle grants permissions to the system itself. Don't tinker with it or you might break the system.", joinable: false, name: "Microservices"})
   {:ok, circle} = Core.create_circle(%{description: "basically doing nothing", joinable: false, name: "Board AEGEE-Dresden"}, body)
   {:ok, circle2} = Core.create_circle(%{description: "This is the toplevel circle for all boards in the system", joinable: false, name: "General board circle"})
-  {:ok, _} = Core.create_circle(%{description: "IT-interested people in the system", joinable: true, name: "IT interest group"})
+  {:ok, circle3} = Core.create_circle(%{description: "IT-interested people in the system", joinable: true, name: "IT interest group"})
   {:ok, _} = Members.create_circle_membership(microservice_circle, microservice_member)
   {:ok, _} = Members.create_body_membership(body, member)
   {:ok, _} = Members.create_circle_membership(circle, member)
+  {:ok, _} = Members.create_circle_membership(circle3, member2)
   {:ok, _} = Core.put_parent_circle(circle, circle2)
   {:ok, permission0} = Repo.all(Permission) |> Core.search_permission_list("create", "member", "global")
   {:ok, permission1} = Repo.all(Permission) |> Core.search_permission_list("view_full", "member", "local")

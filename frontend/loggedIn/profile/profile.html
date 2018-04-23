@@ -72,6 +72,13 @@
                                 <td class="field">Username</td>
                                 <td>{{ vm.user.name }}</td>
                             </tr>
+                            <tr>
+                                <td class="field">Login suspended</td>
+                                <td>
+                                    <span ng-show="vm.user.active == true">No</span>
+                                    <span ng-show="vm.user.active == false">Yes</span>
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>

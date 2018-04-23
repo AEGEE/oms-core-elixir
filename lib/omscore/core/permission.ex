@@ -21,5 +21,6 @@ defmodule Omscore.Core.Permission do
     |> cast(attrs, [:scope, :action, :object, :description, :always_assigned])
     |> validate_required([:scope, :action, :object])
     |> validate_inclusion(:scope, ["global", "local"])
+    |> unique_constraint(:permission_unique, name: :permissions_scope_action_object_index)
   end
 end

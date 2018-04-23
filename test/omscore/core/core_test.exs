@@ -26,7 +26,7 @@ defmodule Omscore.CoreTest do
 
     test "list_always_assigned_permissions returns all always assigned permissions" do
       permission1 = permission_fixture()
-      permission2 = permission_fixture(%{always_assigned: true})
+      permission2 = permission_fixture(%{object: "different obj", always_assigned: true})
       assert permissions = Core.list_always_assigned_permissions()
       assert !Enum.any?(permissions, fn(x) -> x.id == permission1.id end)
       assert Enum.any?(permissions, fn(x) -> x.id == permission2.id end)
@@ -35,6 +35,11 @@ defmodule Omscore.CoreTest do
     test "get_permission!/1 returns the permission with given id" do
       permission = permission_fixture()
       assert Core.get_permission!(permission.id) == permission
+    end
+
+    test "get_permission/3 returns the permission by scope, action, object" do
+      permission = permission_fixture()
+      assert Core.get_permission(permission.scope, permission.action, permission.object) == permission
     end
 
     test "create_permission/1 with valid data creates a permission" do
@@ -51,6 +56,11 @@ defmodule Omscore.CoreTest do
 
     test "create_permission/1 with invalid scope returns error changeset" do
       assert {:error, %Ecto.Changeset{}} = Core.create_permission(@valid_attrs |> Map.put(:scope, "some invalid scope"))
+    end
+
+    test "create_permission/1 with duplicate object fails" do
+      assert {:ok, %Permission{}} = Core.create_permission(@valid_attrs)
+      assert {:error, _} = Core.create_permission(@valid_attrs)
     end
 
     test "update_permission/2 with valid data updates the permission" do
@@ -92,7 +102,8 @@ defmodule Omscore.CoreTest do
     end
 
     test "reduce_permissions/1 removes duplicate permissions" do
-      permission_list = [permission_fixture()] ++ [permission_fixture()]
+      permission = permission_fixture()
+      permission_list = [permission] ++ [permission]
       permission_list = Core.reduce_permission_list(permission_list)
       assert Enum.count(permission_list) == 1
     end

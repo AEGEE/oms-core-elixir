@@ -11,6 +11,7 @@ defmodule Omscore.Repo.Migrations.CreatePermissions do
 
       timestamps()
     end
+    create unique_index(:permissions, [:scope, :action, :object])
 
   end
 end

@@ -44,6 +44,8 @@ defmodule Omscore.Core do
 
   # Gets a single permission
   def get_permission!(id), do: Repo.get!(Permission, id)
+  # Gets a single permission by scope, object and action
+  def get_permission(scope, action, object), do: Repo.get_by(Permission, %{scope: scope, action: action, object: object})
 
   # Creates a permission
   def create_permission(attrs \\ %{}) do
