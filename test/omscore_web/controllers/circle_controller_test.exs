@@ -2,6 +2,7 @@ defmodule OmscoreWeb.CircleControllerTest do
   use OmscoreWeb.ConnCase
 
   alias Omscore.Core
+  alias Omscore.Members
   alias Omscore.Core.Circle
 
   @create_attrs %{description: "some description", joinable: true, name: "some name"}
@@ -181,7 +182,7 @@ defmodule OmscoreWeb.CircleControllerTest do
         "body_id" => nil})
     end
 
-    test "user is assigned cicle_admin role when creating a circle", %{conn: conn} do
+    test "user is not anymore assigned cicle_admin role when creating a circle", %{conn: conn} do
       %{token: token, member: member} = create_member_with_permissions([%{action: "create", object: "free_circle"}, %{action: "view", object: "circle"}])
       conn = put_req_header(conn, "x-auth-token", token)
 
@@ -189,8 +190,7 @@ defmodule OmscoreWeb.CircleControllerTest do
       assert %{"id" => id} = json_response(conn, 201)["data"]
 
       membership = Omscore.Members.get_circle_membership(id, member.id)
-      assert membership != nil
-      assert membership.circle_admin == true
+      assert membership == nil
     end
 
     test "renders errors when data is invalid", %{conn: conn} do
@@ -214,14 +214,12 @@ defmodule OmscoreWeb.CircleControllerTest do
     setup [:create_circle]
 
     test "renders circle when data is valid and user is circle_admin", %{conn: conn} do
-      %{token: token} = create_member_with_permissions([%{action: "create", object: "free_circle"}, %{action: "view", object: "circle"}])
+      %{token: token, member: member} = create_member_with_permissions([%{action: "create", object: "free_circle"}, %{action: "view", object: "circle"}])
       conn = put_req_header(conn, "x-auth-token", token)
 
-      conn = post conn, circle_path(conn, :create), circle: @create_attrs
-      assert %{"id" => id} = json_response(conn, 201)["data"]
-
-      conn = recycle(conn)
-      |> put_req_header("x-auth-token", token)
+      circle = circle_fixture();
+      assert {:ok, _} = Members.create_circle_membership(circle, member, %{circle_admin: true})
+      id = circle.id
 
       conn = put conn, circle_path(conn, :update, id), circle: @update_attrs
       assert %{"id" => ^id} = json_response(conn, 200)["data"]
@@ -239,11 +237,12 @@ defmodule OmscoreWeb.CircleControllerTest do
     end
 
     test "renders errors when data is invalid", %{conn: conn} do
-      %{token: token} = create_member_with_permissions([%{action: "create", object: "free_circle"}, %{action: "view", object: "circle"}])
+      %{token: token, member: member} = create_member_with_permissions([%{action: "create", object: "free_circle"}, %{action: "view", object: "circle"}])
       conn = put_req_header(conn, "x-auth-token", token)
 
-      conn = post conn, circle_path(conn, :create), circle: @create_attrs
-      assert %{"id" => id} = json_response(conn, 201)["data"]
+      circle = circle_fixture();
+      assert {:ok, _} = Members.create_circle_membership(circle, member, %{circle_admin: true})
+      id = circle.id
 
       conn = recycle(conn)
       |> put_req_header("x-auth-token", token)
@@ -389,16 +388,16 @@ defmodule OmscoreWeb.CircleControllerTest do
     end
 
     test "deletes chosen circle when being circle_admin", %{conn: conn} do
-      %{token: token} = create_member_with_permissions([%{action: "create", object: "free_circle"}, %{action: "view", object: "circle"}])
+      %{token: token, member: member} = create_member_with_permissions([%{action: "create", object: "free_circle"}, %{action: "view", object: "circle"}])
       conn = put_req_header(conn, "x-auth-token", token)
 
-      conn = post conn, circle_path(conn, :create), circle: @create_attrs
-      assert %{"id" => id} = json_response(conn, 201)["data"]
+      circle = circle_fixture();
+      assert {:ok, _} = Members.create_circle_membership(circle, member, %{circle_admin: true})
 
       conn = recycle(conn)
       |> put_req_header("x-auth-token", token)
 
-      conn = delete conn, circle_path(conn, :delete, id)
+      conn = delete conn, circle_path(conn, :delete, circle.id)
       assert response(conn, 204)
     end
   end
@@ -457,15 +456,15 @@ defmodule OmscoreWeb.CircleControllerTest do
 
   describe "edit circle_membership" do
     test "lets circle_admin edit circle memberships", %{conn: conn} do
-      %{token: token} = create_member_with_permissions([%{action: "create", object: "free_circle"}])
+      %{token: token, member: member1} = create_member_with_permissions([%{action: "create", object: "free_circle"}])
       %{token: token2, member: member} = create_member_with_permissions([%{action: "join", object: "circle"}])
-      conn = put_req_header(conn, "x-auth-token", token)
 
-      # First member creates the circle and thus becomes circle admin
-      conn = post conn, circle_path(conn, :create), circle: @create_attrs
-      assert %{"id" => id} = json_response(conn, 201)["data"]
+      # First member creates the circle and becomes circle admin
+      circle = circle_fixture();
+      assert {:ok, _} = Members.create_circle_membership(circle, member1, %{circle_admin: true})
+      id = circle.id
 
-      conn = recycle(conn)
+      conn = conn
       |> put_req_header("x-auth-token", token2)
 
       # Second member joins
@@ -527,18 +526,17 @@ defmodule OmscoreWeb.CircleControllerTest do
 
   describe "delete circle_membership" do
     test "lets circle_admin delete circle memberships", %{conn: conn} do
-      %{token: token} = create_member_with_permissions([%{action: "create", object: "free_circle"}])
+      %{token: token, member: member1} = create_member_with_permissions([%{action: "create", object: "free_circle"}])
       %{token: token2, member: member} = create_member_with_permissions([%{action: "join", object: "circle"}])
-      conn = put_req_header(conn, "x-auth-token", token)
 
       # First member creates the circle and thus becomes circle admin
-      conn = post conn, circle_path(conn, :create), circle: @create_attrs
-      assert %{"id" => id} = json_response(conn, 201)["data"]
+      circle = circle_fixture();
+      assert {:ok, _} = Members.create_circle_membership(circle, member1, %{circle_admin: true})
+      id = circle.id
 
-      conn = recycle(conn)
-      |> put_req_header("x-auth-token", token2)
 
       # Second member joins
+      conn = put_req_header(conn, "x-auth-token", token2)
       conn = post conn, circle_path(conn, :join_circle, id)
       assert json_response(conn, 200)
 
@@ -672,7 +670,7 @@ defmodule OmscoreWeb.CircleControllerTest do
   end
 
   describe "create bound circle" do
-    test "create allowed to member of the body who has the permission to create bound circles", %{conn: conn} do
+    test "create creates a new bound circle", %{conn: conn} do
       body = body_fixture()
       %{token: token, member: member} = create_member_with_permissions([%{action: "create", object: "bound_circle"}, %{action: "view", object: "circle"}])
       conn = put_req_header(conn, "x-auth-token", token)
@@ -693,13 +691,22 @@ defmodule OmscoreWeb.CircleControllerTest do
         "body_id" => body.id})
     end
 
-    test "rejected to members who are not member of the body", %{conn: conn} do
+    test "rejected to members who are not member of the body when only having local permission", %{conn: conn} do
       body = body_fixture()
-      %{token: token} = create_member_with_permissions([%{action: "create", object: "bound_circle"}])
+      %{token: token} = create_member_with_permissions([%{scope: "local", action: "create", object: "bound_circle"}])
       conn = put_req_header(conn, "x-auth-token", token)
 
       conn = post conn, body_circle_path(conn, :create_bound, body.id), circle: @create_attrs
       assert json_response(conn, 403)
+    end
+
+    test "allowed to members who are not member of the body when having permission", %{conn: conn} do
+      body = body_fixture()
+      %{token: token} = create_member_with_permissions([%{scope: "global", action: "create", object: "bound_circle"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      conn = post conn, body_circle_path(conn, :create_bound, body.id), circle: @create_attrs
+      assert json_response(conn, 201)
     end
 
     test "rejected to members without creation permission", %{conn: conn} do

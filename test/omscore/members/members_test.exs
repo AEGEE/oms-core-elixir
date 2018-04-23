@@ -66,7 +66,9 @@ defmodule Omscore.MembersTest do
 
     test "update_member/2 with valid data updates the member" do
       member = member_fixture()
-      assert {:ok, member} = Members.update_member(member, @update_attrs)
+      body = body_fixture()
+      assert {:ok, _} = Members.create_body_membership(body, member)
+      assert {:ok, member} = Members.update_member(member, @update_attrs |> Map.put(:primary_body_id, body.id))
       assert %Member{} = member
       assert member.about_me == "some updated about_me"
       assert member.address == "some updated address"
@@ -76,6 +78,15 @@ defmodule Omscore.MembersTest do
       assert member.last_name == "some updated last_name"
       assert member.phone == "+1212345679"
       assert member.seo_url == "some_updated_seo_url"
+      assert member.primary_body_id == body.id
+    end
+
+    test "update_member/2 forbids choosing a body the member is not member of" do
+      member = member_fixture()
+      body = body_fixture()
+      assert {:error, _} = Members.update_member(member, %{primary_body_id: body.id})
+      assert {:ok, _} = Members.create_body_membership(body, member)
+      assert {:ok, _} = Members.update_member(member, %{primary_body_id: body.id})
     end
 
     test "update_member/2 with invalid data returns error changeset" do

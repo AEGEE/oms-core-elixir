@@ -27,15 +27,17 @@ defmodule Omscore.Members.Member do
   @doc false
   def changeset(member, attrs) do
     member
-    |> cast(attrs, [:first_name, :last_name, :date_of_birth, :gender, :phone, :seo_url, :address, :about_me, :user_id])
+    |> cast(attrs, [:first_name, :last_name, :date_of_birth, :primary_body_id, :gender, :phone, :seo_url, :address, :about_me, :user_id])
     |> generate_seo_url
     |> validate_required([:first_name, :last_name, :date_of_birth, :address, :seo_url, :user_id])
     |> validate_format(:seo_url, ~r/^[\w-]*[a-zA-Z_][\w-]*$/, message: "has invalid format. It needs at least 3 characters, only numbers and letters with at least one letter in it.")
     |> validate_exclusion(:seo_url, ["me"])
     |> validate_length(:seo_url, min: 3)
     |> validate_format(:phone, ~r/^(\+|00){0,2}(9[976]\d|8[987530]\d|6[987]\d|5[90]\d|42\d|3[875]\d|2[98654321]\d|9[8543210]|8[6421]|6[6543210]|5[87654321]|4[987654310]|3[9643210]|2[70]|7|1)\d{1,14}$/, message: "is not a valid phone number. Please enter a valid international phone number") # Thanks stackoverflow
+    |> validate_primary_body()
     |> unique_constraint(:seo_url)
     |> unique_constraint(:user_id)
+    |> foreign_key_constraint(:primary_body_id)
   end
 
   defp generate_seo_url(%Ecto.Changeset{valid?: true} = changeset) do
@@ -46,4 +48,17 @@ defmodule Omscore.Members.Member do
     end
   end
   defp generate_seo_url(changeset), do: changeset
+
+  defp validate_primary_body(%Ecto.Changeset{valid?: true} = changeset) do
+    body_id = get_field(changeset, :primary_body_id)
+    if body_id != nil do
+      case Omscore.Members.get_body_membership(body_id, get_field(changeset, :id)) do
+        nil -> add_error(changeset, :primary_body_id, "You can only assign a primary body that you are member in")
+        _ -> changeset
+      end
+    else
+      changeset
+    end
+  end
+  defp validate_primary_body(changeset), do: changeset
 end

@@ -23,8 +23,7 @@ defmodule OmscoreWeb.CircleController do
 
   def create(conn, %{"circle" => circle_params}) do
     with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "create", "free_circle"),
-         {:ok, %Circle{} = circle} <- Core.create_circle(circle_params),
-         {:ok, _} <- Members.create_circle_membership(circle, conn.assigns.member, %{circle_admin: true}) do
+         {:ok, %Circle{} = circle} <- Core.create_circle(circle_params) do
       conn
       |> put_status(:created)
       |> put_resp_header("location", circle_path(conn, :show, circle))
@@ -200,18 +199,9 @@ defmodule OmscoreWeb.CircleController do
     end
   end
 
-  defp is_body_member(body, member) do
-    case Members.get_body_membership(body, member) do
-      nil -> {:forbidden, "You must be member of the body to execute this request"}
-      _ -> {:ok}
-    end
-  end
-
   def create_bound(conn, %{"circle" => circle_params}) do
-      with {:ok} <- is_body_member(conn.assigns.body, conn.assigns.member),
-           {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "create", "bound_circle"),
-           {:ok, %Circle{} = circle} <- Core.create_circle(circle_params, conn.assigns.body),
-           {:ok, _} <- Members.create_circle_membership(circle, conn.assigns.member, %{circle_admin: true}) do
+      with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "create", "bound_circle"),
+           {:ok, %Circle{} = circle} <- Core.create_circle(circle_params, conn.assigns.body) do
         conn
         |> put_status(:created)
         |> put_resp_header("location", circle_path(conn, :show, circle))

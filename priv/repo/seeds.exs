@@ -151,6 +151,13 @@ if Repo.all(Permission) == [] do
   })
 
   Repo.insert!(%Permission{
+    scope: "global",
+    action: "create",
+    object: "bound_circle",
+    description: "Creating bound circles in any body of the system, even those you are not member in"
+  })
+
+  Repo.insert!(%Permission{
     scope: "local",
     action: "create",
     object: "bound_circle",

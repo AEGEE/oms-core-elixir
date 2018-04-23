@@ -11,6 +11,9 @@
             <div class="m-b-10" ng-show="vm.permissions.edit_profile">
                 <button type="button" ng-click="vm.showEditProfileModal()" class="btn btn-warning btn-block btn-sm">Edit Profile</a>
             </div>
+            <div class="m-b-10" ng-show="vm.permissions.delete_profile">
+                <button type="button" ng-click="vm.deleteProfile()" class="btn btn-danger btn-block btn-sm">Delete Profile</a>
+            </div>
         </div>
 
         <div class="profile-right">
@@ -21,56 +24,53 @@
                             <tr>
                                 <th></th>
                                 <th>
-                                    <h4>{{ vm.user.first_name }} <small>{{ vm.user.last_name }}</small></h4>
+                                    <h4>{{ vm.member.first_name }} <small>{{ vm.member.last_name }}</small></h4>
                                 </th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr class="highlight">
-                                <td class="field">Username</td>
-                                <td>{{ vm.user.seo_url }}</a></td>
+                            <tr class="divider highlight">
+                                <td colspan="2"></td>
                             </tr>
                             <tr>
-                                <td class="field">Email</td>
-                                <td><a href="mailto:{{ vm.user.contact_email }}">{{ vm.user.contact_email }}</a></td>
+                                <td class="field">Profile link</td>
+                                <td>{{ vm.member.seo_url }}</a></td>
+                            </tr>
+                            <tr>
+                                <td class="field">Primary Body</td>
+                                <td ng-if="vm.member.primary_body"><a ui-sref="app.bodies({id: vm.member.primary_body.seo_url})">{{ vm.member.primary_body.name }}</a></td>
+                                <td ng-if="!vm.member.primary_body">No primary body assigned</td>
                             </tr>
                             <tr>
                                 <td class="field">Phone number</td>
-                                <td>{{ vm.user.phone }}</td>
+                                <td>{{ vm.member.phone }}</td>
                             </tr>
                             <tr>
                                 <td class="field">Date of birth</td>
-                                <td>{{ vm.user.date_of_birth }}</td>
+                                <td>{{ vm.member.date_of_birth.toLocaleDateString() }}</td>
                             </tr>
                             <tr>
                                 <td class="field">Gender</td>
-                                <td>{{ vm.user.gender }}</td>
-                            </tr>
-                            <tr class="divider">
-                                <td colspan="2"></td>
+                                <td>{{ vm.member.gender }}</td>
                             </tr>
                             <tr>
-                                <td class="field">Country</td>
-                                <td>{{ vm.user.address.country.name }}</td>
+                                <td class="field">Address</td>
+                                <td>{{ vm.member.address }}
                             </tr>
                             <tr>
-                                <td class="field">Street</td>
-                                <td>{{ vm.user.address.street }}</td>
-                            </tr>
-                            <tr>
-                                <td class="field">City</td>
-                                <td>{{ vm.user.address.city }}</td>
-                            </tr>
-                            <tr>
-                                <td class="field">Zipcode</td>
-                                <td>{{ vm.user.address.zipcode }}</td>
-                            </tr>
-                            <tr class="divider">
-                                <td colspan="2"></td>
-                            </tr>
-                            <tr class="highlight">
                                 <td class="field">About Me</td>
-                                <td>{{ vm.user.description }}</td>
+                                <td>{{ vm.member.about_me }}</td>
+                            </tr>
+                            <tr class="divider highlight">
+                                <td colspan="2"></td>
+                            </tr>
+                            <tr>
+                                <td class="field">Email</td>
+                                <td>{{ vm.user.email }}</td>
+                            </tr>
+                            <tr>
+                                <td class="field">Username</td>
+                                <td>{{ vm.user.name }}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -82,11 +82,18 @@
     <div class="profile-section">
         <div class="row">
             <!-- Bodies column -->
-            <div class="col-lg-6">
+            <div class="col-lg-6" ng-show=vm.member.body_memberships>
                 <h4 class="title">Bodies</h4>
-                <div class="row" ng-repeat="body in vm.user.bodies">
-                    <bodytile body="body"></bodytile>
+                <div class="row" ng-repeat="body_membership in vm.member.body_memberships">
+                    <bodytile body="body_membership.body"></bodytile>
                 </div>
+            </div>
+
+            <div class="col-lg-6" ng-show="vm.member.circle_memberships">
+                <h4 class="title">Circles</h4>
+                <span ng-repeat="circle_membership in vm.member.circle_memberships">
+                    <simplecircle circle="circle_membership.circle"></simplecircle>
+                </span>
             </div>
         </div>
     </div>

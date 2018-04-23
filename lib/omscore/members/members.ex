@@ -110,7 +110,7 @@ defmodule Omscore.Members do
 
   # Get a single join request by id
   def get_join_request!(id), do: Repo.get!(JoinRequest, id)
-  
+
   # Get a single join request by body id and members id
   def get_join_request(%Omscore.Core.Body{} = body, %Member{} = member), do: get_join_request(body.id, member.id)
   def get_join_request(body_id, member_id), do: Repo.get_by(JoinRequest, %{body_id: body_id, member_id: member_id})
@@ -148,10 +148,13 @@ defmodule Omscore.Members do
   
   alias Omscore.Members.BodyMembership
 
-  #def get_body_membership!(id), do: Repo.get(BodyMembership, id)
+
+  # Returns a body membership by body and member
+  # Returns nil if not found
   def get_body_membership(%Omscore.Core.Body{} = body, %Member{} = member), do: get_body_membership(body.id, member.id)
   def get_body_membership(body_id, member_id), do: Repo.get_by(BodyMembership, %{body_id: body_id, member_id: member_id})
 
+  # Returns a body membership by id. Raises on not found
   def get_body_membership!(body_membership_id), do: Repo.get!(BodyMembership, body_membership_id)
 
   # Creates a membership with a body
