@@ -4,6 +4,7 @@
 
     const baseUrl = baseUrlRepository['oms-core-elixir'];
     const apiUrl = `${baseUrl}api`;
+    const loginserviceUrl = baseUrlRepository['oms-loginservice'] + "api";
 
     angular
         .module('app.profile', [])
@@ -28,7 +29,7 @@
     }
 
 
-    function ProfileController($http, $stateParams, $state) {
+    function ProfileController(loginModal, $http, $stateParams, $state, $rootScope) {
         // Data
         var vm = this;
         vm.member = {};
@@ -36,6 +37,7 @@
             edit_profile: true,
             delete_profile: true
         };
+        vm.ownProfile = false;
         vm.baseUrl = baseUrl;
 
         vm.changePicture = () => {
@@ -51,10 +53,22 @@
             .then(function successCallback(response) {
                 vm.member = response.data.data;
                 vm.member.date_of_birth = new Date(vm.member.date_of_birth);
+                vm.ownProfile = vm.member.id == $rootScope.currentUser.id;
+                vm.getUser(); // Call this here so on missing permissions we get only one error
             }).catch(function(err) {showError(err);});
         }
         vm.getMember();
 
+        vm.getUser = () => {
+            $http({
+                method: 'GET',
+                url: loginserviceUrl + '/user/' + $stateParams.id,
+            })
+            .then(function successCallback(response) {
+                vm.user = response.data.data;
+            }).catch(function(err) {showError(err);});
+        }
+        
 
         vm.showEditProfileModal = function() {
             $('#editProfileModal').modal('show');
@@ -113,6 +127,39 @@
                 vm.member.primary_body_id = null;
                 vm.member.primary_body = undefined;
             }
+        }
+
+
+        vm.showEditUserDataModal = function() {
+            $('#editUserDataModal').modal('show');
+        }
+
+        vm.saveUserData = function() {
+            let data = {user: vm.user};
+            if(vm.user.password) {
+                if(vm.user.password_copy != vm.user.password){
+                    vm.errors = {password: "Passwords not matching"}
+                    return;
+                }
+                data.old_password = vm.user.old_password;
+            }
+            $http({
+                method: 'PUT',
+                url: loginserviceUrl + '/user',
+                data: data
+            })
+            .then(function successCallback(response) {
+                // Successfully saved that body
+                $('#editUserDataModal').modal('hide');
+                showSuccess("Successfully edited user information")
+                authenticate(loginModal, $rootScope, $http, {skipCheckToken: true});
+                vm.getUser();
+            }).catch(function(err) {
+                if(err.status == 422)
+                    vm.errors = err.data.errors;
+                else
+                    showError(err);
+            });
         }
 
         vm.deleteProfile = () => {

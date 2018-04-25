@@ -1,0 +1,46 @@
+
+<!-- #modal-dialog -->
+<div class="modal fade" id="editUserDataModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title">Edit Profile</h4>
+            </div>
+            <form name="userDataForm" ng-submit="vm.saveUserData()" class="margin-bottom-0" novalidate>
+                <div class="modal-body">
+                    <div class="form-group m-b-20">
+                        <label for="name">Username</label>
+                        <input type="text" id="name" class="form-control" ng-model="vm.user.name" placeholder="You can login with your username too" required/>
+                        <p class="label label-danger" ng-show="vm.errors.name">{{ vm.errors.name }}</p>
+                    </div>
+                    <div class="form-group m-b-20">
+                        <label for="last_name">Email</label>
+                        <input type="text" id="email" class="form-control" ng-model="vm.user.email" placeholder="Email" required/>
+                        <p class="label label-danger" ng-show="vm.errors.email">{{ vm.errors.email }}</p>
+                    </div>
+                    <hr />
+                    <label>Change password</label>
+                    <div class="form-group m-b-10">
+                        <input type="password" id="old_password" class="form-control" ng-model="vm.user.old_password" placeholder="Type old password" required/>
+                        <p class="label label-danger" ng-show="vm.errors.old_password">{{ vm.errors.old_password }}</p>
+                    </div>
+                    <div class="form-group m-b-10">
+                        <input type="password" id="password" class="form-control" ng-model="vm.user.password" placeholder="Type new password" required/>
+                        <p class="label label-danger" ng-show="vm.errors.password">{{ vm.errors.password }}</p>
+                    </div>
+                    <div class="form-group m-b-20">
+                        <input type="password" id="password_copy" class="form-control" ng-model="vm.user.password_copy" placeholder="Repeat new password" required/>
+                        <p class="label label-danger" ng-show="vm.errors.password_copy">{{ vm.errors.password_copy }}</p>
+                    </div>
+                   
+                    <p class="m-t-30 alert alert-info">Please make up your mind for a second why a <a href="https://howsecureismypassword.net/" target="_blank">strong password</a> is a good idea. We recommend a <a href="https://padlock.io/" target="_blank">password manager.</a></p>
+                </div>
+                <div class="modal-footer">
+                    <!--<button class="btn btn-sm btn-danger" data-dismiss="modal"><i class="fa fa-ban"></i> Close</button>-->
+                    <button class="btn btn-sm btn-success" type="submit"><i class="fa fa-save"></i> Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

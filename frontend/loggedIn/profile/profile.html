@@ -6,13 +6,16 @@
                 <i class="fa fa-user hide"></i>
             </div>
             <div class="m-b-10" ng-show="vm.permissions.edit_profile">
-                <button type="button" ng-click="vm.changePicture()" class="btn btn-warning btn-block btn-sm">Change Picture</a>
+                <button type="button" ng-click="vm.changePicture()" class="btn btn-warning btn-block btn-sm">Change Picture</button>
             </div>
             <div class="m-b-10" ng-show="vm.permissions.edit_profile">
-                <button type="button" ng-click="vm.showEditProfileModal()" class="btn btn-warning btn-block btn-sm">Edit Profile</a>
+                <button type="button" ng-click="vm.showEditProfileModal()" class="btn btn-warning btn-block btn-sm">Edit Profile</button>
+            </div>
+            <div class="m-b-10" ng-show="vm.ownProfile">
+                <button type="button" ng-click="vm.showEditUserDataModal()" class="btn btn-warning btn-block btn-sm">Edit Userdata</button>
             </div>
             <div class="m-b-10" ng-show="vm.permissions.delete_profile">
-                <button type="button" ng-click="vm.deleteProfile()" class="btn btn-danger btn-block btn-sm">Delete Profile</a>
+                <button type="button" ng-click="vm.deleteProfile()" class="btn btn-danger btn-block btn-sm">Delete Profile</button>
             </div>
         </div>
 
@@ -39,7 +42,7 @@
                             <tr>
                                 <td class="field">Primary Body</td>
                                 <td ng-if="vm.member.primary_body"><a ui-sref="app.bodies({id: vm.member.primary_body.seo_url})">{{ vm.member.primary_body.name }}</a></td>
-                                <td ng-if="!vm.member.primary_body">No primary body assigned</td>
+                                <td ng-if="vm.member.primary_body == null">No primary body assigned</td>
                             </tr>
                             <tr>
                                 <td class="field">Phone number</td>
@@ -63,6 +66,13 @@
                             </tr>
                             <tr class="divider highlight">
                                 <td colspan="2"></td>
+                            </tr>
+                            <tr>
+                                <td class="field">Superadmin</td>
+                                <td>
+                                    <span ng-show="vm.user.superadmin == true">Yes</span>
+                                    <span ng-show="vm.user.superadmin == false">No</span>
+                                </td>
                             </tr>
                             <tr>
                                 <td class="field">Email</td>
@@ -108,3 +118,4 @@
 
 <!-- ########################### Body types edit modal ###################### -->
 <ng-include src="vm.baseUrl + 'loggedIn/profile/edit_profile_form.html'"></ng-include>
+<ng-include src="vm.baseUrl + 'loggedIn/profile/edit_userdata_form.html'"></ng-include>
