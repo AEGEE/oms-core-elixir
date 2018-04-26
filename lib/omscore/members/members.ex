@@ -157,6 +157,10 @@ defmodule Omscore.Members do
   # Returns a body membership by id. Raises on not found
   def get_body_membership!(body_membership_id), do: Repo.get!(BodyMembership, body_membership_id)
 
+  # Returns a body membership making sure it's from the right body
+  # Raises on not found
+  def get_body_membership_safe!(body_id, body_membership_id), do: Repo.get_by!(BodyMembership, %{id: body_membership_id, body_id: body_id})
+
   # Creates a membership with a body
   # Should not be used directly, only by tests and approve_join_request
   def create_body_membership(%Omscore.Core.Body{} = body, %Member{} = member) do
@@ -165,6 +169,12 @@ defmodule Omscore.Members do
     |> Ecto.Changeset.put_assoc(:body, body)
     |> Ecto.Changeset.put_assoc(:member, member)
     |> Repo.insert()
+  end
+
+  def update_body_membership(%BodyMembership{} = bm, attrs \\ %{}) do
+    bm
+    |> BodyMembership.changeset(attrs)
+    |> Repo.update()
   end
 
   def delete_body_membership(%BodyMembership{} = bm) do

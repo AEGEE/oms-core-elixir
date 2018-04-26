@@ -1,0 +1,28 @@
+
+<!-- #modal-dialog -->
+<div class="modal fade" id="editBodyMembershipModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title">Body membership</h4>
+            </div>
+            <div class="alert alert-danger" ng-show="vm.errors.message">
+                Errors, the backend responded: {{ vm.errors.message }}
+            </div>
+            <form name="bodyMembershipForm" ng-submit="vm.saveBodyMembership()" class="margin-bottom-0" novalidate>
+                <div class="modal-body">
+                    <div class="form-group m-b-20">
+                        <label for="comment">Comment</label>
+                        <input type="text" id="comment" class="form-control" ng-model="vm.edited_body_membership.comment" placeholder="Comment about the member" required/>
+                        <p class="label label-danger" ng-show="vm.errors.comment">{{ vm.errors.comment }}</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <!--<button class="btn btn-sm btn-danger" data-dismiss="modal"><i class="fa fa-ban"></i> Close</button>-->
+                    <button class="btn btn-sm btn-success" type="submit"><i class="fa fa-save"></i> Save body membership</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

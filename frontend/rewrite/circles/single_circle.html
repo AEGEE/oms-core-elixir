@@ -98,7 +98,9 @@
 
 <div class="m-b-10">
   <button type="button" class="btn btn-white" ng-click="vm.showMembers=true" ng-show="!vm.showMembers">Show Members</button>
+  <button type="button" class="btn btn-white" ng-click="vm.showMembers=false" ng-show="vm.showMembers">Hide Members</button>
   <button type="button" class="btn btn-primary" ng-click="vm.joinCircle()">Join Circle</button>
+  <button type="button" class="btn btn-primary" ng-click="vm.showAddMemberModal()">Add Member</button>
   <button type="button" class="btn btn-warning" ng-click="vm.editCircle()">Edit Circle</button>
   <button type="button" class="btn btn-danger" ng-click="vm.deleteCircle()">Delete Circle</button>
 </div>
@@ -107,3 +109,4 @@
 <listcirclememberships ng-if="vm.showMembers" url="vm.membersUrl"></listcirclememberships>
 
 <ng-include src="vm.baseUrl + 'rewrite/circles/edit_circle_form.html'"></ng-include>
+<ng-include src="vm.baseUrl + 'rewrite/circles/add_member_form.html'"></ng-include>

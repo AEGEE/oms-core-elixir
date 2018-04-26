@@ -13,6 +13,7 @@ defmodule OmscoreWeb.BodyMembershipView do
 
   def render("body_membership.json", %{body_membership: body_membership}) do
     %{id: body_membership.id,
+      comment: body_membership.comment,
       member_id: body_membership.member_id,
       body_id: body_membership.body_id,
       member: Helper.render_assoc_one(body_membership.member, OmscoreWeb.MemberView, "member.json"),

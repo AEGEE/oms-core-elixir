@@ -56,6 +56,15 @@ defmodule OmscoreWeb.BodyController do
     end
   end
 
+  def update_member(conn, %{"membership_id" => membership_id, "body_membership" => bm_attrs}) do
+    bm = Members.get_body_membership_safe!(conn.assigns.body.id, membership_id) |> Omscore.Repo.preload([:member])
+    with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "update_member", "body"),
+         {:ok, bm} <- Members.update_body_membership(bm, bm_attrs) do
+      render(conn, OmscoreWeb.BodyMembershipView, "show.json", body_membership: bm)
+    end
+
+  end
+
   defp delete_join_request(nil), do: {:ok}
   defp delete_join_request(%Members.JoinRequest{} = join_request) do
     # Rejection == deletion
@@ -65,7 +74,7 @@ defmodule OmscoreWeb.BodyController do
   end
 
   def delete_member(conn, %{"membership_id" => membership_id}) do
-    bm = Members.get_body_membership!(membership_id) |> Omscore.Repo.preload([:member])
+    bm = Members.get_body_membership_safe!(conn.assigns.body.id, membership_id) |> Omscore.Repo.preload([:member])
     jr = Members.get_join_request(bm.body_id, bm.member_id)
     cms = Members.list_circle_memberships(bm.member, conn.assigns.body)
     with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "delete_member", "body"),

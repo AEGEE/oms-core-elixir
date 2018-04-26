@@ -300,6 +300,26 @@ defmodule Omscore.MembersTest do
       assert_raise Ecto.NoResultsError, fn -> Members.get_body_membership!(-1) end
     end
 
+    test "get_body_membership_safe/1 returns a body membership from a given body" do
+      member = member_fixture()
+      body = body_fixture()
+      assert {:ok, bm} = Members.create_body_membership(body, member)
+      assert bm.id == Members.get_body_membership_safe!(body.id, bm.id).id
+
+      body2 = body_fixture()
+      assert_raise Ecto.NoResultsError, fn -> Members.get_body_membership_safe!(body2.id, bm.id) end
+    end
+
+    test "update_body_membership/1 updates a body membership" do
+      member = member_fixture()
+      body = body_fixture()
+      assert {:ok, bm} = Members.create_body_membership(body, member)
+
+      assert {:ok, bm} = Members.update_body_membership(bm, %{comment: "some comment"})
+      assert bm = Members.get_body_membership!(bm.id)
+      assert bm.comment == "some comment"
+    end
+
     test "delete_body_membership/1 deletes a body membership" do
       member = member_fixture()
       body = body_fixture()

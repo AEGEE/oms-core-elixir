@@ -108,6 +108,20 @@ if Repo.all(Permission) == [] do
 
   Repo.insert!(%Permission{
     scope: "global",
+    action: "add_member",
+    object: "circle",
+    description: "Add anyone to any circle in the system, no matter if the circle is joinable or not but still respecting that bound circles can only hold members of the same body. This also allows to add yourself to any circle and thus can be used for a privilege escalation"
+  })
+
+  Repo.insert!(%Permission{
+    scope: "local",
+    action: "add_member",
+    object: "circle",
+    description: "Add any member of the body you got this permission from to any bound circle in that body, no matter if the circle is joinable or not or if the member wants that or not. This also allows to add yourself to any circle so only give it to people who anyways have many rights in the body"
+  })
+
+  Repo.insert!(%Permission{
+    scope: "global",
     action: "update_members",
     object: "circle",
     description: "Update membership details of members of any circle, even those that you are not in a circle_admin position in or even have member status. Should never be assigned as circle_admins automatically get this permission"
@@ -220,6 +234,20 @@ if Repo.all(Permission) == [] do
     action: "view_members",
     object: "body",
     description: "View the members in the body that you got that permission from"
+  })
+
+  Repo.insert!(%Permission{
+    scope: "global",
+    action: "update_member",
+    object: "body",
+    description: "Change the data attached to a body membership in any body in the system"
+  })
+
+  Repo.insert!(%Permission{
+    scope: "local",
+    action: "update_member",
+    object: "body",
+    description: "Change the data attached to a body membership in the body you got this permission from"
   })
 
   Repo.insert!(%Permission{

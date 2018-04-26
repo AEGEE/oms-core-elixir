@@ -454,6 +454,63 @@ defmodule OmscoreWeb.CircleControllerTest do
     end
   end
 
+  describe "add to circle" do
+    test "allows adding any member to any circle with global permission", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "add_member", object: "circle"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      circle = circle_fixture();
+      member = member_fixture();
+
+      conn = post conn, circle_path(conn, :add_to_circle, circle), member_id: member.id
+      assert json_response(conn, 201)
+
+      assert cm = Members.get_circle_membership(circle, member)
+      assert cm.member_id == member.id
+      assert cm.circle_id == circle.id
+    end
+
+    test "also allows adding to a bound circle", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "add_member", object: "circle"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      body = body_fixture()
+      member = member_fixture()
+      circle = bound_circle_fixture(body)
+      assert {:ok, _} = Members.create_body_membership(body, member)
+
+      conn = post conn, circle_path(conn, :add_to_circle, circle), member_id: member.id
+      assert json_response(conn, 201)
+
+      assert cm = Members.get_circle_membership(circle, member)
+      assert cm.member_id == member.id
+      assert cm.circle_id == circle.id
+    end
+
+    test "rejects adding to a circle in a body the member is not member of", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "add_member", object: "circle"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      body = body_fixture()
+      member = member_fixture()
+      circle = bound_circle_fixture(body)
+
+      conn = post conn, circle_path(conn, :add_to_circle, circle), member_id: member.id
+      assert json_response(conn, 403)
+    end
+
+    test "rejects to unauthorized member", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      circle = circle_fixture();
+      member = member_fixture();
+
+      conn = post conn, circle_path(conn, :add_to_circle, circle), member_id: member.id
+      assert json_response(conn, 403)
+    end
+  end
+
   describe "edit circle_membership" do
     test "lets circle_admin edit circle memberships", %{conn: conn} do
       %{token: token, member: member1} = create_member_with_permissions([%{action: "create", object: "free_circle"}])

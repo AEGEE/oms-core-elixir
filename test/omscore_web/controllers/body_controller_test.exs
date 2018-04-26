@@ -218,6 +218,46 @@ defmodule OmscoreWeb.BodyControllerTest do
     end
   end
 
+  describe "update body membership" do
+    setup [:create_body]
+
+    test "updates the body membership", %{conn: conn, body: body} do
+      member = member_fixture()
+      assert {:ok, bm} = Omscore.Members.create_body_membership(body, member)
+
+      %{token: token} = create_member_with_permissions([%{action: "update_member", object: "body"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      conn = put conn, body_body_path(conn, :update_member, body.id, bm.id), body_membership: %{comment: "some comment"}
+      assert res = json_response(conn, 200)["data"]
+      assert res["comment"] == "some comment"
+    end
+
+    test "rejects on missing permissions", %{conn: conn, body: body} do
+      member = member_fixture()
+      assert {:ok, bm} = Omscore.Members.create_body_membership(body, member)
+
+      %{token: token} = create_member_with_permissions([])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      conn = put conn, body_body_path(conn, :update_member, body.id, bm.id), body_membership: %{comment: "some comment"}
+      assert json_response(conn, 403)
+    end
+
+    test "doesn't allow to update body memberships of another body", %{conn: conn, body: body} do
+      member = member_fixture()
+      assert {:ok, bm} = Omscore.Members.create_body_membership(body, member)
+      body2 = body_fixture()
+
+      %{token: token} = create_member_with_permissions([%{action: "update_member", object: "body"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      assert_raise Ecto.NoResultsError, fn ->
+        put conn, body_body_path(conn, :update_member, body2.id, bm.id), body_membership: %{comment: "some comment"}
+      end
+    end
+  end
+
   describe "delete body members" do
     setup [:create_body]
 
@@ -272,6 +312,19 @@ defmodule OmscoreWeb.BodyControllerTest do
       assert response(conn, 204)
 
       assert_raise Ecto.NoResultsError, fn -> Omscore.Members.get_circle_membership!(cm.id) end
+    end
+
+    test "doesn't allow to delete body memberships of another body", %{conn: conn, body: body} do
+      member = member_fixture()
+      assert {:ok, bm} = Omscore.Members.create_body_membership(body, member)
+      body2 = body_fixture()
+
+      %{token: token} = create_member_with_permissions([%{action: "delete_member", object: "body"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      assert_raise Ecto.NoResultsError, fn ->
+        delete conn, body_body_path(conn, :delete_member, body2.id, bm.id)
+      end
     end
   end
 

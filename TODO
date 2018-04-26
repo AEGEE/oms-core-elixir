@@ -1,4 +1,4 @@
-o Inform loginservice of member deletion
+x Inform loginservice of member deletion
 x Member data validation request
 x Compatibility requests
 x Data seeding
@@ -8,7 +8,9 @@ x Permission search for local:create:circle returns result
 x Return all circles when requesting /circles?all=true
 x Adjust error format to oms standarts
 x Allow creating bound circles without being member of the body
-o Request to assign members to a circle
-o Store information alongside with the body membership
+x Request to assign members to a circle
+x Store information alongside with the body membership
+o Searching in body_memberships and circle_memberships
+o Seo_url for bodies and circles
 
 Idea towards cross-service auth: each service can create his own access tokens which are just cryptographically verified, not whether they were actually handed out by the loginservice. So when a service wants something directly from another service without user interaction, it could generate himself a token to do so...

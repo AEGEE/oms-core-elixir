@@ -10,7 +10,9 @@
         .config(config)
         .directive('bodytile', BodyTileDirective)
         .controller('BodyListingController', BodyListingController)
-        .controller('BodySingleController', BodySingleController);
+        .controller('BodySingleController', BodySingleController)
+        .controller('BodyJoinRequestsController', BodyJoinRequestsController)
+        .controller('BodyMembersController', BodyMembersController);
 
     /** @ngInject */
     function config($stateProvider)
@@ -28,12 +30,32 @@
                 }
             })
             .state('app.bodies.single', {
-                url: '/bodies/:id',
+                url: '/:id',
                 data: {'pageTitle': 'Body Details'},
                 views   : {
                     'pageContent@app': {
                         templateUrl: baseUrl + 'rewrite/bodies/single.html',
                         controller: 'BodySingleController as vm'
+                    }
+                }
+            })
+            .state('app.bodies.join_requests', {
+                url: '/:id/join_requests',
+                data: {'pageTitle': 'Join Requests'},
+                views: {
+                    'pageContent@app': {
+                        templateUrl: baseUrl + 'rewrite/bodies/join_requests.html',
+                        controller: 'BodyJoinRequestsController as vm'
+                    }
+                }
+            })
+            .state('app.bodies.members', {
+                url: '/:id/members',
+                 data: {'pageTitle': 'Members'},
+                views: {
+                    'pageContent@app': {
+                        templateUrl: baseUrl + 'rewrite/bodies/members.html',
+                        controller: 'BodyMembersController as vm'
                     }
                 }
             });
@@ -177,54 +199,7 @@
           });
         }
 
-        vm.loadMembers = () => {
-            $http({
-                url: apiUrl + '/bodies/' + $stateParams.id + '/members',
-                method: 'GET'
-            }).then((response) => {
-                vm.body_members = response.data.data;
-            }).catch((error) => {
-                showError(error);
-            });
-        }
-
-        vm.deleteMembership = (membership) => {
-            $http({
-                url: apiUrl + '/bodies/' + $stateParams.id + '/members/' + membership.id,
-                method: 'DELETE'
-            }).then((res) => {
-                showSuccess("Member successfully deleted");
-                vm.loadMembers();
-            }).catch((error) => {
-                showError(error);
-            })
-        }
-
-        vm.loadJoinRequests = () => {
-            $http({
-                url: apiUrl + '/bodies/' + $stateParams.id + '/join_requests',
-                method: 'GET'
-            }).then((response) => {
-                vm.join_requests = response.data.data;
-            }).catch((error) => {
-                showError(error);
-            });
-        }
-
-        vm.processJoinRequest = (join_request, approved) => {
-            $http({
-                url: apiUrl + '/bodies/' + $stateParams.id + '/join_requests/' + join_request.id,
-                method: 'POST',
-                data: {approved: approved}
-            }).then((res) => {
-                showSuccess("Join request approved successfully");
-                vm.loadJoinRequests();
-                vm.loadMembers();
-            }).catch((error) => {
-                showError(error);
-            });
-        }
-
+        
         vm.joinBody = () => {
             $('#joinRequestModal').modal('show');
         }
@@ -244,6 +219,84 @@
                     showError(error);
             })
         }
+    }
+
+    function BodyJoinRequestsController($http, $stateParams) {
+        var vm = this;
+
+        vm.loadJoinRequests = () => {
+            $http({
+                url: apiUrl + '/bodies/' + $stateParams.id + '/join_requests',
+                method: 'GET'
+            }).then((response) => {
+                vm.join_requests = response.data.data;
+            }).catch((error) => {
+                showError(error);
+            });
+        }
+        vm.loadJoinRequests();
+
+        vm.processJoinRequest = (join_request, approved) => {
+            $http({
+                url: apiUrl + '/bodies/' + $stateParams.id + '/join_requests/' + join_request.id,
+                method: 'POST',
+                data: {approved: approved}
+            }).then((res) => {
+                showSuccess("Join request processed successfully");
+                vm.loadJoinRequests();
+            }).catch((error) => {
+                showError(error);
+            });
+        }
+    }
+
+    function BodyMembersController($http, $stateParams) {
+        var vm = this;
+        vm.baseUrl = baseUrl;
+
+        vm.loadMembers = () => {
+            $http({
+                url: apiUrl + '/bodies/' + $stateParams.id + '/members',
+                method: 'GET'
+            }).then((response) => {
+                vm.body_members = response.data.data;
+            }).catch((error) => {
+                showError(error);
+            });
+        }
+        vm.loadMembers();
+
+        vm.editMembership = (membership) => {
+            vm.edited_body_membership = membership;
+            $('#editBodyMembershipModal').modal('show');
+        }
+
+        vm.saveBodyMembership = () => {
+            $http({
+                url: apiUrl + '/bodies/' + $stateParams.id + '/members/' + vm.edited_body_membership.id,
+                method: 'PUT',
+                data: {body_membership: vm.edited_body_membership}
+            }).then((res) => {
+                vm.loadMembers();
+                showSuccess("Membership edited successfully");
+                $('#editBodyMembershipModal').modal('hide');
+            }).catch((error) => {
+                showError(error);
+            });
+        }
+
+        vm.deleteMembership = (membership) => {
+            $http({
+                url: apiUrl + '/bodies/' + $stateParams.id + '/members/' + membership.id,
+                method: 'DELETE'
+            }).then((res) => {
+                showSuccess("Member successfully deleted");
+                vm.loadMembers();
+            }).catch((error) => {
+                showError(error);
+            })
+        }
+
     }
 
 })();

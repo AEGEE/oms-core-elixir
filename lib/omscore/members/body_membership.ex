@@ -4,6 +4,7 @@ defmodule Omscore.Members.BodyMembership do
 
 
   schema "body_memberships" do
+    field :comment, :string
     belongs_to :body, Omscore.Core.Body
     belongs_to :member, Omscore.Members.Member
 
@@ -13,7 +14,7 @@ defmodule Omscore.Members.BodyMembership do
   @doc false
   def changeset(body_membership, attrs) do
     body_membership
-    |> cast(attrs, [])
+    |> cast(attrs, [:comment])
     |> validate_required([])
     |> unique_constraint(:body_membership_unique, name: :body_memberships_body_id_member_id_index)
   end

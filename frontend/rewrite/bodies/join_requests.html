@@ -1,0 +1,19 @@
+<h1 class="page-header">Join requests</h1>
+
+<ul class="registered-users-list clearfix">
+  <li ng-repeat="join_request in vm.join_requests">
+    <a ui-sref="app.profile({id: join_request.member.seo_url})">
+      <img src="assets/img/user-5.jpg" alt="profile pic" />
+      <h4 class="username text-ellipsis">
+        {{ join_request.member.first_name }} {{ join_request.member.last_name }}
+        <small ng-show="!join_request.approved">{{ join_request.motivation }}</small>
+        <small ng-show="join_request.approved">Approved</small>
+      </h4>
+    </a>
+    <span ng-show="!join_request.approved">
+      <button type="button" ng-click="vm.processJoinRequest(join_request, true)" class="btn btn-primary"><i class="fa fa-plus"></i></button>
+      <button type="button" ng-click="vm.processJoinRequest(join_request, false)" class="btn btn-danger"><i class="fa fa-minus"></i></button>
+    </span>
+  </li>
+</ul>
+<span ng-show="!vm.join_requests.length">No join requests in this body</span>

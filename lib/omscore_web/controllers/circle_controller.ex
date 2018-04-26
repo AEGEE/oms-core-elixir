@@ -65,6 +65,20 @@ defmodule OmscoreWeb.CircleController do
     end
   end
 
+  def add_to_circle(conn, %{"member_id" => member_id}) do
+    member = Members.get_member!(member_id)
+
+    # We do not need to check explicitely if the member is part of the body as the Members.create_circle_membership does that
+    # Resultingly this permission means adding only members of the body to only circles of the body in case it is a local permission
+    # or adding any member to any circle, maintaining the body membership constraint in case it's a global permission
+    with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "add_member", "circle"),
+         {:ok, cm} <- Members.create_circle_membership(conn.assigns.circle, member) do
+      conn 
+      |> put_status(:created)
+      |> render(OmscoreWeb.CircleMembershipView, "show.json", circle_membership: cm)
+    end
+  end
+
   def update_circle_membership(conn, %{"membership_id" => membership_id, "circle_membership" => circle_membership_attrs}) do
     circle = conn.assigns.circle
     cm = Members.get_circle_membership!(membership_id)

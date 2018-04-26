@@ -282,7 +282,49 @@
       });
     }
 
+    vm.showAddMemberModal = () => {
+      $('#addMemberModal').modal('show');
+    }
 
+    vm.fetchMembers = (query, timeout) => {
+      let url = (vm.circle.body == null ? (apiUrl + '/members') : (apiUrl + '/bodies/' + vm.circle.body.id + '/members'));
+
+      return $http({
+        url: url,
+        method: 'GET',
+        params: {
+          limit: 8,
+          offset: 0,
+          query: query
+        },
+        transformResponse: appendHttpResponseTransform($http.defaults.transformResponse, function (res) {
+          if(res && res.data) {
+            // For a bound circle, we got body_memberships
+            if (vm.circle.body != null)
+              return res.data.map((x) => {return x.member});
+            return res.data;
+          } else {
+            return [];
+          }
+        }),
+        timeout: timeout,
+      });
+    }
+
+    vm.addMember = ($item) => {
+      if($item) {
+        $http({
+          url: apiUrl + '/circles/' + $stateParams.id + '/add_member',
+          method: 'POST',
+          data: {member_id: $item.originalObject.id}
+        }).then((res) => {
+          showSuccess("Added member to circle");
+          $('#addMemberModal').modal('hide');
+        }).catch((error) => {
+          showError(error);
+        })
+      }
+    }
   }
 
   function ListCircleMembershipsController($http, $scope) {

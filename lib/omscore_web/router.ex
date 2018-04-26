@@ -59,6 +59,7 @@ defmodule OmscoreWeb.Router do
     put "/parent", CircleController, :put_parent
     get "/members", CircleController, :show_members
     post "/members", CircleController, :join_circle
+    post "/add_member", CircleController, :add_to_circle
     delete "/members", CircleController, :delete_myself
     put "/members/:membership_id", CircleController, :update_circle_membership
     delete "/members/:membership_id", CircleController, :delete_circle_membership
@@ -77,6 +78,7 @@ defmodule OmscoreWeb.Router do
     put "/", BodyController, :update
     delete "/", BodyController, :delete
     get "/members", BodyController, :show_members
+    put "/members/:membership_id", BodyController, :update_member
     delete "/members/:membership_id", BodyController, :delete_member
     delete "/members", BodyController, :delete_myself
     post "/members", JoinRequestController, :create
