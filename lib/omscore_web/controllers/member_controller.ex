@@ -109,6 +109,7 @@ defmodule OmscoreWeb.MemberController do
     member = conn.assigns.target_member
 
     with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "delete", "member"),
+         {:ok} <- Omscore.Interfaces.Loginservice.delete_user(member.id),
          {:ok, %Member{}} <- Members.delete_member(member) do
       send_resp(conn, :no_content, "")
     end

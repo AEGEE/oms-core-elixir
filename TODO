@@ -9,5 +9,6 @@ x Return all circles when requesting /circles?all=true
 x Adjust error format to oms standarts
 x Allow creating bound circles without being member of the body
 o Request to assign members to a circle
+o Store information alongside with the body membership
 
 Idea towards cross-service auth: each service can create his own access tokens which are just cryptographically verified, not whether they were actually handed out by the loginservice. So when a service wants something directly from another service without user interaction, it could generate himself a token to do so...

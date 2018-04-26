@@ -29,7 +29,7 @@ defmodule Omscore.Members.Member do
     member
     |> cast(attrs, [:first_name, :last_name, :date_of_birth, :primary_body_id, :gender, :phone, :seo_url, :address, :about_me, :user_id])
     |> generate_seo_url
-    |> validate_required([:first_name, :last_name, :date_of_birth, :address, :seo_url, :user_id])
+    |> validate_required([:first_name, :last_name, :seo_url, :user_id])
     |> validate_format(:seo_url, ~r/^[\w-]*[a-zA-Z_][\w-]*$/, message: "has invalid format. It needs at least 3 characters, only numbers and letters with at least one letter in it.")
     |> validate_exclusion(:seo_url, ["me"])
     |> validate_length(:seo_url, min: 3)

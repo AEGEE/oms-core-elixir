@@ -21,6 +21,9 @@ defmodule Omscore.Core.Permission do
     |> cast(attrs, [:scope, :action, :object, :description, :always_assigned])
     |> validate_required([:scope, :action, :object])
     |> validate_inclusion(:scope, ["global", "local"])
+    |> validate_format(:scope, ~r/^[^:]*$/, message: "Cannot contain colons")
+    |> validate_format(:action, ~r/^[^:]*$/, message: "Cannot contain colons")
+    |> validate_format(:object, ~r/^[^:]*$/, message: "Cannot contain colons")
     |> unique_constraint(:permission_unique, name: :permissions_scope_action_object_index)
   end
 end

@@ -44,6 +44,7 @@ defmodule Omscore.Mixfile do
       {:guardian, "~> 1.0-beta"},
       {:comeonin, "~> 4.0"},
       {:bcrypt_elixir, "~> 0.12"},
+      {:httpoison, "~> 1.0"},
       {:excoveralls, "~> 0.8", only: :test}
     ]
   end
