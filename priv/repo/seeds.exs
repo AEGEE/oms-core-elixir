@@ -364,6 +364,42 @@ if Repo.all(Permission) == [] do
     object: "member",
     description: "Delete any member in your body from the system. This allows to also delete members that are in other bodies and have a quarrel in that one body with the board admin, so be careful in granting this permission. The member can delete his own profile anyways"
   })
+
+  # Permissions of the loginservice
+  Repo.insert!(%Permission{
+    scope: "global",
+    action: "create",
+    object: "recruitment_campaign",
+    description: "Create recruitment campaigns through which users can sign into the system."
+  })
+
+  Repo.insert!(%Permission{
+    scope: "global",
+    action: "update",
+    object: "recruitment_campaign",
+    description: "Edit recruitment campaigns"
+  })
+
+  Repo.insert!(%Permission{
+    scope: "global",
+    action: "delete",
+    object: "recruitment_campaign",
+    description: "Delete a recruitment campaign"
+  })
+
+  Repo.insert!(%Permission{
+    scope: "global",
+    action: "update_active",
+    object: "user",
+    description: "Allows to suspend or activate any user in the system"
+  })
+
+  Repo.insert!(%Permission{
+    scope: "local",
+    action: "update_active",
+    object: "user",
+    description: "Allows to suspend or activate users that are member in the body that you got this permission from"
+  })
 end
 
 
