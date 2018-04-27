@@ -251,7 +251,7 @@
         vm.baseUrl = baseUrl;
         vm.query = ""
 
-         vm.injectParams = (params) => {
+        vm.injectParams = (params) => {
             params.query = vm.query
             return params;
         }

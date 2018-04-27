@@ -2,15 +2,15 @@
 
 <div class="row">
   <div class="input-group">
-    <span class="input-group-addon"><i class="fa fa-search"></i>Search</span>
+    <span class="input-group-addon"><i class="fa fa-search"></i> Search</span>
     <input type="text" class="form-control" placeholder="Type any keywords" ng-model="vm.query" ng-change="vm.resetData()" />
   </div>
 </div>
 
 <hr />
-<div infinite-scroll="vm.loadNextPage()" infinite-scroll-disabled="vm.infiniteScroll.block" infinite-scroll-distance="1">
+<div infinite-scroll="vm.loadNextPage()" infinite-scroll-disabled="vm.infiniteScroll.block" >
   <ul class="registered-users-list clearfix">
-    <li ng-repeat="join_request in vm.infiniteScroll.data">
+    <li ng-repeat="join_request in vm.infiniteScroll.data" class='animate-infinite-scroll'>
       <a ui-sref="app.profile({id: join_request.member.seo_url})">
         <img src="assets/img/user-5.jpg" alt="profile pic" />
         <h4 class="username text-ellipsis">
@@ -30,6 +30,6 @@
 <p ng-show="vm.infiniteScroll.data.length === 0 && !vm.infiniteScroll.busy">
   No join requests found that match the current search
 </p>
-<p ng-show="vm.infiniteScroll.busy">
+<p ng-show="vm.infiniteScroll.loadingMoreResults">
   Searching...
 </p>

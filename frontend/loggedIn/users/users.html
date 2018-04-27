@@ -12,8 +12,8 @@
 
 <hr />
 
-<div infinite-scroll="vm.loadNextPage()" infinite-scroll-disabled="vm.infiniteScroll.block" infinite-scroll-distance="1">
-	<div class="m-b-10 m-l-10" ng-repeat="user in vm.infiniteScroll.data">
+<div infinite-scroll="vm.loadNextPage()" infinite-scroll-disabled="vm.infiniteScroll.block">
+	<div class="animate-infinite-scroll m-b-10 m-t-10" ng-repeat="user in vm.infiniteScroll.data">
 		<userpreview user="user"></userpreview>
 	</div>
 </div>
@@ -21,6 +21,6 @@
 <p ng-show="vm.infiniteScroll.data.length === 0 && !vm.infiniteScroll.busy">
   No users found that match the current search
 </p>
-<p ng-show="vm.infiniteScroll.busy">
+<p ng-show="vm.infiniteScroll.loadingMoreResults">
   Searching...
 </p>

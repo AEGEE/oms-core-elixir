@@ -21,6 +21,11 @@
     "code": "circles",
     "module_link": "rewrite/circles/circles.js",
     "icon": "fa fa-circle"
+  }, {
+    "name": "Permissions",
+    "code": "permissions",
+    "module_link": "rewrite/permissions/permissions.js",
+    "icon": "fa fa-key"
   }],
   "js": ["loggedIn/profile/profile.js"],
   "modules": ["app.profile"],

@@ -88,6 +88,16 @@ defmodule Omscore.HelpersTest do
       assert res == []
     end
 
+    test "empty search does nothing" do
+      member_fixture(%{first_name: "Hans", last_name: "Peter"})
+      
+      res = from(u in Members.Member)
+      |> Helper.search(%{"query" => ""}, [:first_name, :last_name])
+      |> Repo.all
+
+      assert res != []
+    end
+
     test "split search splits the search on a specified char" do
       member = member_fixture(%{first_name: "Hans", last_name: "Peter"})
       member_fixture(%{first_name: "Hans", last_name: "Wurst"})
