@@ -203,16 +203,21 @@ defmodule Omscore.MembersTest do
       assert Members.list_join_requests(body) |> Enum.any?(fn(x) -> x.id == join_request.id && x.motivation == join_request.motivation end)
     end
 
-    test "list_join_requests/2 returns only outstanding join request if requested" do
-      {join_request, body, _member} = join_request_fixture()
-      member2 = member_fixture()
-      assert {:ok, join_request2} = Members.create_join_request(body, member2, @valid_attrs)
-      assert {:ok, _body_membership} = Members.approve_join_request(join_request)
+    test "list_join_requests/2 searches in join_requests" do
+      member1 = member_fixture(%{first_name: "quiesel"})
+      member2 = member_fixture(%{first_name: "weasel"})
+      member3 = member_fixture(%{first_name: "weasley"})
+      body = body_fixture()
 
-      res = Members.list_join_requests(body, true)
-      assert !Enum.any?(res, fn(x) -> x.id == join_request.id end)
-      assert Enum.any?(res, fn(x) -> x.id == join_request2.id end)
+      assert {:ok, _} = Members.create_join_request(body, member1, @valid_attrs)
+      assert {:ok, _} = Members.create_join_request(body, member2, @valid_attrs)
+
+      res = Members.list_join_requests(body, %{"query" => "weas"})
+      assert !Enum.any?(res, fn(x) -> x.member_id == member1.id end)
+      assert Enum.any?(res, fn(x) -> x.member_id == member2.id end)
+      assert !Enum.any?(res, fn(x) -> x.member_id == member3.id end)
     end
+
 
     test "get_join_request!/1 returns the join_request with given id" do
       {join_request, _, _} = join_request_fixture()
@@ -310,6 +315,28 @@ defmodule Omscore.MembersTest do
       assert_raise Ecto.NoResultsError, fn -> Members.get_body_membership_safe!(body2.id, bm.id) end
     end
 
+    test "list_body_memberships/1 lists all body memberships" do
+      member = member_fixture()
+      member2 = member_fixture()
+      body = body_fixture()
+      assert {:ok, _} = Members.create_body_membership(body, member)
+      res = Members.list_body_memberships(body)
+      assert Enum.any?(res, fn(x) -> x.member_id == member.id end)
+      assert !Enum.any?(res, fn(x) -> x.member_id == member2.id end)
+    end
+
+    test "list_body_memberships/2 searches body memberships" do
+      member1 = member_fixture(%{first_name: "quiesel"})
+      member2 = member_fixture(%{first_name: "weasel"})
+      body = body_fixture()
+      assert {:ok, _} = Members.create_body_membership(body, member1)
+      assert {:ok, _} = Members.create_body_membership(body, member2)
+
+      res = Members.list_body_memberships(body, %{"query" => "quiesel"})
+      assert Enum.any?(res, fn(x) -> x.member_id == member1.id end)
+      assert !Enum.any?(res, fn(x) -> x.member_id == member2.id end)
+    end
+
     test "update_body_membership/1 updates a body membership" do
       member = member_fixture()
       body = body_fixture()
@@ -366,7 +393,7 @@ defmodule Omscore.MembersTest do
       {circle_membership, circle, member}
     end
 
-    test "list_circle_memberships/0 returns all circle_memberships for a circle" do
+    test "list_circle_memberships/1 returns all circle_memberships for a circle" do
       {circle_membership, circle, _member} = circle_membership_fixture()
       assert Members.list_circle_memberships(circle) |> Enum.any?(fn(x) -> x.id == circle_membership.id 
                                                                         && x.member_id == circle_membership.member_id 
@@ -375,13 +402,55 @@ defmodule Omscore.MembersTest do
                                                                         && x.circle_admin == circle_membership.circle_admin end)
     end
 
-    test "list_circle_memberships/0 returns all circle_memberships for a member" do
+    test "list_circle_memberships/2 searches in circle->member memberships" do
+      circle = circle_fixture()
+      member1 = member_fixture(%{first_name: "weasel"})
+      member2 = member_fixture(%{first_name: "quiesel"})
+      member3 = member_fixture(%{first_name: "weasley"})
+      assert {:ok, _} = Members.create_circle_membership(circle, member1)
+      assert {:ok, _} = Members.create_circle_membership(circle, member2)
+
+      res = Members.list_circle_memberships(circle, %{"query" => "weas"})
+      assert Enum.any?(res, fn(x) -> x.member_id == member1.id end)
+      assert !Enum.any?(res, fn(x) -> x.member_id == member2.id end)
+      assert !Enum.any?(res, fn(x) -> x.member_id == member3.id end)
+    end
+
+    test "list_circle_memberships/1 returns all circle_memberships for a member" do
       {circle_membership, _circle, member} = circle_membership_fixture()
       assert Members.list_circle_memberships(member)  |> Enum.any?(fn(x) -> x.id == circle_membership.id 
                                                                         && x.member_id == circle_membership.member_id 
                                                                         && x.circle_id == circle_membership.circle_id
                                                                         && x.position == circle_membership.position
                                                                         && x.circle_admin == circle_membership.circle_admin end)
+    end
+
+    test "list_circle_memberships/2 searches in member->circle memberships" do
+      circle1 = circle_fixture(%{name: "monono"})
+      circle2 = circle_fixture(%{name: "bonobo"})
+      circle3 = circle_fixture(%{name: "momonono"})
+      member = member_fixture()
+      assert {:ok, _} = Members.create_circle_membership(circle1, member)
+      assert {:ok, _} = Members.create_circle_membership(circle2, member)
+
+      res = Members.list_circle_memberships(member, %{"query" => "mono"})
+
+      assert Enum.any?(res, fn(x) -> x.circle_id == circle1.id end)
+      assert !Enum.any?(res, fn(x) -> x.circle_id == circle2.id end)
+      assert !Enum.any?(res, fn(x) -> x.circle_id == circle3.id end)
+    end
+
+    test "list_bound_circle_memberships/2 returns all circle memberships a member has in a body" do
+      body = body_fixture()
+      member = member_fixture()
+      assert {:ok, _} = Members.create_body_membership(body, member)
+      circle1 = bound_circle_fixture(body)
+      circle2 = circle_fixture()
+      assert {:ok, _} = Members.create_circle_membership(circle1, member)
+      assert {:ok, _} = Members.create_circle_membership(circle2, member)
+      res = Members.list_bound_circle_memberships(member, body)
+      assert Enum.any?(res, fn(x) -> x.circle_id == circle1.id end)
+      assert !Enum.any?(res, fn(x) -> x.circle_id == circle2.id end)
     end
 
     test "get_circle_membership!/1 returns the circle_membership with given id" do

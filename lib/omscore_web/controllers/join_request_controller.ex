@@ -7,11 +7,11 @@ defmodule OmscoreWeb.JoinRequestController do
 
   action_fallback OmscoreWeb.FallbackController
 
-  def index(conn, _params) do
+  def index(conn, params) do
     body = conn.assigns.body
 
     with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "view", "join_request") do
-      join_requests = Members.list_join_requests(body)
+      join_requests = Members.list_join_requests(body, params)
       render(conn, "index.json", join_requests: join_requests)
     end
   end

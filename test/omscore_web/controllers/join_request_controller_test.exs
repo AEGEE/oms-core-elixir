@@ -47,6 +47,19 @@ defmodule OmscoreWeb.JoinRequestControllerTest do
       assert Enum.all?(res, fn(x) -> Map.has_key?(x, "member") end)
       assert Enum.all?(res, fn(x) -> Map.has_key?(x["member"], "id") end) # assert members are preloaded
     end
+
+    test "allows for searching", %{conn: conn} do
+      member = member_fixture()
+      body = body_fixture()
+      assert {:ok, _} = Members.create_join_request(body, member, %{motivation: "no motivation"})
+
+      %{token: token} = create_member_with_permissions([%{action: "view", object: "join_request"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      conn = get conn, body_join_request_path(conn, :index, body.id), query: "some_really_long_query_that_matches_nothing"
+      assert res = json_response(conn, 200)["data"]
+      assert res == []
+    end
   end
 
   describe "show join_request" do

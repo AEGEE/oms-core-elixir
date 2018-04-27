@@ -38,13 +38,13 @@ defmodule OmscoreWeb.CircleController do
     end
   end
 
-  def show_members(conn, _params) do
+  def show_members(conn, params) do
     circle = conn.assigns.circle
     conn = is_circle_member(conn, circle)
 
     with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "view_members", "circle") do
-      circle = circle |> Omscore.Repo.preload([circle_memberships: [:member]])
-      render(conn, OmscoreWeb.CircleMembershipView, "index.json", circle_memberships: circle.circle_memberships)
+      circle_memberships = Members.list_circle_memberships(circle, params)
+      render(conn, OmscoreWeb.CircleMembershipView, "index.json", circle_memberships: circle_memberships)
     end
   end
 
@@ -238,7 +238,8 @@ defmodule OmscoreWeb.CircleController do
   def put_permissions(conn, %{"permissions" => permissions}) do
     with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "put_permissions", "circle"),
          {:ok, permissions} <- Core.find_permissions(permissions),
-         {:ok, circle} <- Core.put_circle_permissions(conn.assigns.circle, permissions) do
+         {:ok, circle} <- Core.put_circle_permissions(conn.assigns.circle, permissions),
+         circle <- Core.get_circle!(circle.id) do
       render(conn, "show.json", circle: circle)
     end
   end

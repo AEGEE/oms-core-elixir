@@ -256,7 +256,10 @@
           vm.loadInheritedPermissions();
           $scope.$broadcast('angucomplete-alt:clearInput', 'parentCircleTypeahead');
         }).catch((error) => {
-          showError(error);
+          if(error.status == 422)
+            vm.errors = error.data.errors;
+          else
+            showError(error);
         })
       }
     }

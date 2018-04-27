@@ -141,9 +141,23 @@ defmodule OmscoreWeb.CircleControllerTest do
     test "shows the members of the circle to someone with global permission", %{conn: conn, circle: circle} do
       %{token: token} = create_member_with_permissions([%{action: "view_members", object: "circle"}])
       conn = put_req_header(conn, "x-auth-token", token)
+      member = member_fixture()
+      assert {:ok, _} = Omscore.Members.create_circle_membership(circle, member)
 
       conn = get conn, circle_path(conn, :show_members, circle)
-      assert json_response(conn, 200)
+      assert res = json_response(conn, 200)["data"]
+      assert Enum.any?(res, fn(x) -> x["member_id"] == member.id end)
+    end
+
+    test "allows searching", %{conn: conn, circle: circle} do
+      %{token: token} = create_member_with_permissions([%{action: "view_members", object: "circle"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+      member = member_fixture()
+      assert {:ok, _} = Omscore.Members.create_circle_membership(circle, member)
+
+      conn = get conn, circle_path(conn, :show_members, circle), query: "some_really_long_query_that_matches_nothing"
+      assert res = json_response(conn, 200)["data"]
+      assert res == []
     end
 
     test "shows members in your body", %{conn: conn} do

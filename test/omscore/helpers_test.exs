@@ -28,6 +28,16 @@ defmodule Omscore.HelpersTest do
     member
   end
 
+  @circle_attrs %{description: "some description", joinable: true, name: "some name"}
+  def circle_fixture(attrs \\ %{}) do
+    {:ok, circle} =
+      attrs
+      |> Enum.into(@circle_attrs)
+      |> Omscore.Core.create_circle()
+
+    circle
+  end
+
   describe "search" do
     test "searches case-insensitively in passed fields" do
       member1 = member_fixture(%{first_name: "Hans", last_name: "Peter"})
@@ -88,6 +98,34 @@ defmodule Omscore.HelpersTest do
       |> Repo.all
 
       assert res == [member]
+    end
+
+    test "search is join-compatible" do
+      member1 = member_fixture(%{first_name: "Hans"})
+      member2 = member_fixture(%{first_name: "Hans"})
+      member3 = member_fixture(%{first_name: "Peter"})
+      member4 = member_fixture(%{first_name: "Hanseatic"})
+
+      circle = circle_fixture()
+
+      assert {:ok, _} = Members.create_circle_membership(circle, member1)
+      assert {:ok, _} = Members.create_circle_membership(circle, member3)
+      assert {:ok, _} = Members.create_circle_membership(circle, member4)
+
+
+      members_query = from(u in Members.Member)
+      |> Helper.search(%{"query" => "hans"}, [:first_name])
+
+      cm_query = from(cm in Members.CircleMembership, where: cm.circle_id == ^circle.id)
+      |> Ecto.Query.join(:inner, [cm], u in subquery(members_query), cm.member_id == u.id)
+      |> Ecto.Query.preload(:member)
+      
+      res = Repo.all(cm_query)
+
+      assert Enum.any?(res, fn(x) -> x.member_id == member1.id end)
+      assert !Enum.any?(res, fn(x) -> x.member_id == member2.id end)
+      assert !Enum.any?(res, fn(x) -> x.member_id == member3.id end)
+      assert Enum.any?(res, fn(x) -> x.member_id == member4.id end)
     end
   end
 

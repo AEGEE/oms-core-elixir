@@ -312,7 +312,7 @@ if Repo.all(Permission) == [] do
   Repo.insert!(%Permission{
     scope: "local",
     action: "view",
-    object: "members",
+    object: "member",
     description: "View basic information about all members in the body. This does not allow you to perform a members listing, you might however hold the list body_memberships permission"
   })
 

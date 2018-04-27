@@ -223,18 +223,14 @@
 
     function BodyJoinRequestsController($http, $stateParams) {
         var vm = this;
+        vm.query = ""
 
-        vm.loadJoinRequests = () => {
-            $http({
-                url: apiUrl + '/bodies/' + $stateParams.id + '/join_requests',
-                method: 'GET'
-            }).then((response) => {
-                vm.join_requests = response.data.data;
-            }).catch((error) => {
-                showError(error);
-            });
+         vm.injectParams = (params) => {
+            params.query = vm.query
+            return params;
         }
-        vm.loadJoinRequests();
+        infiniteScroll($http, vm, apiUrl + '/bodies/' + $stateParams.id + '/join_requests', vm.injectParams);
+
 
         vm.processJoinRequest = (join_request, approved) => {
             $http({
@@ -243,7 +239,7 @@
                 data: {approved: approved}
             }).then((res) => {
                 showSuccess("Join request processed successfully");
-                vm.loadJoinRequests();
+                vm.resetData();
             }).catch((error) => {
                 showError(error);
             });
@@ -253,18 +249,13 @@
     function BodyMembersController($http, $stateParams) {
         var vm = this;
         vm.baseUrl = baseUrl;
+        vm.query = ""
 
-        vm.loadMembers = () => {
-            $http({
-                url: apiUrl + '/bodies/' + $stateParams.id + '/members',
-                method: 'GET'
-            }).then((response) => {
-                vm.body_members = response.data.data;
-            }).catch((error) => {
-                showError(error);
-            });
+         vm.injectParams = (params) => {
+            params.query = vm.query
+            return params;
         }
-        vm.loadMembers();
+        infiniteScroll($http, vm, apiUrl + '/bodies/' + $stateParams.id + '/members', vm.injectParams);
 
         vm.editMembership = (membership) => {
             vm.edited_body_membership = membership;
@@ -277,7 +268,7 @@
                 method: 'PUT',
                 data: {body_membership: vm.edited_body_membership}
             }).then((res) => {
-                vm.loadMembers();
+                vm.resetData();
                 showSuccess("Membership edited successfully");
                 $('#editBodyMembershipModal').modal('hide');
             }).catch((error) => {
@@ -291,7 +282,7 @@
                 method: 'DELETE'
             }).then((res) => {
                 showSuccess("Member successfully deleted");
-                vm.loadMembers();
+                vm.resetData();
             }).catch((error) => {
                 showError(error);
             })

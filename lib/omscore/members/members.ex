@@ -81,7 +81,7 @@ defmodule Omscore.Members do
   # Get all local permissions that the user has through his membership in the body
   def get_local_permissions(%Member{} = member, %Omscore.Core.Body{} = body) do
     member
-    |> list_circle_memberships(body)                  # Get all circle memberships of the member in that body
+    |> list_bound_circle_memberships(body)                  # Get all circle memberships of the member in that body
     |> Enum.map(fn(x) -> x.circle end)                # Strip the circle_membership part
     |> Omscore.Core.get_permissions_recursive()       # Gather all permissions on any of the circles
     |> Omscore.Core.reduce_permission_list()          # Remove duplicates and overwrite local permissions with global permission, thus no need to filter before
@@ -99,13 +99,16 @@ defmodule Omscore.Members do
   alias Omscore.Members.JoinRequest
 
   # Get all join requests for a body
-  def list_join_requests(body, outstanding_only \\ false) do
-    query = if outstanding_only do
-      from u in JoinRequest, where: u.body_id == ^body.id and not(u.approved), preload: [:member]
-    else
-      from u in JoinRequest, where: u.body_id == ^body.id, preload: [:member]
-    end 
-    Repo.all(query)
+  def list_join_requests(%Omscore.Core.Body{} = body, params \\ %{}) do
+    members_query = from(u in Member)
+    |> Helper.search(params, [:first_name, :last_name])
+
+    jr_query = from(jr in JoinRequest, where: jr.body_id == ^body.id)
+    |> Ecto.Query.join(:inner, [jr], u in subquery(members_query), jr.member_id == u.id)
+    |> Ecto.Query.preload(:member)
+    |> Helper.paginate(params)
+
+    Repo.all(jr_query)
   end
 
   # Get a single join request by id
@@ -161,6 +164,22 @@ defmodule Omscore.Members do
   # Raises on not found
   def get_body_membership_safe!(body_id, body_membership_id), do: Repo.get_by!(BodyMembership, %{id: body_membership_id, body_id: body_id})
 
+  # Lists body memberships in the body
+  # Allows for searching and pagination
+  def list_body_memberships(body_or_body_id), do: list_body_memberships(body_or_body_id, %{})
+  def list_body_memberships(%Omscore.Core.Body{} = body, params), do: list_body_memberships(body.id, params)
+  def list_body_memberships(body_id, params) do
+    members_query = from(u in Member)
+    |> Helper.search(params, [:first_name, :last_name])
+
+    bm_query = from(bm in BodyMembership, where: bm.body_id == ^body_id)
+    |> Ecto.Query.join(:inner, [bm], u in subquery(members_query), bm.member_id == u.id)
+    |> Ecto.Query.preload(:member)
+    |> Helper.paginate(params)
+
+    Repo.all(bm_query)
+  end
+
   # Creates a membership with a body
   # Should not be used directly, only by tests and approve_join_request
   def create_body_membership(%Omscore.Core.Body{} = body, %Member{} = member) do
@@ -184,20 +203,40 @@ defmodule Omscore.Members do
 
   alias Omscore.Members.CircleMembership
 
+  # You can also call both the circle version and the member version without params
+  def list_circle_memberships(%Circle{} = circle), do: list_circle_memberships(circle, %{})
+  def list_circle_memberships(%Member{} = member), do: list_circle_memberships(member, %{})
+
   # Returns the list of members in the circle
-  def list_circle_memberships(%Circle{} = circle) do
-    query = from u in CircleMembership, where: u.circle_id == ^circle.id, preload: [:member]
-    Repo.all(query)
+  # Searching is done in the fields of the member
+  def list_circle_memberships(%Circle{} = circle, params) do
+    members_query = from(u in Member)
+    |> Helper.search(params, [:first_name, :last_name])
+
+    cm_query = from(cm in CircleMembership, where: cm.circle_id == ^circle.id)
+    |> Ecto.Query.join(:inner, [cm], u in subquery(members_query), cm.member_id == u.id)
+    |> Ecto.Query.preload(:member)
+    |> Helper.paginate(params)
+
+    Repo.all(cm_query)
   end
 
   # Returns the list of circles for a member
-  def list_circle_memberships(%Member{} = member) do
-    query = from u in CircleMembership, where: u.member_id == ^member.id, preload: [:circle]
-    Repo.all(query)
+  # Searches in the circle fields in case a search is passed
+  def list_circle_memberships(%Member{} = member, params) do
+    circle_query = from(u in Circle)
+    |> Helper.search(params, [:name, :description])
+
+    cm_query = from(cm in CircleMembership, where: cm.member_id == ^member.id)
+    |> Ecto.Query.join(:inner, [cm], u in subquery(circle_query), cm.circle_id == u.id)
+    |> Ecto.Query.preload(:circle)
+    |> Helper.paginate(params)
+
+    Repo.all(cm_query)
   end
 
   # Returns the list of circle memberships for a member with bound circles
-  def list_circle_memberships(%Member{} = member, %Omscore.Core.Body{} = body) do
+  def list_bound_circle_memberships(%Member{} = member, %Omscore.Core.Body{} = body) do
     query = from u in CircleMembership, where: u.member_id == ^member.id, preload: [:circle]
     Repo.all(query)
     |> Enum.filter(fn(x) -> x.circle.body_id == body.id end)

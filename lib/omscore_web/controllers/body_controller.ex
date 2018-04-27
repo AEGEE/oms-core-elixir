@@ -49,10 +49,10 @@ defmodule OmscoreWeb.BodyController do
     end
   end
 
-  def show_members(conn, _params) do
-    body = conn.assigns.body |> Omscore.Repo.preload([body_memberships: [:member]])
+  def show_members(conn, params) do
+    body_memberships = Members.list_body_memberships(conn.assigns.body, params)
     with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "view_members", "body") do
-      render(conn, OmscoreWeb.BodyMembershipView, "index.json", body_memberships: body.body_memberships)
+      render(conn, OmscoreWeb.BodyMembershipView, "index.json", body_memberships: body_memberships)
     end
   end
 
@@ -76,7 +76,7 @@ defmodule OmscoreWeb.BodyController do
   def delete_member(conn, %{"membership_id" => membership_id}) do
     bm = Members.get_body_membership_safe!(conn.assigns.body.id, membership_id) |> Omscore.Repo.preload([:member])
     jr = Members.get_join_request(bm.body_id, bm.member_id)
-    cms = Members.list_circle_memberships(bm.member, conn.assigns.body)
+    cms = Members.list_bound_circle_memberships(bm.member, conn.assigns.body)
     with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "delete_member", "body"),
          {:ok, _} <- Members.delete_body_membership(bm),
          {:ok} <- delete_join_request(jr),

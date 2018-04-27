@@ -216,6 +216,19 @@ defmodule OmscoreWeb.BodyControllerTest do
       conn = get conn, body_body_path(conn, :show_members, body.id)
       assert json_response(conn, 403)
     end
+
+    test "allows searching", %{conn: conn, body: body} do
+      member = member_fixture()
+      assert {:ok, _} = Omscore.Members.create_body_membership(body, member)
+
+      %{token: token} = create_member_with_permissions([%{action: "view_members", object: "body"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      conn = get conn, body_body_path(conn, :show_members, body.id), query: "some_really_long_query_that_matches_nothing"
+      assert res = json_response(conn, 200)["data"]
+
+      assert res == []
+    end
   end
 
   describe "update body membership" do
