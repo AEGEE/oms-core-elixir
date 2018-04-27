@@ -333,17 +333,13 @@
   function ListCircleMembershipsController($http, $scope) {
     var vm = this;
 
-    vm.loadMembers = () => {
-      $http({
-        url: apiUrl + $scope.url,
-        method: 'GET'
-      }).then((response) => {
-        vm.circle_members = response.data.data;
-      }).catch((error) => {
-        showError(error);
-      })
+    vm.query = ""
+
+    vm.injectParams = (params) => {
+        params.query = vm.query
+        return params;
     }
-    vm.loadMembers();
+    infiniteScroll($http, vm, apiUrl + $scope.url, vm.injectParams);
 
     vm.deleteMembership = (circle_membership) => {
       $http({
@@ -351,7 +347,7 @@
         method: 'DELETE'
       }).then((response) => {
         showSuccess("Membership deleted successfully");
-        vm.loadMembers();
+        vm.resetData();
       }).catch((error) => {
         showError(error);
       })
@@ -369,7 +365,7 @@
         data: {circle_membership: vm.edited_cm}
       }).then((response) => {
         showSuccess("Membership updated successfully");
-        vm.loadMembers();
+        vm.resetData();
         $('#editCMModal').modal('hide');
       }).catch((error) => {
         if(err.status == 422)
