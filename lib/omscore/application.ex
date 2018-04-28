@@ -6,6 +6,12 @@ defmodule Omscore.Application do
   def start(_type, _args) do
     import Supervisor.Spec
 
+    # In test env, use ets to facilitate some interface testing
+    if Application.get_env(:omscore, :env) == :test do
+      :ets.new(:saved_mail, [:duplicate_bag, :public, :named_table])
+      :ets.new(:core_fake_responses, [:set, :public, :named_table])
+    end
+
     # Define workers and child supervisors to be supervised
     children = [
       # Start the Ecto repository
@@ -14,6 +20,7 @@ defmodule Omscore.Application do
       supervisor(OmscoreWeb.Endpoint, []),
       # Start your own worker by calling: Omscore.Worker.start_link(arg1, arg2, arg3)
       # worker(Omscore.Worker, [arg1, arg2, arg3]),
+      worker(Omscore.ExpireTokens, [])
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

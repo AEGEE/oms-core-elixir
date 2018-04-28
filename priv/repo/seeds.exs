@@ -15,6 +15,7 @@ alias Omscore.Members.Member
 alias Omscore.Core
 alias Omscore.Members
 alias Omscore.Repo
+alias Omscore.Auth.User
 
 # Seed permissions
 if Repo.all(Permission) == [] do
@@ -405,6 +406,28 @@ end
 
 # Create test-data so it's possible to experiment with the api without having to boot up the whole system
 if Mix.env() == :dev && Repo.all(Member) == [] do
+  Repo.insert!(%Omscore.Registration.Campaign{
+    name: "Default recruitment campaign",
+    url: "default",
+    active: true,
+    description_short: "Signup to our app!",
+    description_long: "Really, sign up to our app!",
+    activate_user: true,
+  })
+
+  Repo.insert!(%User{
+    name: "admin",
+    email: "admin@aegee.org",
+    active: true,
+    superadmin: true,
+    id: 1
+  } |> User.changeset(%{password: "admin1234"}))
+
+  # By manually using ids we need to update the primary key sequence to not run into random errors later on
+  qry = "SELECT setval('users_id_seq', (SELECT MAX(id) from \"users\"));"
+  Ecto.Adapters.SQL.query!(Repo, qry, [])
+
+
   {:ok, _} = Members.create_member(%{about_me: "I am a microservice. I have a user account so the system can access itself from within, don't delete me.", address: "Europe", date_of_birth: ~D[2010-04-17], first_name: "Microservice", gender: "machine", last_name: "Microservice", phone: "+123456789", user_id: 1})
   {:ok, body} = Core.create_body(%{address: "Dresden", description: "Very prehistoric antenna", email: "info@aegee-dresden.org", legacy_key: "DRE", name: "AEGEE-Dresden", phone: "don't call us"})
   {:ok, circle} = Core.create_circle(%{description: "basically doing nothing", joinable: false, name: "Board AEGEE-Dresden"}, body)

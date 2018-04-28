@@ -17,7 +17,14 @@ end
 
 # General application configuration
 config :omscore,
-  ecto_repos: [Omscore.Repo]
+  ecto_repos: [Omscore.Repo],
+  env: Mix.env,
+  url_prefix: System.get_env("BASE_URL") || "www.oms.eu",
+  ttl_refresh: 60 * 60 * 24 * 7 * 2,  # 2 weeks
+  ttl_access: 60 * 60,                # 1 hour
+  ttl_password_reset: 60 * 15,        # 15 Minutes
+  ttl_mail_confirmation: 60 * 60 * 2, # 2 hours
+  expiry_worker_freq: 5 * 60 * 1000   # 5 Minutes
 
 # Configures the endpoint
 config :omscore, OmscoreWeb.Endpoint,
@@ -34,6 +41,10 @@ config :omscore, Omscore.Guardian,
 config :omscore, Omscore.Interfaces.Loginservice,
   url: "http://oms-loginservice:4000/api",
   user_delete_provider: :do_nothing
+
+config :omscore, Omscore.Interfaces.Mail,
+  from: "alastair@nico-westerbeck.de",
+  sendgrid_key: Helper.read_secret_from_file(System.get_env("SENDGRID_KEY_FILE"), "censored")
 
 # Configures Elixir's Logger
 config :logger, :console,
