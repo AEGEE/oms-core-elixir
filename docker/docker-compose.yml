@@ -22,9 +22,11 @@ services:
         environment:
             JWT_ISSUER: OMS
             JWT_SECRET_KEY_FILE: /run/secrets/jwt_key
+            SENDGRID_KEY_FILE: /run/secrets/sendgrid_key
             DB_HOST: postgres-oms-core-elixir
         secrets:
             - jwt_key
+            - sendgrid_key
 
 
     postgres-oms-core-elixir:

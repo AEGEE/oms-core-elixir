@@ -1,0 +1,31 @@
+<h1 class="page-header">{{ vm.campaign.name }}</h1>
+
+<div class="m-b-40">
+  <table class="table">
+    <tr>
+      <td>Name</td>
+      <td>{{ vm.campaign.name }}</td>
+    </tr>
+    <tr>
+      <td>Description short</td>
+      <td>{{ vm.campaign.description_short }}</td>
+    </tr>
+    <tr>
+      <td>Description long</td>
+      <td>{{ vm.campaign.description_long }}</td>
+    </tr>
+    <tr>
+      <td>URL</td>
+      <td>/signup/{{ vm.campaign.url }}</td>
+    </tr>
+    <tr>
+      <td>Body</td>
+      <td>
+        <span ng-show="vm.campaign.autojoin_body"><a ui-sref="app.bodies.single({id: vm.campaign.autojoin_body.seo_url})">{{ vm.campaign.autojoin_body.name }}</a></span>
+        <span ng-show="!vm.campaign.autojoin_body">This campaign will not create a join request to a body after signup</span>
+      </td>
+    </tr>
+  </table>
+</div>
+
+

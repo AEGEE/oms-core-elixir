@@ -47,7 +47,7 @@
                 if(!value)
                     return;
                 $http({
-                    url: 'services/oms-loginservice/api/users/' + value,
+                    url: apiUrl + '/users/' + value,
                     method: 'GET'
                 }).then(function(response) {
                     scope.fetched_user=response.data.data;

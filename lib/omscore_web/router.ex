@@ -73,9 +73,11 @@ defmodule OmscoreWeb.Router do
 
     delete "/user/:user_id", LoginController, :delete_user
 
-    post "/campaigns", CampaignController, :create
-    put "/campaigns/:id", CampaignController, :update
-    delete "/campaigns/:id", CampaignController, :delete
+    get "/backend_campaigns", CampaignController, :index_full
+    post "/backend_campaigns", CampaignController, :create
+    get "/backend_campaigns/:campaign_id", CampaignController, :show_full
+    put "/backend_campaigns/:id", CampaignController, :update
+    delete "/backend_campaigns/:id", CampaignController, :delete
   end
 
   # Operating on the member, permissions based on the bodies he is part in will be granted

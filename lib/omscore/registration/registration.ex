@@ -9,6 +9,7 @@ defmodule Omscore.Registration do
   alias Omscore.Registration.Campaign
   alias Omscore.Registration.MailConfirmation
   alias Omscore.Registration.Submission
+  alias OmscoreWeb.Helper
 
   @doc """
   Returns the list of campaigns.
@@ -19,8 +20,18 @@ defmodule Omscore.Registration do
       [%Campaign{}, ...]
 
   """
-  def list_campaigns do
-    Repo.all(Campaign)
+  def list_campaigns(params \\ %{}) do
+    from(u in Campaign, order_by: [:name])
+    |> Helper.paginate(params)
+    |> Helper.search(params, [:name, :description_short, :url])
+    |> Repo.all
+  end
+
+  def list_active_campaigns(params \\ %{}) do
+    from(u in Campaign, order_by: [:name], where: u.active == true)
+    |> Helper.paginate(params)
+    |> Helper.search(params, [:name, :description_short, :url])
+    |> Repo.all
   end
 
   @doc """
@@ -133,7 +144,7 @@ defmodule Omscore.Registration do
   end
 
   defp dispatch_confirmation_mail(user, token) do
-    url = Application.get_env(:omscore, :url_prefix) <> "/signup?token=" <> token
+    url = Application.get_env(:omscore, :url_prefix) <> "/confirm_signup?token=" <> token
     Omscore.Interfaces.Mail.send_mail(user.email, "Confirm your email address", 
       "To confirm your email, visit " <> url <> " or copy&paste the token into the form on the website: " <> token)
   end

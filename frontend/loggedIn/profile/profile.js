@@ -4,7 +4,6 @@
 
     const baseUrl = baseUrlRepository['oms-core-elixir'];
     const apiUrl = `${baseUrl}api`;
-    const loginserviceUrl = baseUrlRepository['oms-loginservice'] + "api";
 
     angular
         .module('app.profile', [])
@@ -54,21 +53,12 @@
                 vm.member = response.data.data;
                 vm.member.date_of_birth = new Date(vm.member.date_of_birth);
                 vm.ownProfile = vm.member.id == $rootScope.currentUser.id;
-                vm.getUser(); // Call this here so on missing permissions we get only one error
+                vm.user = vm.member.user;
             }).catch(function(err) {showError(err);});
         }
         vm.getMember();
 
-        vm.getUser = () => {
-            $http({
-                method: 'GET',
-                url: loginserviceUrl + '/user/' + $stateParams.id,
-            })
-            .then(function successCallback(response) {
-                vm.user = response.data.data;
-            }).catch(function(err) {showError(err);});
-        }
-        
+       
 
         vm.showEditProfileModal = function() {
             $('#editProfileModal').modal('show');
@@ -145,7 +135,7 @@
             }
             $http({
                 method: 'PUT',
-                url: loginserviceUrl + '/user',
+                url: apiUrl + '/user',
                 data: data
             })
             .then(function successCallback(response) {
@@ -153,7 +143,6 @@
                 $('#editUserDataModal').modal('hide');
                 showSuccess("Successfully edited user information")
                 authenticate(loginModal, $rootScope, $http, {skipCheckToken: true});
-                vm.getUser();
             }).catch(function(err) {
                 if(err.status == 422)
                     vm.errors = err.data.errors;
@@ -164,7 +153,7 @@
 
         vm.deleteProfile = () => {
             $http({
-                url: apiUrl + '/members/' + $stateParams.id,
+                url: apiUrl + '/user/' + vm.member.user.id,
                 method: 'DELETE'
             }).then((res) => {
                 showSuccess("Member deleted successfully. It might take some time until his login will be deactivated")

@@ -12,8 +12,6 @@ config :omscore, OmscoreWeb.Endpoint,
   code_reloader: true,
   check_origin: false
 
-config :omscore, Omscore.Interfaces.Loginservice,
-  user_delete_provider: :delete_from_loginservice
 # ## SSL Support
 #
 # In order to use HTTPS in development, a self-signed

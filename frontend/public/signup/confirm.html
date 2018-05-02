@@ -1,0 +1,20 @@
+<div class="login-cover">
+  <div class="login-cover-image">
+    <img src="assets/img/login-bg/bg-3.jpg" alt="Background">
+  </div>
+  <div class="login login-v2">
+    <div class="login-content" style="text-align: center;">
+      <h1>Confirm email address</h1>
+      <form name="confirmMailForm" ng-submit="vm.submitToken()">
+        <div class="form-group m-b-10">
+          <label for="token" class="pull-left">Token</label>
+          <input type="text" id="token" class="form-control" ng-model="vm.token" placeholder="Input the token from your mail" required/>
+          <p class="label label-danger" ng-show="vm.errors.token">{{ vm.errors.token }}</p>
+        </div>
+        <hr />
+        <button class="btn btn-primary" type="submit">Submit token</button>
+        <a class="btn btn-white" style="color: #222;" ui-sref="public.signup({campaign_id: vm.campaign_id})" ng-show="vm.campaign_id">Actually... I don't have a token</a>
+      </form>
+    </div>
+  </div>
+</div>

@@ -5,7 +5,7 @@ defmodule Omscore.Repo.Migrations.CreateSubmissions do
     create table(:submissions) do
       add :first_name, :string
       add :last_name, :string
-      add :motivation, :string
+      add :motivation, :text
 
       add :mail_confirmed, :boolean, default: false, null: false
 

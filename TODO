@@ -13,4 +13,9 @@ x Store information alongside with the body membership
 x Searching in body_memberships and circle_memberships
 o Seo_url for bodies and circles
 
+x Fix profile view
+x Fix url in mails
+o Create campaigns frontend view
+o Suspend users request
+
 Idea towards cross-service auth: each service can create his own access tokens which are just cryptographically verified, not whether they were actually handed out by the loginservice. So when a service wants something directly from another service without user interaction, it could generate himself a token to do so...

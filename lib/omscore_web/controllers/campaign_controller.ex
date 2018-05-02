@@ -9,9 +9,16 @@ defmodule OmscoreWeb.CampaignController do
 
 
 
-  def index(conn, _params) do
-    campaigns = Registration.list_campaigns()
-    render(conn, "index.json", campaigns: campaigns)
+  def index(conn, params) do
+    campaigns = Registration.list_active_campaigns(params)
+    render(conn, "index_public.json", campaigns: campaigns)
+  end
+
+  def index_full(conn, params) do
+    campaigns = Registration.list_campaigns(params)
+    with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "view", "campaign") do
+      render(conn, "index.json", campaigns: campaigns)
+    end
   end
 
   def create(conn, %{"campaign" => campaign_params}) do
@@ -25,7 +32,14 @@ defmodule OmscoreWeb.CampaignController do
 
   def show(conn, %{"campaign_url" => campaign_url}) do
     campaign = Registration.get_campaign_by_url!(campaign_url)
-    render(conn, "show.json", campaign: campaign)
+    render(conn, "show_public.json", campaign: campaign)
+  end
+
+  def show_full(conn, %{"campaign_id" => campaign_id}) do
+    campaign = Registration.get_campaign!(campaign_id)
+    with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "view", "campaign") do
+      render(conn, "show.json", campaign: campaign)
+    end
   end
 
   def update(conn, %{"id" => id, "campaign" => campaign_params}) do
@@ -67,7 +81,7 @@ defmodule OmscoreWeb.CampaignController do
          {:ok, _data} <- Registration.send_confirmation_mail(user, submission) do
       conn
       |> put_status(:created)
-      |> render("success.json")
+      |> render("success.json", msg: "Submission recorded successfully")
     else
       {:error, {:unprocessable_entity, %{"errors" => errors}}} -> {:unprocessable_entity, %{errors: errors}}
       {:error, {status, errors}} -> {status, errors}
@@ -79,7 +93,7 @@ defmodule OmscoreWeb.CampaignController do
   def confirm_mail(conn, %{"confirmation_url" => confirmation_url}) do
     confirmation = Registration.get_confirmation_by_url!(confirmation_url)
     with {:ok} <- Registration.confirm_mail(confirmation) do
-      render(conn, "success.json")
+      render(conn, "success.json", msg: "Mail confirmed!")
     end
   end
 end

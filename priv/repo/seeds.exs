@@ -351,7 +351,8 @@ if Repo.all(Permission) == [] do
     object: "member",
     description: "Update any member in the body you got this permission from. Notice that member information is global and several bodies might have the permission to access the same member. Also don't assign it when not necessary, the member can update his own profile anyways."
   })
-
+  
+  # User permissions
   Repo.insert!(%Permission{
     scope: "global",
     action: "delete",
@@ -364,28 +365,6 @@ if Repo.all(Permission) == [] do
     action: "delete",
     object: "user",
     description: "Delete any member in your body from the system. This allows to also delete members that are in other bodies and have a quarrel in that one body with the board admin, so be careful in granting this permission. The member can delete his own profile anyways"
-  })
-
-  # Permissions of the loginservice
-  Repo.insert!(%Permission{
-    scope: "global",
-    action: "create",
-    object: "recruitment_campaign",
-    description: "Create recruitment campaigns through which users can sign into the system."
-  })
-
-  Repo.insert!(%Permission{
-    scope: "global",
-    action: "update",
-    object: "recruitment_campaign",
-    description: "Edit recruitment campaigns"
-  })
-
-  Repo.insert!(%Permission{
-    scope: "global",
-    action: "delete",
-    object: "recruitment_campaign",
-    description: "Delete a recruitment campaign"
   })
 
   Repo.insert!(%Permission{
@@ -401,6 +380,36 @@ if Repo.all(Permission) == [] do
     object: "user",
     description: "Allows to suspend or activate users that are member in the body that you got this permission from"
   })
+
+  # Recruitment campaigns
+  Repo.insert!(%Permission{
+    scope: "global",
+    action: "view",
+    object: "campaign",
+    description: "View all campaigns in the system, no matter if active or not."
+  })
+
+  Repo.insert!(%Permission{
+    scope: "global",
+    action: "create",
+    object: "campaign",
+    description: "Create recruitment campaigns through which users can sign into the system."
+  })
+
+  Repo.insert!(%Permission{
+    scope: "global",
+    action: "update",
+    object: "campaign",
+    description: "Edit recruitment campaigns"
+  })
+
+  Repo.insert!(%Permission{
+    scope: "global",
+    action: "delete",
+    object: "campaign",
+    description: "Delete a recruitment campaign"
+  })
+
 end
 
 

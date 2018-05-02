@@ -21,16 +21,115 @@ defmodule OmscoreWeb.CampaignControllerTest do
     {:ok, conn: put_req_header(conn, "accept", "application/json")}
   end
 
+  defp holds_only_public_data?(campaign) do
+    campaign["id"] == nil && campaign["activate_user"] == nil && campaign["active"] == nil
+  end
+
   describe "index" do
-    test "lists all campaigns", %{conn: conn} do
+    test "lists all active campaigns", %{conn: conn} do
+      campaign1 = campaign_fixture(%{active: true})
+      campaign2 = campaign_fixture(%{active: false, url: "bla"})
+
       conn = get conn, campaign_path(conn, :index)
-      assert json_response(conn, 200)["data"]
+      assert res = json_response(conn, 200)["data"]
+      assert Enum.any?(res, fn(x) -> x["url"] == campaign1.url end)
+      assert !Enum.any?(res, fn(x) -> x["url"] == campaign2.url end)
+      assert Enum.all?(res, fn(x) -> holds_only_public_data?(x) end)
+    end
+
+    test "public version paginates and searches", %{conn: conn} do
+      campaign_fixture(%{active: true, url: "1"})
+      campaign_fixture(%{active: true, url: "2"})
+      campaign_fixture(%{active: true, url: "3"})
+      campaign_fixture(%{active: true, url: "4"})
+
+      conn = get conn, campaign_path(conn, :index), query: "some_endless_query_that_matches_nothing"
+      assert res = json_response(conn, 200)["data"]
+      assert res == []
+
+      conn = get conn, campaign_path(conn, :index), offset: 0, limit: 2
+      assert res = json_response(conn, 200)["data"]
+      assert Enum.count(res) == 2
+    end
+
+    test "backend version lists all campaigns", %{conn: conn} do
+      %{token: access_token} = create_member_with_permissions([%{action: "view", object: "campaign"}])
+      conn = put_req_header(conn, "x-auth-token", access_token)
+
+      campaign1 = campaign_fixture(%{active: true})
+      campaign2 = campaign_fixture(%{active: false, url: "bla"})
+
+      conn = get conn, campaign_path(conn, :index_full)
+      assert res = json_response(conn, 200)["data"]
+      assert Enum.any?(res, fn(x) -> x["id"] == campaign1.id end)
+      assert Enum.any?(res, fn(x) -> x["id"] == campaign2.id end)
+    end
+
+    test "backend version requires permissions", %{conn: conn} do
+      campaign_fixture()
+      %{token: access_token} = create_member_with_permissions([])
+      conn = put_req_header(conn, "x-auth-token", access_token)
+
+      conn = get conn, campaign_path(conn, :index_full)
+      assert json_response(conn, 403)
+    end
+
+
+    test "backend version paginates and searches", %{conn: conn} do
+      campaign_fixture(%{active: true, url: "1"})
+      campaign_fixture(%{active: true, url: "2"})
+      campaign_fixture(%{active: true, url: "3"})
+      campaign_fixture(%{active: true, url: "4"})
+
+      %{token: access_token} = create_member_with_permissions([%{action: "view", object: "campaign"}])
+      conn = put_req_header(conn, "x-auth-token", access_token)
+
+      conn = get conn, campaign_path(conn, :index_full), query: "some_endless_query_that_matches_nothing"
+      assert res = json_response(conn, 200)["data"]
+      assert res == []
+
+      conn = conn
+      |> recycle()
+      |> put_req_header("x-auth-token", access_token)
+
+      conn = get conn, campaign_path(conn, :index_full), offset: 0, limit: 2
+      assert res = json_response(conn, 200)["data"]
+      assert Enum.count(res) == 2
+    end
+  end
+
+  describe "show" do
+    test "public version only shows some things", %{conn: conn} do
+      campaign = campaign_fixture()
+
+      conn = get conn, campaign_path(conn, :show, campaign.url)
+      assert res = json_response(conn, 200)["data"]
+      assert holds_only_public_data?(res)
+    end
+
+    test "backend version also preloads body and submissions", %{conn: conn} do
+      campaign = campaign_fixture()
+      %{token: access_token} = create_member_with_permissions([%{action: "view", object: "campaign"}])
+      conn = put_req_header(conn, "x-auth-token", access_token)
+
+      conn = get conn, campaign_path(conn, :show_full, campaign.id)
+      assert res = json_response(conn, 200)["data"]
+      assert !holds_only_public_data?(res)
+    end
+
+    test "backend version requires permissions", %{conn: conn} do
+      campaign = campaign_fixture()
+      %{token: access_token} = create_member_with_permissions([])
+      conn = put_req_header(conn, "x-auth-token", access_token)
+
+      conn = get conn, campaign_path(conn, :show_full, campaign.id)
+      assert json_response(conn, 403)
     end
   end
 
   describe "create campaign" do
     test "renders campaign when data is valid", %{conn: conn} do
-      %{token: access_token} = create_member_with_permissions([%{action: "create", object: "campaign"}])
+      %{token: access_token} = create_member_with_permissions([%{action: "create", object: "campaign"}, %{action: "view", object: "campaign"}])
       conn = put_req_header(conn, "x-auth-token", access_token)
 
       conn = post conn, campaign_path(conn, :create), campaign: @create_attrs
@@ -40,7 +139,7 @@ defmodule OmscoreWeb.CampaignControllerTest do
       |> recycle()
       |> put_req_header("x-auth-token", access_token)
 
-      conn = get conn, campaign_path(conn, :show, @create_attrs.url)
+      conn = get conn, campaign_path(conn, :show_full, id)
       assert json_response(conn, 200)["data"] |> map_inclusion(%{
         "id" => id,
         "active" => true,
@@ -70,7 +169,7 @@ defmodule OmscoreWeb.CampaignControllerTest do
     setup [:create_campaign]
 
     test "renders campaign when data is valid", %{conn: conn, campaign: %Campaign{id: id} = campaign} do
-      %{token: access_token} = create_member_with_permissions([%{action: "update", object: "campaign"}])
+      %{token: access_token} = create_member_with_permissions([%{action: "update", object: "campaign"}, %{action: "view", object: "campaign"}])
       conn = put_req_header(conn, "x-auth-token", access_token)
 
       conn = put conn, campaign_path(conn, :update, campaign), campaign: @update_attrs
@@ -80,7 +179,7 @@ defmodule OmscoreWeb.CampaignControllerTest do
       |> recycle()
       |> put_req_header("x-auth-token", access_token)
 
-      conn = get conn, campaign_path(conn, :show, @update_attrs.url)
+      conn = get conn, campaign_path(conn, :show_full, id)
       assert json_response(conn, 200)["data"] |> map_inclusion(%{
         "id" => id,
         "active" => true,
@@ -288,7 +387,7 @@ defmodule OmscoreWeb.CampaignControllerTest do
     # Parse the url token from a content which looks like this:
     # To confirm your email, visit www.alastair.com/registration/signup?token=vXMkHWvQETck73sjQpccFDgQQuavIoDZ
 
-    Application.get_env(:omscore, :url_prefix) <> "/signup?token="
+    Application.get_env(:omscore, :url_prefix) <> "/confirm_signup?token="
     |> Regex.escape
     |> Kernel.<>("([^\s]*)")
     |> Regex.compile!

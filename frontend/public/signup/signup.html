@@ -1,0 +1,52 @@
+<div class="login-cover">
+  <div class="login-cover-image">
+    <img src="assets/img/login-bg/bg-3.jpg" alt="Background">
+  </div>
+  <div class="login login-v2">
+    <div class="login-content" style="text-align: center;">
+      <h1>OMS Signup</h1>
+      <form name="signupForm" ng-submit="vm.sendSignup()">
+        <div class="form-group m-b-10">
+          <label for="name" class="pull-left">Username</label>
+          <input type="text" id="name" class="form-control" ng-model="vm.user.name" placeholder="You will be able to login with this" required/>
+          <p class="label label-danger" ng-show="vm.errors.name">{{ vm.errors.name }}</p>
+        </div>
+        <div class="form-group m-b-10">
+          <label for="email" class="pull-left">Email</label>
+          <input type="text" id="email" class="form-control" ng-model="vm.user.email" placeholder="Where should the system send mails" required/>
+          <p class="label label-danger" ng-show="vm.errors.email">{{ vm.errors.email }}</p>
+        </div>
+        <div class="form-group m-b-10">
+          <label for="password" class="pull-left">Password</label>
+          <input type="password" id="password" class="form-control" ng-model="vm.user.password" placeholder="Type a secure password" required/>
+          <input type="password" id="password_copy" class="form-control" ng-model="vm.user.password_copy" placeholder="Repeat password" required />
+          <p class="label label-danger" ng-show="vm.errors.password">{{ vm.errors.password }}</p>
+        </div>
+        <hr />
+        <div class="form-group m-b-10">
+          <label for="first_name" class="pull-left">First name</label>
+          <input type="text" id="first_name" class="form-control" ng-model="vm.user.first_name" placeholder="E.g. Steven" />
+          <p class="label label-danger" ng-show="vm.errors.first_name">{{ vm.errors.first_name }}</p>
+        </div>
+        <div class="form-group m-b-10">
+          <label for="last_name" class="pull-left">Last name</label>
+          <input type="text" id="last_name" class="form-control" ng-model="vm.user.last_name" placeholder="E.g. Hawkins" required/>
+          <p class="label label-danger" ng-show="vm.errors.last_name">{{ vm.errors.last_name }}</p>
+        </div>
+        <div class="form-group m-b-10">
+          <label for="motivation" class="pull-left">Motivation</label>
+          <input type="text" id="motivation" class="form-control" ng-model="vm.user.motivation" placeholder="Explain briefly why you want to be a member" required/>
+          <p class="label label-danger" ng-show="vm.errors.motivation">{{ vm.errors.motivation }}</p>
+        </div>
+        <hr />
+        <div class="form-group">
+          <input class="form-check-input" type="checkbox" ng-model="vm.terms" id="terms">
+          <label for="terms" class="form-check-label">I accept the <a href="" target="_blank">terms and conditions</a></label>
+          <p class="label label-danger" ng-show="vm.errors.terms">{{ vm.errors.terms }}</p>
+        </div>
+        <button class="btn btn-primary" type="submit">Submit</button>
+        <a class="btn btn-white" style="color: #222;" ui-sref="public.confirm_signup({campaign_id: vm.campaign_id})">I have a token</a>
+      </form>
+    </div>
+  </div>
+</div>
