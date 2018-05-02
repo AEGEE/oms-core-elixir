@@ -18,7 +18,7 @@ defmodule OmscoreWeb.FallbackController do
     |> render(OmscoreWeb.ErrorView, "error.json", msg: "Not Found")
   end
 
-  def call(conn, {:error, status, message}) when status in [:forbidden, :not_found, :unprocessable_entity] do
+  def call(conn, {:error, status, message}) when status in [:forbidden, :not_found, :unprocessable_entity, :bad_request] do
     conn
     |> put_status(status)
     |> render(OmscoreWeb.ErrorView, "error.json", msg: message)

@@ -10,14 +10,6 @@ defmodule Omscore.RegistrationTest do
     @update_attrs %{active: true, autojoin_body_id: 2, activate_user: false, name: "some updated name", url: "some_updated_url", description_short: "some updated description"}
     @invalid_attrs %{active: nil, callback_url: nil, name: nil, url: nil}
 
-    def campaign_fixture(attrs \\ %{}) do
-      {:ok, campaign} =
-        attrs
-        |> Enum.into(@valid_attrs)
-        |> Registration.create_campaign()
-
-      campaign
-    end
 
     test "list_campaigns/0 returns all campaigns" do
       campaign = campaign_fixture()

@@ -3,7 +3,7 @@ defmodule Omscore.Repo.Migrations.CreateMembers do
 
   def change do
     create table(:members) do
-      add :user_id, :integer
+      add :user_id, references(:users, on_delete: :delete_all)
       add :first_name, :string
       add :last_name, :string
       add :date_of_birth, :date
@@ -18,8 +18,8 @@ defmodule Omscore.Repo.Migrations.CreateMembers do
     end
 
     create index(:members, [:primary_body_id])
+    create index(:members, [:user_id])
 
     create unique_index(:members, [:seo_url])
-    create unique_index(:members, [:user_id])
   end
 end

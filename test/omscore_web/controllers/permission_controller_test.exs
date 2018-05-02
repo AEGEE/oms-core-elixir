@@ -14,7 +14,7 @@ defmodule OmscoreWeb.PermissionControllerTest do
   end
 
   def create_many_permissions(range) do
-    Enum.map(range, fn(_) -> permission_fixture() end)
+    Enum.map(range, fn(x) -> permission_fixture(%{object: to_string(x)}) end)
   end
 
   setup %{conn: conn} do

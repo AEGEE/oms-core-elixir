@@ -11,6 +11,10 @@ defmodule OmscoreWeb.Router do
     plug OmscoreWeb.PermissionFetchPlug
   end
 
+  pipeline :authorize_bare do
+    plug OmscoreWeb.AuthorizePlug
+  end
+
   pipeline :fetch_body do
     plug OmscoreWeb.BodyFetchPlug
   end
@@ -23,6 +27,26 @@ defmodule OmscoreWeb.Router do
     plug OmscoreWeb.MemberPermissionPlug
   end
 
+  scope "/", OmscoreWeb do
+    pipe_through [:api]
+
+    post "/login", LoginController, :login
+    post "/renew", LoginController, :renew_token
+    get "/user_existence", LoginController, :check_user_existence
+    post "/password_reset", LoginController, :password_reset
+    post "/confirm_reset_password/:reset_url", LoginController, :confirm_password_reset
+
+  end
+
+  scope "/", OmscoreWeb do
+    pipe_through [:api, :authorize_bare]
+
+    get "/user", LoginController, :user_data
+    put "/user", LoginController, :edit_user
+    delete "/user/:member_id", LoginController, :delete_user
+    post "/logout", LoginController, :logout
+    post "/logout/all", LoginController, :logout_all
+  end
 
   scope "/", OmscoreWeb do
     pipe_through [:api, :authorize]

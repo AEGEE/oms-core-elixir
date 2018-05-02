@@ -9,34 +9,10 @@ defmodule Omscore.HelpersTest do
   def create_many_members(id_range) do
     id_range
     |> Enum.map(fn(x) -> 
-      {:ok, member} = Members.create_member(@create_attrs |> Map.put(:user_id, x))
-      member
+      member_fixture(@create_attrs |> Map.put(:user_id, x))
     end)
   end
 
-  def member_fixture(attrs \\ %{}) do
-    attrs = Enum.into(attrs, @create_attrs)
-    {:ok, member} = Members.create_member(attrs |> Map.put(:user_id, :rand.uniform(1000000)))
-
-    member
-  end
-
-  def member_fixture_ex(attrs) do
-    attrs = Enum.into(attrs, @create_attrs)
-    {:ok, member} = Members.create_member(attrs)
-
-    member
-  end
-
-  @circle_attrs %{description: "some description", joinable: true, name: "some name"}
-  def circle_fixture(attrs \\ %{}) do
-    {:ok, circle} =
-      attrs
-      |> Enum.into(@circle_attrs)
-      |> Omscore.Core.create_circle()
-
-    circle
-  end
 
   describe "search" do
     test "searches case-insensitively in passed fields" do
@@ -60,9 +36,9 @@ defmodule Omscore.HelpersTest do
     end
 
     test "combines gracefully with a previous where clause" do
-      member1 = member_fixture_ex(%{first_name: "Hans", last_name: "Peter", user_id: 1})
-      member_fixture_ex(%{first_name: "Hans", last_name: "Gollum", user_id: 2})
-      member_fixture_ex(%{first_name: "Hans", last_name: "Sonstewer", user_id: 3})
+      member1 = member_fixture(%{first_name: "Hans", last_name: "Peter", user_id: 1})
+      member_fixture(%{first_name: "Hans", last_name: "Gollum", user_id: 2})
+      member_fixture(%{first_name: "Hans", last_name: "Sonstewer", user_id: 3})
 
       res = from(u in Members.Member, where: u.user_id != 1)
       |> Helper.search(%{"query" => "hans"}, [:first_name])

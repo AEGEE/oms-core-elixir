@@ -10,14 +10,6 @@ defmodule Omscore.CoreTest do
     @update_attrs %{action: "some updated action", description: "some updated description", object: "some updated object", scope: "local"}
     @invalid_attrs %{action: nil, description: nil, object: nil, scope: nil}
 
-    def permission_fixture(attrs \\ %{}) do
-      {:ok, permission} =
-        attrs
-        |> Enum.into(@valid_attrs)
-        |> Core.create_permission()
-
-      permission
-    end
 
     test "list_permissions/0 returns all permissions" do
       permission = permission_fixture()
@@ -145,14 +137,6 @@ defmodule Omscore.CoreTest do
     @update_attrs %{address: "some updated address", description: "some updated description", email: "some updated email", legacy_key: "some updated legacy_key", name: "some updated name", phone: "some updated phone"}
     @invalid_attrs %{address: nil, description: nil, email: nil, legacy_key: nil, name: nil, phone: nil}
 
-    def body_fixture(attrs \\ %{}) do
-      {:ok, body} =
-        attrs
-        |> Enum.into(@valid_attrs)
-        |> Core.create_body()
-
-      body
-    end
 
     test "list_bodies/0 returns all bodies" do
       body = body_fixture()
@@ -220,14 +204,6 @@ defmodule Omscore.CoreTest do
     @update_attrs %{description: "some updated description", joinable: false, name: "some updated name"}
     @invalid_attrs %{description: nil, joinable: nil, name: nil}
 
-    def circle_fixture(attrs \\ %{}) do
-      {:ok, circle} =
-        attrs
-        |> Enum.into(@valid_attrs)
-        |> Core.create_circle()
-
-      circle
-    end
 
     test "list_circles/0 returns all circles" do
       circle = circle_fixture()

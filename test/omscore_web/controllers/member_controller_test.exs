@@ -15,8 +15,7 @@ defmodule OmscoreWeb.MemberControllerTest do
   def create_many_members(id_range) do
     id_range
     |> Enum.map(fn(x) -> 
-      {:ok, member} = Members.create_member(@create_attrs |> Map.put(:user_id, x))
-      member
+      member_fixture(@create_attrs |> Map.put(:user_id, x))
     end)
   end
 
@@ -79,7 +78,9 @@ defmodule OmscoreWeb.MemberControllerTest do
       %{token: token} = create_member_with_permissions([%{action: "create", object: "member"}, %{action: "view", object: "member"}])
       conn = put_req_header(conn, "x-auth-token", token)
 
-      conn = post conn, member_path(conn, :create), member: @create_attrs
+      user = user_fixture()
+
+      conn = post conn, member_path(conn, :create), member: Map.put(@create_attrs, :user_id, user.id)
       assert %{"id" => id} = json_response(conn, 201)["data"]
 
       conn = recycle(conn) |> put_req_header("x-auth-token", token)
@@ -94,7 +95,7 @@ defmodule OmscoreWeb.MemberControllerTest do
         "gender" => "some gender",
         "last_name" => "some last_name",
         "phone" => "+1212345678",
-        "user_id" => 42})
+        "user_id" => user.id})
     end
 
     test "renders errors when data is invalid", %{conn: conn} do
@@ -232,6 +233,7 @@ defmodule OmscoreWeb.MemberControllerTest do
       assert res["join_requests"] != nil
       assert res["circle_memberships"] != nil
       assert res["body_memberships"] != nil
+      #assert res["user_data"] != nil
     end
 
     test "rejects request for unauthorized user", %{conn: conn, member: member} do
@@ -371,7 +373,7 @@ defmodule OmscoreWeb.MemberControllerTest do
   end
 
   defp create_member(_) do
-    member = fixture(:member)
+    member = member_fixture()
     {:ok, member: member}
   end
 end
