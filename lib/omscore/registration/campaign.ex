@@ -6,12 +6,12 @@ defmodule Omscore.Registration.Campaign do
   schema "campaigns" do
     field :active, :boolean, default: false
     field :activate_user, :boolean, default: false
-    field :autojoin_body_id, :integer
     field :name, :string
     field :description_short, :string
     field :description_long, :string
     field :url, :string
 
+    belongs_to(:autojoin_body, Omscore.Core.Body)
     has_many(:submissions, Omscore.Registration.Submission)
 
     timestamps()
@@ -24,5 +24,6 @@ defmodule Omscore.Registration.Campaign do
     |> validate_required([:name, :url, :active, :description_short])
     |> validate_format(:url, ~r/^[A-Za-z0-9_-]*$/)
     |> unique_constraint(:url)
+    |> foreign_key_constraint(:autojoin_body_id)
   end
 end

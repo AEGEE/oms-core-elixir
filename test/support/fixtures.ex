@@ -141,10 +141,17 @@ defmodule OmscoreWeb.Fixtures do
   
   @user_attrs %{email: "some@email.com", name: "some name", password: "some password", active: true, superadmin: false}
   def user_fixture(attrs \\ %{}) do
-    {:ok, user} =
-      attrs
-      |> Enum.into(@user_attrs)
-      |> Omscore.Auth.create_user()
+    attrs = attrs
+    |> Enum.into(@user_attrs)
+
+    {:ok, user} = attrs
+    |> Omscore.Auth.create_user()
+
+    {:ok, user} = Omscore.Auth.update_user_superadmin(user, attrs.superadmin)
+
+    if attrs[:member_id] do
+      Omscore.Auth.update_user_member_id(user, attrs.member_id)
+    end
 
     # Fetch separately because otherwise the password would stick around in the map
     Omscore.Repo.get!(Omscore.Auth.User, user.id)
@@ -160,12 +167,18 @@ defmodule OmscoreWeb.Fixtures do
     campaign
   end
 
-  def submission_fixture(), do: submission_fixture(user_fixture())
-  def submission_fixture(user) do
-    campaign = campaign_fixture()
-    attrs = %Omscore.Registration.Submission{responses: "ast", user_id: user.id, campaign_id: campaign.id}
-    Omscore.Repo.insert!(attrs)
+  @submission_attrs %{first_name: "some first_name", last_name: "some last_name", motivation: "some motivation"}
+  def submission_fixture(%Omscore.Auth.User{} = user, %Omscore.Registration.Campaign{} = campaign, attrs) do
+    attrs = attrs
+    |> Enum.into(@submission_attrs)
+
+    {:ok, submission} = Omscore.Registration.create_submission(campaign, user, attrs)
+    submission
   end
+  def submission_fixture(%Omscore.Auth.User{} = user, %Omscore.Registration.Campaign{} = campaign), do: submission_fixture(user, campaign, %{})
+  def submission_fixture(%Omscore.Auth.User{} = user), do: submission_fixture(user, campaign_fixture(), %{})
+  def submission_fixture(attrs), do: submission_fixture(user_fixture(), campaign_fixture(), attrs)
+  def submission_fixture(), do: submission_fixture(user_fixture(), campaign_fixture(), %{})
 
   def token_fixture(time \\ Ecto.DateTime.utc()) do
     user = user_fixture()

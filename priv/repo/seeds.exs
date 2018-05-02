@@ -432,7 +432,7 @@ if Mix.env() == :dev && Repo.all(Member) == [] do
   {:ok, body} = Core.create_body(%{address: "Dresden", description: "Very prehistoric antenna", email: "info@aegee-dresden.org", legacy_key: "DRE", name: "AEGEE-Dresden", phone: "don't call us"})
   {:ok, circle} = Core.create_circle(%{description: "basically doing nothing", joinable: false, name: "Board AEGEE-Dresden"}, body)
   {:ok, circle2} = Core.create_circle(%{description: "This is the toplevel circle for all boards in the system", joinable: false, name: "General board circle"})
-  {:ok, circle3} = Core.create_circle(%{description: "IT-interested people in the system", joinable: true, name: "IT interest group"})
+  {:ok, _circle3} = Core.create_circle(%{description: "IT-interested people in the system", joinable: true, name: "IT interest group"})
   {:ok, circle4} = Core.create_circle(%{description: "This circle holds all permissions in the system and thus effectively makes you superadmin", name: "Superadmins", joinable: false})
   {:ok, _} = Core.put_parent_circle(circle, circle2)
   {:ok, permission1} = Repo.all(Permission) |> Core.search_permission_list("view_full", "member", "local")

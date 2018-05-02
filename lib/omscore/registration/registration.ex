@@ -113,19 +113,16 @@ defmodule Omscore.Registration do
     hash = Omscore.hash_without_salt(confirmation_url)
 
     Repo.get_by!(MailConfirmation, url: hash)
-    |> Repo.preload([submission: [:campaign, :user]])
   end
 
   def get_submission!(submission_id), do: Repo.get!(Submission, submission_id)
 
-  def create_submission(campaign, user, responses) do
-    attrs = %{responses: responses,
+  def create_submission(campaign, user, submission_attrs) do
+    %Submission{
       user_id: user.id,
       campaign_id: campaign.id
     }
-
-    %Submission{}
-    |> Submission.changeset(attrs)
+    |> Submission.changeset(submission_attrs)
     |> Repo.insert()
   end
 
@@ -155,17 +152,28 @@ defmodule Omscore.Registration do
   end
 
   def confirm_mail(confirmation) do
+    confirmation = confirmation
+    |> Repo.preload([submission: [campaign: [:autojoin_body], user: []]])
+
     confirmation.submission
     |> Submission.changeset(%{mail_confirmed: true})
     |> Repo.update!
 
+    {:ok, member} = Omscore.Members.create_member(%{first_name: confirmation.submission.first_name, 
+                                                    last_name: confirmation.submission.last_name,
+                                                    user_id: confirmation.submission.user.id})
+
+    {:ok, user} = Omscore.Auth.update_user_member_id(confirmation.submission.user, member.id)
+
     if confirmation.submission.campaign.activate_user do
-      confirmation.submission.user
+      user
       |> Omscore.Auth.User.changeset(%{active: true})
       |> Repo.update!
     end
 
-    #Omscore.Interfaces.UserActivationAction.user_activation_action(confirmation.submission)
+    if confirmation.submission.campaign.autojoin_body_id do
+      Omscore.Members.create_join_request(confirmation.submission.campaign.autojoin_body, member, %{motivation: confirmation.submission.motivation})
+    end
 
     confirmation 
     |> Repo.delete!

@@ -44,10 +44,7 @@ defmodule Omscore.ExpireTokensTest do
 
     assert {:ok, user} = Omscore.Auth.update_user_member_id(user, 1)
 
-    :ets.insert(:core_fake_responses, {:member_delete, {:ok}})
-
-    {deletes, fails} = Omscore.ExpireTokens.expire_mail_confirmations()
-    assert fails == []
+    deletes = Omscore.ExpireTokens.expire_mail_confirmations()
     assert deletes != []
 
     assert_raise Ecto.NoResultsError, fn -> Repo.get!(Omscore.Auth.User, user.id) end

@@ -3,7 +3,10 @@ defmodule Omscore.Repo.Migrations.CreateSubmissions do
 
   def change do
     create table(:submissions) do
-      add :responses, :string
+      add :first_name, :string
+      add :last_name, :string
+      add :motivation, :string
+
       add :mail_confirmed, :boolean, default: false, null: false
 
       add :user_id, references(:users, on_delete: :delete_all)

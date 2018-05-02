@@ -6,8 +6,8 @@ defmodule Omscore.RegistrationTest do
   describe "campaigns" do
     alias Omscore.Registration.Campaign
 
-    @valid_attrs %{active: true, autojoin_body_id: 1, activate_user: true, name: "some name", url: "some_url", description_short: "short description"}
-    @update_attrs %{active: true, autojoin_body_id: 2, activate_user: false, name: "some updated name", url: "some_updated_url", description_short: "some updated description"}
+    @valid_attrs %{active: true, autojoin_body_id: nil, activate_user: true, name: "some name", url: "some_url", description_short: "short description"}
+    @update_attrs %{active: true, activate_user: false, name: "some updated name", url: "some_updated_url", description_short: "some updated description"}
     @invalid_attrs %{active: nil, callback_url: nil, name: nil, url: nil}
 
     test "list_campaigns/0 returns all campaigns" do
@@ -34,7 +34,7 @@ defmodule Omscore.RegistrationTest do
       assert {:ok, %Campaign{} = campaign} = Registration.create_campaign(@valid_attrs)
       assert campaign.active == true
       assert campaign.activate_user == true
-      assert campaign.autojoin_body_id == 1
+      assert campaign.autojoin_body_id == nil
       assert campaign.name == "some name"
       assert campaign.url == "some_url"
     end
@@ -54,11 +54,12 @@ defmodule Omscore.RegistrationTest do
  
     test "update_campaign/2 with valid data updates the campaign" do
       campaign = campaign_fixture()
-      assert {:ok, campaign} = Registration.update_campaign(campaign, @update_attrs)
+      body = body_fixture()
+      assert {:ok, campaign} = Registration.update_campaign(campaign, @update_attrs |> Map.put(:autojoin_body_id, body.id))
       assert %Campaign{} = campaign
       assert campaign.active == true
       assert campaign.activate_user == false
-      assert campaign.autojoin_body_id == 2
+      assert campaign.autojoin_body_id == body.id
       assert campaign.name == "some updated name"
       assert campaign.url == "some_updated_url"
     end
@@ -82,12 +83,23 @@ defmodule Omscore.RegistrationTest do
   end
 
   describe "submission" do
-    test "create submission" do
+    @valid_attrs %{first_name: "some first_name", last_name: "some last_name", motivation: "some motivation"}
+    @invalid_attrs %{first_name: nil, last_name: nil, motivation: nil}
+
+    test "create with valid attrs creates submission" do
       campaign = campaign_fixture()
       user = user_fixture()
 
-      assert {:ok, submission} = Registration.create_submission(campaign, user, "")
-      assert Registration.get_submission!(submission.id)
+      assert {:ok, submission} = Registration.create_submission(campaign, user, @valid_attrs)
+      assert submission = Registration.get_submission!(submission.id)
+      assert submission |> map_inclusion(@valid_attrs)
+    end
+
+    test "create with invalid attrs throws an error" do
+      campaign = campaign_fixture()
+      user = user_fixture()
+
+      assert {:error, _} = Registration.create_submission(campaign, user, @invalid_attrs)
     end
 
     test "create confirmation object creates a confirmation object" do
@@ -130,6 +142,30 @@ defmodule Omscore.RegistrationTest do
       assert_raise Ecto.NoResultsError, fn -> Registration.get_confirmation!(confirmation.id) end
       user = Omscore.Auth.get_user!(submission.user_id)
       assert user.active == true
+    end
+
+    test "confirm_mail/1 also creates a member object and a join request if that was specified in the campaign" do
+      body = body_fixture()
+      campaign = campaign_fixture(%{activate_user: false, autojoin_body_id: body.id})
+      user = user_fixture(%{active: false})
+      submission = submission_fixture(user, campaign, %{first_name: "hans", last_name: "peter", motivation: "tralala"})
+      assert {:ok, confirmation, url} = Registration.create_confirmation_object(submission)
+
+      assert {:ok} = Registration.confirm_mail(Registration.get_confirmation_by_url!(url))
+
+      submission = Registration.get_submission!(submission.id)
+      assert submission.mail_confirmed == true
+      assert_raise Ecto.NoResultsError, fn -> Registration.get_confirmation!(confirmation.id) end
+      user = Omscore.Auth.get_user!(submission.user_id)
+      assert user.active == false
+
+      assert user.member_id
+      assert member = Omscore.Members.get_member!(user.member_id)
+      assert member.first_name == "hans"
+      assert member.last_name == "peter"
+
+      assert jr = Omscore.Members.get_join_request(body, member)
+      assert jr.motivation == "tralala"
     end
   end
 end

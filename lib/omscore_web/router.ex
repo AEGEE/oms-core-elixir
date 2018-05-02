@@ -37,6 +37,10 @@ defmodule OmscoreWeb.Router do
     post "/password_reset", LoginController, :password_reset
     post "/confirm_reset_password/:reset_url", LoginController, :confirm_password_reset
 
+    get "/campaigns", CampaignController, :index
+    get "/campaigns/:campaign_url", CampaignController, :show
+    post "/campaigns/:campaign_url", CampaignController, :submit
+    post "/confirm_mail/:confirmation_url", CampaignController, :confirm_mail
   end
 
   # For user-based request, don't fetch anything from the db but just validate the token
@@ -68,6 +72,10 @@ defmodule OmscoreWeb.Router do
     post "/tokens/user", MemberController, :show_by_token
 
     delete "/user/:user_id", LoginController, :delete_user
+
+    post "/campaigns", CampaignController, :create
+    put "/campaigns/:id", CampaignController, :update
+    delete "/campaigns/:id", CampaignController, :delete
   end
 
   # Operating on the member, permissions based on the bodies he is part in will be granted
