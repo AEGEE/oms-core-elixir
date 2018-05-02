@@ -22,10 +22,16 @@ defmodule OmscoreWeb.Fixtures do
     }
 
     user_attrs = Enum.into(user_attrs, default_user_attrs)
-    %Omscore.Auth.User{id: user_attrs.id} 
+    user = %Omscore.Auth.User{id: user_attrs.id} 
     |> Omscore.Auth.User.changeset(user_attrs)
     |> Omscore.Repo.insert!
+
+    qry = "SELECT setval('users_id_seq', (SELECT MAX(id) from \"users\"));"
+    Ecto.Adapters.SQL.query!(Omscore.Repo, qry, [])
+
     {:ok, member} = Omscore.Members.create_member(attrs)
+
+    Omscore.Auth.update_user_member_id(user, member.id)
 
     member
   end
@@ -154,7 +160,8 @@ defmodule OmscoreWeb.Fixtures do
     campaign
   end
 
-   def submission_fixture(user) do
+  def submission_fixture(), do: submission_fixture(user_fixture())
+  def submission_fixture(user) do
     campaign = campaign_fixture()
     attrs = %Omscore.Registration.Submission{responses: "ast", user_id: user.id, campaign_id: campaign.id}
     Omscore.Repo.insert!(attrs)

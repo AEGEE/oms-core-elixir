@@ -10,7 +10,6 @@ defmodule Omscore.RegistrationTest do
     @update_attrs %{active: true, autojoin_body_id: 2, activate_user: false, name: "some updated name", url: "some_updated_url", description_short: "some updated description"}
     @invalid_attrs %{active: nil, callback_url: nil, name: nil, url: nil}
 
-
     test "list_campaigns/0 returns all campaigns" do
       campaign = campaign_fixture()
       assert Registration.list_campaigns() |> Enum.any?(fn(x) -> x == campaign end)
@@ -79,6 +78,58 @@ defmodule Omscore.RegistrationTest do
     test "change_campaign/1 returns a campaign changeset" do
       campaign = campaign_fixture()
       assert %Ecto.Changeset{} = Registration.change_campaign(campaign)
+    end
+  end
+
+  describe "submission" do
+    test "create submission" do
+      campaign = campaign_fixture()
+      user = user_fixture()
+
+      assert {:ok, submission} = Registration.create_submission(campaign, user, "")
+      assert Registration.get_submission!(submission.id)
+    end
+
+    test "create confirmation object creates a confirmation object" do
+      submission = submission_fixture()
+
+      assert {:ok, confirmation, url} = Registration.create_confirmation_object(submission)
+      assert confirmation = Registration.get_confirmation!(confirmation.id)
+      # Don't store the url in plaintext
+      assert confirmation.url != url
+      assert_raise Ecto.NoResultsError, fn -> Registration.get_confirmation_by_url!(confirmation.url) end
+      assert Registration.get_confirmation_by_url!(url)
+    end
+
+    test "send_confirmation_mail/2 creates a confirmation object and sends a confirmation mail" do
+      user = user_fixture(%{active: false})
+      submission = submission_fixture(user)
+      :ets.delete_all_objects(:saved_mail)
+
+      assert {:ok, confirmation} = Registration.send_confirmation_mail(user, submission)
+      assert Registration.get_confirmation!(confirmation.id)
+
+      assert :ets.lookup(:saved_mail, user.email)
+    end
+
+    test "confirm_mail/1 activates the user, sets the mail confirmation flag and deletes the confirmation object" do
+      user = user_fixture(%{active: false})
+      submission = submission_fixture(user)
+      assert {:ok, confirmation, url} = Registration.create_confirmation_object(submission)
+
+      submission = Registration.get_submission!(submission.id)
+      assert submission.mail_confirmed == false
+      assert Registration.get_confirmation!(confirmation.id)
+      user = Omscore.Auth.get_user!(submission.user_id)
+      assert user.active == false
+
+      assert {:ok} = Registration.confirm_mail(Registration.get_confirmation_by_url!(url))
+      
+      submission = Registration.get_submission!(submission.id)
+      assert submission.mail_confirmed == true
+      assert_raise Ecto.NoResultsError, fn -> Registration.get_confirmation!(confirmation.id) end
+      user = Omscore.Auth.get_user!(submission.user_id)
+      assert user.active == true
     end
   end
 end

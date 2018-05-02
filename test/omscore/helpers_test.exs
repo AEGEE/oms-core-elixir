@@ -18,7 +18,7 @@ defmodule Omscore.HelpersTest do
     test "searches case-insensitively in passed fields" do
       member1 = member_fixture(%{first_name: "Hans", last_name: "Peter"})
       member2 = member_fixture(%{first_name: "Jürgen", last_name: "Vollpfosten"})
-      create_many_members(0..30)
+      create_many_members(1..31)
 
       res = from(u in Members.Member)
       |> Helper.search(%{"query" => "hans"}, [:first_name, :last_name])
@@ -117,7 +117,7 @@ defmodule Omscore.HelpersTest do
 
   describe "paginate" do
     test "limits results" do
-      create_many_members(0..30)
+      create_many_members(1..30)
 
       res = from(u in Members.Member)
       |> Helper.paginate(%{"limit" => "10", "offset" => "0"})
@@ -127,7 +127,7 @@ defmodule Omscore.HelpersTest do
     end
 
     test "offsets results" do
-      create_many_members(0..30)
+      create_many_members(1..30)
 
       res = from(u in Members.Member, order_by: u.user_id)
       |> Helper.paginate(%{"limit" => "10", "offset" => "5"})

@@ -186,7 +186,7 @@ defmodule OmscoreWeb.PlugTest do
     assert conn.assigns.target_member == conn.assigns.member
     assert Enum.any?(conn.assigns.permissions, fn(x) -> x.action == "view_full" && x.object == "member" end)
     assert Enum.any?(conn.assigns.permissions, fn(x) -> x.action == "update" && x.object == "member" end)
-    assert Enum.any?(conn.assigns.permissions, fn(x) -> x.action == "delete" && x.object == "member" end)
+    assert Enum.any?(conn.assigns.permissions, fn(x) -> x.action == "delete" && x.object == "user" end)
   end
 
   test "raises when trying to fetch unknown member", %{conn: conn} do

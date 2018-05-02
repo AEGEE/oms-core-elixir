@@ -355,14 +355,14 @@ if Repo.all(Permission) == [] do
   Repo.insert!(%Permission{
     scope: "global",
     action: "delete",
-    object: "member",
+    object: "user",
     description: "Remove an account from the system. Don't assign this as any member can delete his own account anyways."
   })
 
   Repo.insert!(%Permission{
     scope: "local",
     action: "delete",
-    object: "member",
+    object: "user",
     description: "Delete any member in your body from the system. This allows to also delete members that are in other bodies and have a quarrel in that one body with the board admin, so be careful in granting this permission. The member can delete his own profile anyways"
   })
 

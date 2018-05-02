@@ -233,7 +233,7 @@ defmodule OmscoreWeb.MemberControllerTest do
       assert res["join_requests"] != nil
       assert res["circle_memberships"] != nil
       assert res["body_memberships"] != nil
-      #assert res["user_data"] != nil
+      assert res["user"] != nil
     end
 
     test "rejects request for unauthorized user", %{conn: conn, member: member} do
@@ -331,44 +331,6 @@ defmodule OmscoreWeb.MemberControllerTest do
 
       conn = put conn, member_path(conn, :update, member.id), member: @invalid_attrs
       assert json_response(conn, 422)["errors"] != %{}
-    end
-  end
-
-  describe "delete member" do
-    setup [:create_member]
-
-    test "deletes chosen member", %{conn: conn, member: member} do
-      %{token: token} = create_member_with_permissions([%{action: "view", object: "member"}, %{action: "delete", object: "member"}])
-      conn = put_req_header(conn, "x-auth-token", token)
-
-      conn = delete conn, member_path(conn, :delete, member)
-      assert response(conn, 204)
-
-      conn = recycle(conn) |> put_req_header("x-auth-token", token)
-
-      assert_error_sent 404, fn ->
-        get conn, member_path(conn, :show, member.id)
-      end
-    end
-
-    test "deletes own account even without permission", %{conn: conn} do
-      %{token: token, member: member} = create_member_with_permissions([%{action: "view", object: "member"}])
-      conn = put_req_header(conn, "x-auth-token", token)
-
-      conn = delete conn, member_path(conn, :delete, member.id)
-      assert response(conn, 204)
-
-      assert_raise Ecto.NoResultsError, fn ->
-        Members.get_member!(member.id)
-      end
-    end
-
-    test "reject request for unauthorized user", %{conn: conn, member: member} do
-      %{token: token} = create_member_with_permissions([])
-      conn = put_req_header(conn, "x-auth-token", token)
-
-      conn = delete conn, member_path(conn, :delete, member.id)
-      assert json_response(conn, 403)
     end
   end
 

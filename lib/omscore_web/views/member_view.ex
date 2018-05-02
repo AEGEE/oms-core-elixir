@@ -29,6 +29,7 @@ defmodule OmscoreWeb.MemberView do
       circle_memberships: Helper.render_assoc_many(member.circle_memberships, OmscoreWeb.CircleMembershipView, "circle_membership.json"),
       bodies: Helper.render_assoc_many(member.bodies, OmscoreWeb.BodyView, "body.json"),
       body_memberships: Helper.render_assoc_many(member.body_memberships, OmscoreWeb.BodyMembershipView, "body_membership.json"),
-      join_requests: Helper.render_assoc_many(member.join_requests, OmscoreWeb.JoinRequestView, "join_request.json")}
+      join_requests: Helper.render_assoc_many(member.join_requests, OmscoreWeb.JoinRequestView, "join_request.json"),
+      user: Helper.render_assoc_one(member.user, OmscoreWeb.LoginView, "user_data.json")}
   end
 end

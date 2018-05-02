@@ -276,67 +276,60 @@ defmodule OmscoreWeb.LoginControllerTest do
     assert json_response(conn, 422)
   end
 
-  test "superadmin can delete users", %{conn: conn} do
-    user_fixture(%{name: "admin1", password: "admin1234", email: "admin1@admin.com"})
-    |> Auth.update_user_superadmin(true)
+  describe "delete user" do
+    test "deletes chosen user", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "view", object: "member"}, %{action: "delete", object: "user"}])
+      conn = put_req_header(conn, "x-auth-token", token)
 
-    user = user_fixture()
-    |> Auth.update_user_member_id(2)
-    |> Kernel.elem(1)
+      member = member_fixture()
 
-    conn = post conn, login_path(conn, :login), username: "admin1", password: "admin1234"
-    assert access = json_response(conn, 200)["access_token"]
+      conn = delete conn, login_path(conn, :delete_user, member.user_id)
+      assert response(conn, 204)
 
-    conn = conn
-    |> recycle()
-    |> put_req_header("x-auth-token", access)
+      conn = recycle(conn) |> put_req_header("x-auth-token", token)
 
-    conn = delete conn, login_path(conn, :delete_user, 2)
-    assert response(conn, 204)
+      assert_error_sent 404, fn ->
+        get conn, member_path(conn, :show, member.id)
+      end
+    end
 
-    assert_raise Ecto.NoResultsError, fn -> Auth.get_user!(user.id) end
+    test "deletes own account even without permission", %{conn: conn} do
+      %{token: token, member: member} = create_member_with_permissions([%{action: "view", object: "member"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      conn = delete conn, login_path(conn, :delete_user, member.user_id)
+      assert response(conn, 204)
+
+      assert_raise Ecto.NoResultsError, fn ->
+        Omscore.Members.get_member!(member.id)
+      end
+    end
+
+    test "also deletes user object", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "delete", object: "user"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      member = member_fixture(%{user_id: 7})
+      assert Omscore.Auth.get_user!(7)
+      
+      conn = delete conn, login_path(conn, :delete_user, member.user_id)
+      assert response(conn, 204)
+
+      assert_raise Ecto.NoResultsError, fn ->
+        Omscore.Auth.get_user!(7)
+      end
+    end
+
+    test "reject request for unauthorized user", %{conn: conn} do
+      member = member_fixture()
+      %{token: token} = create_member_with_permissions([])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      conn = delete conn, login_path(conn, :delete_user, member.user_id)
+      assert json_response(conn, 403)
+    end
   end
 
-  test "non-superadmins are rejected user deletion", %{conn: conn} do
-    user_fixture(%{superadmin: false, name: "admin1", password: "admin1234", email: "admin1@admin.com"})
-    user = user_fixture()
-    |> Auth.update_user_member_id(2)
-    |> Kernel.elem(1)
-
-    conn = post conn, login_path(conn, :login), username: "admin1", password: "admin1234"
-    assert access = json_response(conn, 200)["access_token"]
-
-    conn = conn
-    |> recycle()
-    |> put_req_header("x-auth-token", access)
-
-    conn = delete conn, login_path(conn, :delete_user, 2)
-    assert json_response(conn, 403)
-    assert Auth.get_user!(user.id)
-  end
-
-  test "can not delete another superadmin", %{conn: conn} do
-    user_fixture(%{name: "admin1", password: "admin1234", email: "admin1@admin.com"})
-    |> Auth.update_user_superadmin(true)
-
-    user = user_fixture()
-    |> Auth.update_user_member_id(2)
-    |> Kernel.elem(1)
-    |> Auth.update_user_superadmin(true)
-    |> Kernel.elem(1)
-
-    conn = post conn, login_path(conn, :login), username: "admin1", password: "admin1234"
-    assert access = json_response(conn, 200)["access_token"]
-
-    conn = conn
-    |> recycle()
-    |> put_req_header("x-auth-token", access)
-
-    conn = delete conn, login_path(conn, :delete_user, 2)
-    assert json_response(conn, 403)
-
-    assert Auth.get_user!(user.id)
-  end
 
   defp parse_url_from_mail({_, _, content, _}) do
     # Parse the url token from a content which looks like this:

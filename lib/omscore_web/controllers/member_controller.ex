@@ -37,7 +37,8 @@ defmodule OmscoreWeb.MemberController do
                              circle_memberships: [:circle], 
                              bodies: [], 
                              circles: [], 
-                             primary_body: []])
+                             primary_body: [],
+                             user: []])
     
     render(conn, "show.json", member: member)
   end
@@ -102,16 +103,6 @@ defmodule OmscoreWeb.MemberController do
     with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "update", "member"),
          {:ok, %Member{} = member} <- Members.update_member(member, member_params) do
       render(conn, "show.json", member: member)
-    end
-  end
-
-  def delete(conn, _params) do
-    member = conn.assigns.target_member
-
-    with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "delete", "member"),
-         {:ok} <- Omscore.Interfaces.Loginservice.delete_user(member.id),
-         {:ok, %Member{}} <- Members.delete_member(member) do
-      send_resp(conn, :no_content, "")
     end
   end
 end

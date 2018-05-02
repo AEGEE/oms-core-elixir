@@ -108,12 +108,15 @@ defmodule Omscore.Registration do
     Campaign.changeset(campaign, %{})
   end
 
+  def get_confirmation!(confirmation_id), do: Repo.get!(MailConfirmation, confirmation_id)
   def get_confirmation_by_url!(confirmation_url) do
     hash = Omscore.hash_without_salt(confirmation_url)
 
     Repo.get_by!(MailConfirmation, url: hash)
     |> Repo.preload([submission: [:campaign, :user]])
   end
+
+  def get_submission!(submission_id), do: Repo.get!(Submission, submission_id)
 
   def create_submission(campaign, user, responses) do
     attrs = %{responses: responses,
@@ -138,7 +141,7 @@ defmodule Omscore.Registration do
       "To confirm your email, visit " <> url <> " or copy&paste the token into the form on the website: " <> token)
   end
 
-  defp create_confirmation_object(submission) do
+  def create_confirmation_object(submission) do
     url = Omscore.random_url()
 
     res = %MailConfirmation{}

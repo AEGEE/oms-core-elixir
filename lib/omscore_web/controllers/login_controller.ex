@@ -37,15 +37,6 @@ defmodule OmscoreWeb.LoginController do
   end
 
 
-  # Requesting another users data requires you to have the permission to do that from the core
-  #def user_data_foreign(conn, %{"member_id" => member_id}) do
-  #  with {:ok, data} <- Omscore.Interfaces.MemberFetch.fetch_member(conn.assigns.access_token, member_id),
-  #       {:ok, user_id} <- parse_core_members_response(data),
-  #       user <- Auth.get_user!(user_id) do
-  #    render(conn, "user.json", user: user)
-  #  end
-  #end
-
   # With provided password the user can also edit his password
   def edit_user(conn, %{"user" => user_params, "old_password" => old_password}) when not(is_nil(old_password)) do
     user_params = Map.delete(user_params, "active")
@@ -83,25 +74,16 @@ defmodule OmscoreWeb.LoginController do
     end
   end
 
-  defp check_superadmin(user, true) do
-    if user.superadmin do
-      {:ok}
-    else
-      {:forbidden, "Only superadmins can delete other users"}
-    end
-  end
-  defp check_superadmin(user, false) do
-    if user.superadmin do
-      {:forbidden, "You can not delete other superadmins"}
-    else
-      {:ok}
-    end
-  end
+  def delete_user(conn, %{"user_id" => user_id}) do
+    user = Auth.get_user!(user_id)
 
-  def delete_user(conn, %{"member_id" => member_id}) do
-    user = Auth.get_user_by_member_id!(member_id)
-    with {:ok} <- check_superadmin(conn.assigns.user, true),
-         {:ok} <- check_superadmin(user, false),
+    conn = if user.member_id do
+      OmscoreWeb.MemberPermissionPlug.call(Map.put(conn, :path_params, %{"member_id" => user.member_id}), [])
+    else
+      conn
+    end
+
+    with {:ok, _} <- Omscore.Core.search_permission_list(conn.assigns.permissions, "delete", "user"),
          {:ok, _} <- Auth.delete_user(user) do
       send_resp(conn, :no_content, "")
     end

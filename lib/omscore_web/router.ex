@@ -43,7 +43,6 @@ defmodule OmscoreWeb.Router do
 
     get "/user", LoginController, :user_data
     put "/user", LoginController, :edit_user
-    delete "/user/:member_id", LoginController, :delete_user
     post "/logout", LoginController, :logout
     post "/logout/all", LoginController, :logout_all
   end
@@ -64,6 +63,8 @@ defmodule OmscoreWeb.Router do
 
     # Compatibility request to the old core
     post "/tokens/user", MemberController, :show_by_token
+
+    delete "/user/:user_id", LoginController, :delete_user
   end
 
   scope "/members/:member_id", OmscoreWeb do
@@ -71,7 +72,6 @@ defmodule OmscoreWeb.Router do
 
     get "/", MemberController, :show
     put "/", MemberController, :update
-    delete "/", MemberController, :delete
   end
 
   scope "/circles/:circle_id", OmscoreWeb do

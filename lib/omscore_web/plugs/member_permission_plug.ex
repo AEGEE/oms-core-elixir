@@ -25,7 +25,7 @@ defmodule OmscoreWeb.MemberPermissionPlug do
   # If fetching own permissions, just add some things to the permission list
   @additional_permissions [%Permission{action: "view_full", object: "member", scope: "member"},
                            %Permission{action: "update", object: "member", scope: "member"},
-                           %Permission{action: "delete", object: "member", scope: "member"}]
+                           %Permission{action: "delete", object: "user", scope: "member"}]
   def process_myself(conn) do
     permissions = Enum.into(conn.assigns.permissions, @additional_permissions)
     conn 
