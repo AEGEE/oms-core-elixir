@@ -334,6 +334,25 @@ defmodule OmscoreWeb.MemberControllerTest do
     end
   end
 
+  describe "index permissions" do
+    test "lists permissions a user has over another user", %{conn: conn} do
+      body = body_fixture()
+      circle = bound_circle_fixture(body)
+      permission = permission_fixture()
+      assert {:ok, _} = Omscore.Core.put_circle_permissions(circle, [permission])
+      %{token: token, member: member1} = create_member_with_permissions([])
+      assert {:ok, _} = Omscore.Members.create_body_membership(body, member1)
+      assert {:ok, _} = Omscore.Members.create_circle_membership(circle, member1)
+      member2 = member_fixture()
+
+      conn = put_req_header(conn, "x-auth-token", token)
+      conn = get conn, member_path(conn, :index_permissions, member2.id)
+      assert res = json_response(conn, 200)["data"]
+
+      assert Enum.any?(res, fn(x) -> x["id"] == permission.id end)
+    end
+  end
+
   defp create_member(_) do
     member = member_fixture()
     {:ok, member: member}

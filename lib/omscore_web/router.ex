@@ -27,6 +27,7 @@ defmodule OmscoreWeb.Router do
     plug OmscoreWeb.MemberPermissionPlug
   end
 
+  # Public requests without api authentication
   scope "/", OmscoreWeb do
     pipe_through [:api]
 
@@ -38,6 +39,7 @@ defmodule OmscoreWeb.Router do
 
   end
 
+  # For user-based request, don't fetch anything from the db but just validate the token
   scope "/", OmscoreWeb do
     pipe_through [:api, :authorize_bare]
 
@@ -47,6 +49,7 @@ defmodule OmscoreWeb.Router do
     post "/logout/all", LoginController, :logout_all
   end
 
+  # More complex requests require the requesting user to have a member object so permissions can be granted
   scope "/", OmscoreWeb do
     pipe_through [:api, :authorize]
     resources "/permissions", PermissionController, except: [:new, :edit]
@@ -67,13 +70,16 @@ defmodule OmscoreWeb.Router do
     delete "/user/:user_id", LoginController, :delete_user
   end
 
+  # Operating on the member, permissions based on the bodies he is part in will be granted
   scope "/members/:member_id", OmscoreWeb do
     pipe_through [:api, :authorize, :fetch_member]
 
     get "/", MemberController, :show
     put "/", MemberController, :update
+    get "/my_permissions", MemberController, :index_permissions
   end
 
+  # In case the circle is bound, additional permissions through the body it is bound to will be granted
   scope "/circles/:circle_id", OmscoreWeb do
     pipe_through [:api, :authorize, :fetch_circle]
 
@@ -92,6 +98,7 @@ defmodule OmscoreWeb.Router do
     put "/permissions", CircleController, :put_permissions
   end
 
+  # Body-based request add permissions the user has in the body
   scope "/bodies/:body_id", OmscoreWeb, as: :body do
     pipe_through [:api, :authorize, :fetch_body]
 

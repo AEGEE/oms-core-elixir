@@ -105,4 +105,8 @@ defmodule OmscoreWeb.MemberController do
       render(conn, "show.json", member: member)
     end
   end
+
+  def index_permissions(conn, _params) do
+    render(conn, OmscoreWeb.PermissionView, "index.json", permissions: conn.assigns.permissions)
+  end
 end
