@@ -25,7 +25,7 @@ defmodule OmscoreWeb.BodyController do
   end
 
   def show(conn, _params) do
-    body = conn.assigns.body |> Omscore.Repo.preload([:circles])
+    body = conn.assigns.body |> Omscore.Repo.preload([:circles, :shadow_circle])
 
     with {:ok, %Core.Permission{filters: filters}} <- Core.search_permission_list(conn.assigns.permissions, "view", "body") do
       render(conn, "show.json", body: body, filters: filters)

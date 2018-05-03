@@ -130,6 +130,7 @@
         vm.body = {};
         vm.countries = [];
         vm.body_types = [];
+        vm.single_view = true;
 
         vm.getBody = function(id) {
             $http({
@@ -198,7 +199,6 @@
               showError(error);
           });
         }
-
         
         vm.joinBody = () => {
             $('#joinRequestModal').modal('show');
@@ -219,6 +219,38 @@
                     showError(error);
             })
         }
+
+        vm.fetchCircles = (query, timeout) => {
+          return $http({
+            url: apiUrl + '/bodies/' + $stateParams.id + '/circles',
+            method: 'GET',
+            params: {
+              limit: 8,
+              offset: 0,
+              query: query
+            },
+            transformResponse: appendHttpResponseTransform($http.defaults.transformResponse, function (res) {
+              if(res && res.data) {
+                return res.data;
+              } else {
+                return [];
+              }
+            }),
+            timeout: timeout,
+          });
+        }
+
+        vm.assignShadowCircle = ($item) => {
+            if($item) {
+                vm.body.shadow_circle = $item.originalObject;
+                vm.body.shadow_circle_id = vm.body.shadow_circle.id;
+            }
+            else {
+                vm.body.shadow_circle = null;
+                vm.body.shadow_circle_id = null;
+            }
+        }
+
     }
 
     function BodyJoinRequestsController($http, $stateParams) {

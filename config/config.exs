@@ -39,7 +39,7 @@ config :omscore, Omscore.Guardian,
   secret_key: Helper.read_secret_from_file(System.get_env("JWT_SECRET_KEY_FILE"), "rrSTfyfvFlFj1JCl8QW/ritOLKzIncRPC5ic0l0ENVUoiSIPBCDrdU6Su5vZHngY")
 
 config :omscore, Omscore.Interfaces.Mail,
-  from: "alastair@nico-westerbeck.de",
+  from: "oms@aegee.org",
   sendgrid_key: Helper.read_secret_from_file(System.get_env("SENDGRID_KEY_FILE"), "censored"),
   mail_service: :sendgrid
 
