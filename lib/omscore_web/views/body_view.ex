@@ -10,7 +10,7 @@ defmodule OmscoreWeb.BodyView do
 
     %{success: true, data: data}
   end
-  def render("index.json", %{bodies: bodies}), do: render("index.json", %{bodies: bodies, filters: []})
+  #def render("index.json", %{bodies: bodies}), do: render("index.json", %{bodies: bodies, filters: []})
 
   def render("show.json", %{body: body, filters: filters}) do
     data = body
@@ -30,7 +30,8 @@ defmodule OmscoreWeb.BodyView do
       address: body.address,
       description: body.description,
       legacy_key: body.legacy_key,
-      circles: Helper.render_assoc_many(body.circles, OmscoreWeb.CircleView, "circle.json")
+      circles: Helper.render_assoc_many(body.circles, OmscoreWeb.CircleView, "circle.json"),
+      shadow_circle: Helper.render_assoc_one(body.shadow_circle, OmscoreWeb.CircleView, "circle.json")
     }
   end
 end

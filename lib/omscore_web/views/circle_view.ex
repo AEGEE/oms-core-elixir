@@ -10,7 +10,7 @@ defmodule OmscoreWeb.CircleView do
 
     %{success: true, data: data}
   end
-  def render("index.json", %{circles: circles}), do: render("index.json", %{circles: circles, filters: []})
+  #def render("index.json", %{circles: circles}), do: render("index.json", %{circles: circles, filters: []})
 
   def render("show.json", %{circle: circle, filters: filters}) do
     data = circle

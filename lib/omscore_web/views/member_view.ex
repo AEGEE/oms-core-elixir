@@ -10,7 +10,7 @@ defmodule OmscoreWeb.MemberView do
 
     %{success: true, data: data}
   end
-  def render("index.json", %{members: members}), do: render("index.json", %{members: members, filters: []})
+  #def render("index.json", %{members: members}), do: render("index.json", %{members: members, filters: []})
 
   def render("show.json", %{member: member, filters: filters}) do
     data = member

@@ -25,7 +25,30 @@
         <span ng-show="!vm.campaign.autojoin_body">This campaign will not create a join request to a body after signup</span>
       </td>
     </tr>
+    <tr>
+      <td>Activate User</td>
+      <td>
+        <span ng-show="vm.campaign.activate_user">User will be activated automatically after mail confirmation</span>
+        <span ng-show="!vm.campaign.activate_user">User will remain inactive even after mail confirmation</span>
+      </td>
+    </tr>
+    <tr>
+      <td>Status</td>
+      <td>
+        <span ng-show="vm.campaign.active">Active</span>
+        <span ng-show="!vm.campaign.active">Inactive</span>
+      </td>
+    </tr>
   </table>
 </div>
+
+
+<button class="btn btn-warning" type="button" ng-click="vm.showEditModal()">Edit Campaign</button>
+<button class="btn btn-danger" type="button" ng-click="vm.deleteCampaign()">Delete Campaign</button>
+
+<ng-include src="vm.baseUrl + 'loggedIn/campaigns/edit_campaign_form.html'"></ng-include>
+
+
+
 
 

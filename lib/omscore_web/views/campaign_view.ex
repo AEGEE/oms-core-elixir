@@ -26,7 +26,7 @@ defmodule OmscoreWeb.CampaignView do
 
     %{success: true, data: data}
   end
-  def render("index.json", %{campaigns: campaigns}), do: render("index.json", %{campaigns: campaigns, filters: []})
+  #def render("index.json", %{campaigns: campaigns}), do: render("index.json", %{campaigns: campaigns, filters: []})
 
   def render("show.json", %{campaign: campaign, filters: filters}) do
     data = campaign

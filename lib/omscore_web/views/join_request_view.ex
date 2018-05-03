@@ -10,7 +10,7 @@ defmodule OmscoreWeb.JoinRequestView do
 
     %{success: true, data: data}
   end
-  def render("index.json", %{join_requests: join_requests}), do: render("index.json", %{join_requests: join_requests, filters: []})
+  #def render("index.json", %{join_requests: join_requests}), do: render("index.json", %{join_requests: join_requests, filters: []})
 
   def render("show.json", %{join_request: join_request, filters: filters}) do
     data = join_request

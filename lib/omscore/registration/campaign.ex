@@ -22,7 +22,7 @@ defmodule Omscore.Registration.Campaign do
     campaign
     |> cast(attrs, [:name, :url, :active, :activate_user, :autojoin_body_id, :description_long, :description_short])
     |> validate_required([:name, :url, :active, :description_short])
-    |> validate_format(:url, ~r/^[A-Za-z0-9_-]*$/)
+    |> validate_format(:url, ~r/^[A-Za-z0-9_-]*$/, message: "no special characters allowed in url")
     |> unique_constraint(:url)
     |> foreign_key_constraint(:autojoin_body_id)
   end

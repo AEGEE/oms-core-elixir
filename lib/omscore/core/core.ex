@@ -200,6 +200,10 @@ defmodule Omscore.Core do
 
   # Creates a body.
   def create_body(attrs \\ %{}) do
+    attrs = attrs
+    |> Map.delete(:shadow_circle_id)
+    |> Map.delete("shadow_circle_id")
+
     %Body{}
     |> Body.changeset(attrs)
     |> Repo.insert()

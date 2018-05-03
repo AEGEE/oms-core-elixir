@@ -22,7 +22,7 @@ defmodule Omscore.Core.Permission do
     |> cast(attrs, [:scope, :action, :object, :description, :always_assigned])
     |> cast_embed(:filters)
     |> validate_required([:scope, :action, :object])
-    |> validate_inclusion(:scope, ["global", "local"])
+    |> validate_inclusion(:scope, ["global", "local"], message: "must be either global or local")
     |> validate_format(:scope, ~r/^[^:]*$/, message: "Cannot contain colons")
     |> validate_format(:action, ~r/^[^:]*$/, message: "Cannot contain colons")
     |> validate_format(:object, ~r/^[^:]*$/, message: "Cannot contain colons")

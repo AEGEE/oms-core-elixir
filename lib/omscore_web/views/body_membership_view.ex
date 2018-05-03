@@ -11,7 +11,7 @@ defmodule OmscoreWeb.BodyMembershipView do
 
     %{success: true, data: data}
   end
-  def render("index.json", %{body_memberships: body_memberships}), do: render("index.json", %{body_memberships: body_memberships, filters: []})
+  #def render("index.json", %{body_memberships: body_memberships}), do: render("index.json", %{body_memberships: body_memberships, filters: []})
 
   def render("show.json", %{body_membership: body_membership, filters: filters}) do
     data = body_membership

@@ -233,6 +233,12 @@ defmodule Omscore.CoreTest do
       assert body.phone == "some phone"
     end
 
+    test "create_body/1 ignores shadow_circle_id" do
+      circle = circle_fixture()
+      assert {:ok, %Body{} = body} = Core.create_body(@valid_attrs |> Map.put(:shadow_circle_id, circle.id))
+      assert body.shadow_circle_id == nil
+    end
+
     test "create_body/1 with invalid data returns error changeset" do
       assert {:error, %Ecto.Changeset{}} = Core.create_body(@invalid_attrs)
     end
@@ -247,6 +253,20 @@ defmodule Omscore.CoreTest do
       assert body.legacy_key == "some updated legacy_key"
       assert body.name == "some updated name"
       assert body.phone == "some updated phone"
+    end
+
+    test "update_body/2 can update the shadow_circle" do
+      body = body_fixture()
+      circle = bound_circle_fixture(body)
+      assert {:ok, body} = Core.update_body(body, %{shadow_circle_id: circle.id})
+      assert %Body{} = body
+      assert body.shadow_circle_id == circle.id
+    end
+
+    test "update_body/2 won't assign a circle outside the body as shadow circle" do
+      body = body_fixture()
+      circle = circle_fixture()
+      assert {:error, _} = Core.update_body(body, %{shadow_circle_id: circle.id})
     end
 
     test "update_body/2 with invalid data returns error changeset" do
