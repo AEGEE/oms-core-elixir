@@ -131,15 +131,24 @@ defmodule Omscore.Members do
   def approve_join_request(%JoinRequest{} = join_request) do
     Repo.transaction fn ->
       join_request = join_request
-      |> Repo.preload([:body, :member])
+      |> Repo.preload([body: [:shadow_circle], member: []])
       |> JoinRequest.changeset(%{})
       |> Ecto.Changeset.put_change(:approved, true)
       |> Repo.update!()
 
-      case create_body_membership(join_request.body, join_request.member) do
+      membership = case create_body_membership(join_request.body, join_request.member) do
         {:ok, membership} -> membership # Repo.transaction will wrap it in an {:ok, bm} tuple
         {:error, msg} -> Repo.rollback(msg)
       end
+
+      if join_request.body.shadow_circle != nil do
+        case create_circle_membership(join_request.body.shadow_circle, join_request.member) do
+          {:ok, _} -> :ok
+          {:error, msg} -> Repo.rollback(msg)
+        end
+      end
+
+      membership
     end
   end
 

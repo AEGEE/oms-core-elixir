@@ -233,6 +233,21 @@ defmodule Omscore.MembersTest do
       assert Omscore.Core.get_body_members(body) |> Enum.any?(fn(x) -> x.id == member.id end)
     end
 
+    test "approve_join_request/1 also adds the user to the shadow_circle in case there is one" do
+      {join_request, body, member} = join_request_fixture()
+      circle = bound_circle_fixture(body)
+      {:ok, body} = Omscore.Core.update_body(body, %{shadow_circle_id: circle.id})
+      assert body.shadow_circle_id != nil
+
+      join_request = Members.get_join_request!(join_request.id)
+
+      assert {:ok, body_membership} = Members.approve_join_request(join_request)
+      assert join_request = Members.get_join_request!(join_request.id)
+      assert join_request.approved == true
+      assert Members.get_body_membership!(body_membership.id)
+      assert Members.get_circle_membership(circle, member) != nil
+    end
+
     test "approve_join_request/1 cancels in case somehow the user already got a body membership" do
       {join_request, body, member} = join_request_fixture()
       assert {:ok, _} = Members.create_body_membership(body, member)
