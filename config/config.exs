@@ -43,6 +43,10 @@ config :omscore, Omscore.Interfaces.Mail,
   sendgrid_key: Helper.read_secret_from_file(System.get_env("SENDGRID_KEY_FILE"), "censored"),
   mail_service: :sendgrid
 
+config :omscore, Omscore.Mailer,
+  adapter: Bamboo.SendgridAdapter,
+  api_key: Helper.read_secret_from_file(System.get_env("SENDGRID_KEY_FILE"), "censored")
+
 # Configures Elixir's Logger
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",

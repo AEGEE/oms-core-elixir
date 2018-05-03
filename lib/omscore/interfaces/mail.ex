@@ -1,31 +1,21 @@
 defmodule Omscore.Interfaces.Mail do
+  import Bamboo.Email
+
   def send_mail(to, subject, content, content_type \\ "text/plain") do
     mail_service = Application.get_env(:omscore, Omscore.Interfaces.Mail)[:mail_service]
     apply(Omscore.Interfaces.Mail, mail_service, [to, subject, content, content_type])
   end
 
-  def sendgrid(to, subject, content, content_type) do
-    data = %{
-      personalizations: [%{
-        to: [%{email: to}],
-        subject: subject
-      }],
-      from: %{email: Application.get_env(:omscore, Omscore.Interfaces.Mail)[:from]}, 
-      content: [%{
-        type: content_type,
-        value: content
-      }]
-    } 
-
-    case HTTPoison.post("https://api.sendgrid.com/v3/mail/send", Poison.encode!(data), [{"Authorization", "Bearer " <> Application.get_env(:omscore, Omscore.Interfaces.Mail)[:sendgrid_key]}, {"Content-Type", "application/json"}]) do
-      {:ok, %HTTPoison.Response{status_code: 202}} -> {:ok}
-      {:ok, %HTTPoison.Response{status_code: 400} = res} -> 
-        IO.inspect(res)
-        {:error, "Could not send mail, sendgrid token might be malconfigured"}
-      res ->
-        IO.inspect(res) 
-        {:error, "Could not send mail for unknown reason"}
-    end
+  def sendgrid(to, subject, content, _content_type) do
+    new_email(
+      to: to,
+      from: Application.get_env(:omscore, Omscore.Interfaces.Mail)[:from],
+      subject: subject,
+      html_body: content
+    )
+    |> Omscore.Mailer.deliver_later
+    
+    {:ok}
   end
 
   def consoleout(to, subject, content, content_type) do
