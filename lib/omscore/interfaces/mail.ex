@@ -19,8 +19,12 @@ defmodule Omscore.Interfaces.Mail do
 
     case HTTPoison.post("https://api.sendgrid.com/v3/mail/send", Poison.encode!(data), [{"Authorization", "Bearer " <> Application.get_env(:omscore, Omscore.Interfaces.Mail)[:sendgrid_key]}, {"Content-Type", "application/json"}]) do
       {:ok, %HTTPoison.Response{status_code: 202}} -> {:ok}
-      {:ok, %HTTPoison.Response{status_code: 400}} -> {:error, "Could not send mail, sendgrid token might be malconfigured"}
-      _ -> {:error, "Could not send mail for unknown reason"}
+      {:ok, %HTTPoison.Response{status_code: 400} = res} -> 
+        IO.inspect(res)
+        {:error, "Could not send mail, sendgrid token might be malconfigured"}
+      res ->
+        IO.inspect(res) 
+        {:error, "Could not send mail for unknown reason"}
     end
   end
 
