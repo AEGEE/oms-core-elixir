@@ -16,8 +16,8 @@ defmodule OmscoreWeb.CampaignController do
 
   def index_full(conn, params) do
     campaigns = Registration.list_campaigns(params)
-    with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "view", "campaign") do
-      render(conn, "index.json", campaigns: campaigns)
+    with {:ok, %Core.Permission{filters: filters}} <- Core.search_permission_list(conn.assigns.permissions, "view", "campaign") do
+      render(conn, "index.json", campaigns: campaigns, filters: filters)
     end
   end
 
@@ -37,15 +37,17 @@ defmodule OmscoreWeb.CampaignController do
 
   def show_full(conn, %{"campaign_id" => campaign_id}) do
     campaign = Registration.get_campaign!(campaign_id)
-    with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "view", "campaign") do
-      render(conn, "show.json", campaign: campaign)
+    |> Omscore.Repo.preload([:submissions, :autojoin_body])
+    with {:ok, %Core.Permission{filters: filters}} <- Core.search_permission_list(conn.assigns.permissions, "view", "campaign") do
+      render(conn, "show.json", campaign: campaign, filters: filters)
     end
   end
 
   def update(conn, %{"id" => id, "campaign" => campaign_params}) do
     campaign = Registration.get_campaign!(id)
 
-    with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "update", "campaign"),
+    with {:ok, %Core.Permission{filters: filters}} <- Core.search_permission_list(conn.assigns.permissions, "update", "campaign"),
+        campaign_params = Core.apply_attribute_filters(campaign_params, filters),
         {:ok, %Campaign{} = campaign} <- Registration.update_campaign(campaign, campaign_params) do
       render(conn, "show.json", campaign: campaign)
     end

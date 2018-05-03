@@ -3,13 +3,25 @@ defmodule OmscoreWeb.BodyMembershipView do
   alias OmscoreWeb.BodyMembershipView
   alias OmscoreWeb.Helper
 
-  def render("index.json", %{body_memberships: body_memberships}) do
-    %{success: true, data: render_many(body_memberships, BodyMembershipView, "body_membership.json")}
-  end
 
-  def render("show.json", %{body_membership: body_membership}) do
-    %{success: true, data: render_one(body_membership, BodyMembershipView, "body_membership.json")}
+  def render("index.json", %{body_memberships: body_memberships, filters: filters}) do
+    data = body_memberships
+    |> render_many(BodyMembershipView, "body_membership.json")
+    |> Omscore.Core.apply_attribute_filters(filters)
+
+    %{success: true, data: data}
   end
+  def render("index.json", %{body_memberships: body_memberships}), do: render("index.json", %{body_memberships: body_memberships, filters: []})
+
+  def render("show.json", %{body_membership: body_membership, filters: filters}) do
+    data = body_membership
+    |> render_one(BodyMembershipView, "body_membership.json")
+    |> Omscore.Core.apply_attribute_filters(filters)
+
+    %{success: true, data: data}
+  end
+  def render("show.json", %{body_membership: body_membership}), do: render("show.json", %{body_membership: body_membership, filters: []})
+
 
   def render("body_membership.json", %{body_membership: body_membership}) do
     %{id: body_membership.id,

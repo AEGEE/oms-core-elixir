@@ -6,6 +6,11 @@ defmodule OmscoreWeb.LoginControllerTest do
   alias Omscore.Auth
   alias Omscore.Repo
 
+  setup %{conn: conn} do
+    Omscore.Repo.delete_all(Omscore.Core.Permission)
+    {:ok, conn: put_req_header(conn, "accept", "application/json")}
+  end
+
   test "successful login delivers access and refresh token", %{conn: conn} do
     user_fixture()
 

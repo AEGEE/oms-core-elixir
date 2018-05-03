@@ -20,6 +20,7 @@ defmodule OmscoreWeb.MemberControllerTest do
   end
 
   setup %{conn: conn} do
+    Omscore.Repo.delete_all(Omscore.Core.Permission)
     {:ok, conn: put_req_header(conn, "accept", "application/json")}
   end
 
@@ -70,6 +71,17 @@ defmodule OmscoreWeb.MemberControllerTest do
 
       conn = get conn, member_path(conn, :index)
       assert json_response(conn, 403)
+    end
+
+    test "works with filtered permissions", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "view", object: "member", filters: [%{field: "id"}]}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      create_many_members(0..100)
+
+      conn = get conn, member_path(conn, :index)
+      assert res = json_response(conn, 200)["data"]
+      assert Enum.all?(res, fn(x) -> !Map.has_key?(x, "id") end)
     end
   end
 
@@ -203,24 +215,9 @@ defmodule OmscoreWeb.MemberControllerTest do
       assert res == json_response(conn, 200)["data"]
     end
 
-    test "shows restricted member data when having restricted permission to view that member", %{conn: conn, member: member} do
-      %{token: token} = create_member_with_permissions([%{action: "view", object: "member"}])
-      conn = put_req_header(conn, "x-auth-token", token)
-
-      conn = get conn, member_path(conn, :show, member.id)
-      assert res = json_response(conn, 200)["data"]
-
-      assert res["id"] == member.id
-      assert res["first_name"] == member.first_name
-      assert res["bodies"] == nil
-      assert res["circles"] == nil
-      assert res["join_requests"] == nil
-      assert res["circle_memberships"] == nil
-      assert res["body_memberships"] == nil
-    end
-
+    
     test "shows unrestricted member data when having unrestricted permission to view that member", %{conn: conn, member: member} do
-      %{token: token} = create_member_with_permissions([%{action: "view_full", object: "member"}])
+      %{token: token} = create_member_with_permissions([%{action: "view", object: "member"}])
       conn = put_req_header(conn, "x-auth-token", token)
 
       conn = get conn, member_path(conn, :show, member.id)
@@ -245,7 +242,7 @@ defmodule OmscoreWeb.MemberControllerTest do
     end
 
     test "show by token shows another member by the token", %{conn: conn} do
-      %{token: token1} = create_member_with_permissions([%{action: "view_full", object: "member"}])
+      %{token: token1} = create_member_with_permissions([%{action: "view", object: "member"}])
       %{token: token2, member: member2} = create_member_with_permissions([])
       conn = put_req_header(conn, "x-auth-token", token1)
 
@@ -271,6 +268,16 @@ defmodule OmscoreWeb.MemberControllerTest do
 
       conn = post conn, member_path(conn, :show_by_token), token: "some invalid token"
       assert json_response(conn, 422)
+    end
+
+    test "works with filtered permissions", %{conn: conn, member: member} do
+      %{token: token} = create_member_with_permissions([%{action: "view", object: "member", filters: [%{field: "user"}]}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      conn = get conn, member_path(conn, :show, member.id)
+      assert res = json_response(conn, 200)["data"] 
+
+      assert !Map.has_key?(res, "user")
     end
   end
 
@@ -331,6 +338,30 @@ defmodule OmscoreWeb.MemberControllerTest do
 
       conn = put conn, member_path(conn, :update, member.id), member: @invalid_attrs
       assert json_response(conn, 422)["errors"] != %{}
+    end
+
+    test "works with filtered permissions", %{conn: conn, member: member} do
+      %{token: token} = create_member_with_permissions([%{action: "view", object: "member"}, %{action: "update", object: "member", filters: [%{field: "address"}]}])
+      conn = put_req_header(conn, "x-auth-token", token)
+      id = member.id
+
+      conn = put conn, member_path(conn, :update, id), member: @update_attrs
+      assert %{"id" => ^id} = json_response(conn, 200)["data"]
+
+      conn = recycle(conn) |> put_req_header("x-auth-token", token)
+
+      conn = get conn, member_path(conn, :show, id)
+
+      assert %{
+        "id" => ^id,
+        "about_me" => "some updated about_me",
+        "address" => "some address",
+        "date_of_birth" => "2011-05-18",
+        "first_name" => "some updated first_name",
+        "gender" => "some updated gender",
+        "last_name" => "some updated last_name",
+        "phone" => "+1212345679",
+        "seo_url" => "some_updated_seo_url"} = json_response(conn, 200)["data"]
     end
   end
 

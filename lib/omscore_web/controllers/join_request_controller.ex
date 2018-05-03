@@ -10,9 +10,9 @@ defmodule OmscoreWeb.JoinRequestController do
   def index(conn, params) do
     body = conn.assigns.body
 
-    with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "view", "join_request") do
+    with {:ok, %Core.Permission{filters: filters}} <- Core.search_permission_list(conn.assigns.permissions, "view", "join_request") do
       join_requests = Members.list_join_requests(body, params)
-      render(conn, "index.json", join_requests: join_requests)
+      render(conn, "index.json", join_requests: join_requests, filters: filters)
     end
   end
 
@@ -30,8 +30,8 @@ defmodule OmscoreWeb.JoinRequestController do
   def show(conn, %{"id" => id}) do
     join_request = Members.get_join_request!(id) |> Omscore.Repo.preload([:body, :member])
     with {:ok} <- validate_same_body(join_request, conn.assigns.body),
-         {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "view", "join_request") do
-      render(conn, "show.json", join_request: join_request)
+         {:ok, %Core.Permission{filters: filters}} <- Core.search_permission_list(conn.assigns.permissions, "view", "join_request") do
+      render(conn, "show.json", join_request: join_request, filters: filters)
     end
   end
 

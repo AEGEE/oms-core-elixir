@@ -153,8 +153,7 @@ if Repo.all(Permission) == [] do
     scope: "global", 
     action: "join",
     object: "circle",
-    description: "Allows to join circles which are joinable. Non-joinable circles can never be joined",
-    always_assigned: true
+    description: "Allows to join circles which are joinable. Non-joinable circles can never be joined"
   })
 
   Repo.insert!(%Permission{
@@ -314,21 +313,7 @@ if Repo.all(Permission) == [] do
     scope: "local",
     action: "view",
     object: "member",
-    description: "View basic information about all members in the body. This does not allow you to perform a members listing, you might however hold the list body_memberships permission"
-  })
-
-  Repo.insert!(%Permission{
-    scope: "global",
-    action: "view_full",
-    object: "member",
-    description: "View all details of any member in the system. Assign this role to trusted persons only to avoid disclosure."
-  })
-
-  Repo.insert!(%Permission{
-    scope: "local",
-    action: "view_full",
-    object: "member",
-    description: "View all details of any member in the body that you got this permission from"
+    description: "View information about all members in the body. This does not allow you to perform a members listing, you might however hold the list:body_memberships permission to perform a members listing of the members in the body"
   })
 
   Repo.insert!(%Permission{

@@ -60,6 +60,20 @@ defmodule OmscoreWeb.JoinRequestControllerTest do
       assert res = json_response(conn, 200)["data"]
       assert res == []
     end
+
+    test "works with filtered permissions", %{conn: conn} do
+      member = member_fixture()
+      body = body_fixture()
+      assert {:ok, jr} = Members.create_join_request(body, member, %{motivation: "no motivation"})
+
+      %{token: token} = create_member_with_permissions([%{action: "view", object: "join_request", filters: [%{field: "member"}]}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      conn = get conn, body_join_request_path(conn, :index, body.id)
+      assert res = json_response(conn, 200)["data"]
+      assert Enum.any?(res, fn(x) -> x["id"] == jr.id end)
+      assert Enum.all?(res, fn(x) -> !Map.has_key?(x, "member") end)
+    end
   end
 
   describe "show join_request" do
@@ -89,6 +103,22 @@ defmodule OmscoreWeb.JoinRequestControllerTest do
       assert_raise Ecto.NoResultsError, fn ->
         get conn, body_join_request_path(conn, :show, body.id, -1)
       end
+    end
+
+    test "works with filtered permissions", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "view", object: "join_request", filters: [%{field: "member"}]}])
+      conn = put_req_header(conn, "x-auth-token", token)
+      
+      member = member_fixture()
+      body = body_fixture()
+      assert {:ok, jr} = Members.create_join_request(body, member, %{motivation: "no motivation"})
+
+      conn = get conn, body_join_request_path(conn, :show, body.id, jr.id)
+      assert res = json_response(conn, 200)["data"]
+
+      assert res["motivation"] == "no motivation"
+      assert res["id"] == jr.id
+      assert !Map.has_key?(res, "member") 
     end
   end
 

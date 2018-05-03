@@ -11,8 +11,8 @@ defmodule Omscore.Registration.Campaign do
     field :description_long, :string
     field :url, :string
 
-    belongs_to(:autojoin_body, Omscore.Core.Body)
-    has_many(:submissions, Omscore.Registration.Submission)
+    belongs_to :autojoin_body, Omscore.Core.Body
+    has_many :submissions, Omscore.Registration.Submission
 
     timestamps()
   end

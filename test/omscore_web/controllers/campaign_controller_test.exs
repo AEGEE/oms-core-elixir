@@ -18,6 +18,8 @@ defmodule OmscoreWeb.CampaignControllerTest do
   end
 
   setup %{conn: conn} do
+    Omscore.Repo.delete_all(Omscore.Core.Permission)
+
     {:ok, conn: put_req_header(conn, "accept", "application/json")}
   end
 
@@ -96,6 +98,18 @@ defmodule OmscoreWeb.CampaignControllerTest do
       assert res = json_response(conn, 200)["data"]
       assert Enum.count(res) == 2
     end
+
+    test "works with permission filters", %{conn: conn} do
+      %{token: access_token} = create_member_with_permissions([%{action: "view", object: "campaign", filters: [%{field: "active"}]}])
+      conn = put_req_header(conn, "x-auth-token", access_token)
+
+      campaign_fixture(%{active: true})
+      campaign_fixture(%{active: false, url: "bla"})
+
+      conn = get conn, campaign_path(conn, :index_full)
+      assert res = json_response(conn, 200)["data"]
+      assert Enum.all?(res, fn(x) -> !Map.has_key?(x, "active") end)
+    end
   end
 
   describe "show" do
@@ -108,13 +122,19 @@ defmodule OmscoreWeb.CampaignControllerTest do
     end
 
     test "backend version also preloads body and submissions", %{conn: conn} do
-      campaign = campaign_fixture()
+      body = body_fixture()
+      campaign = campaign_fixture(%{autojoin_body_id: body.id})
+      user = user_fixture()
+      submission_fixture(user, campaign)
       %{token: access_token} = create_member_with_permissions([%{action: "view", object: "campaign"}])
       conn = put_req_header(conn, "x-auth-token", access_token)
 
       conn = get conn, campaign_path(conn, :show_full, campaign.id)
       assert res = json_response(conn, 200)["data"]
       assert !holds_only_public_data?(res)
+      assert res["submissions"] != nil
+      assert Enum.count(res["submissions"]) == 1
+      assert res["autojoin_body"]["id"] == body.id
     end
 
     test "backend version requires permissions", %{conn: conn} do
@@ -124,6 +144,16 @@ defmodule OmscoreWeb.CampaignControllerTest do
 
       conn = get conn, campaign_path(conn, :show_full, campaign.id)
       assert json_response(conn, 403)
+    end
+
+    test "works with filtered permissions", %{conn: conn} do
+      campaign = campaign_fixture()
+      %{token: access_token} = create_member_with_permissions([%{action: "view", object: "campaign", filters: [%{field: "submissions"}]}])
+      conn = put_req_header(conn, "x-auth-token", access_token)
+
+      conn = get conn, campaign_path(conn, :show_full, campaign.id)
+      assert res = json_response(conn, 200)["data"]
+      assert !Map.has_key?(res, "submissions")
     end
   end
 
@@ -202,6 +232,27 @@ defmodule OmscoreWeb.CampaignControllerTest do
 
       conn = put conn, campaign_path(conn, :update, campaign), campaign: @update_attrs
       assert json_response(conn, 403)
+    end
+
+    test "works with filter permissions", %{conn: conn, campaign: campaign} do
+      %{token: access_token} = create_member_with_permissions([%{action: "update", object: "campaign", filters: [%{field: "name"}]}, %{action: "view", object: "campaign"}])
+      conn = put_req_header(conn, "x-auth-token", access_token)
+      id = campaign.id
+
+      conn = put conn, campaign_path(conn, :update, campaign), campaign: @update_attrs
+      assert %{"id" => ^id} = json_response(conn, 200)["data"]
+
+      conn = conn
+      |> recycle()
+      |> put_req_header("x-auth-token", access_token)
+
+      conn = get conn, campaign_path(conn, :show_full, id)
+      assert %{
+        "id" => ^id,
+        "active" => true,
+        "activate_user" => false,
+        "name" => "some name",
+        "url" => "some_updated_url"} = json_response(conn, 200)["data"]
     end
   end
 

@@ -3,16 +3,25 @@ defmodule OmscoreWeb.MemberView do
   alias OmscoreWeb.MemberView
   alias OmscoreWeb.Helper
 
-  def render("index.json", %{members: members}) do
-    %{success: true, data: render_many(members, MemberView, "member.json")}
-  end
+  def render("index.json", %{members: members, filters: filters}) do
+    data = members
+    |> render_many(MemberView, "member.json")
+    |> Omscore.Core.apply_attribute_filters(filters)
 
-  def render("show.json", %{member: member}) do
-    %{success: true, data: render_one(member, MemberView, "member.json")}
+    %{success: true, data: data}
   end
+  def render("index.json", %{members: members}), do: render("index.json", %{members: members, filters: []})
+
+  def render("show.json", %{member: member, filters: filters}) do
+    data = member
+    |> render_one(MemberView, "member.json")
+    |> Omscore.Core.apply_attribute_filters(filters)
+
+    %{success: true, data: data}
+  end
+  def render("show.json", %{member: member}), do: render("show.json", %{member: member, filters: []})
 
   def render("member.json", %{member: member}) do
-
     %{id: member.id,
       user_id: member.user_id,
       first_name: member.first_name,

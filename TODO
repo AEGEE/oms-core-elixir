@@ -15,7 +15,16 @@ o Seo_url for bodies and circles
 
 x Fix profile view
 x Fix url in mails
-o Create campaigns frontend view
+
 o Suspend users request
+o When creating a bound circle, update the view
+o Circles listing for some reason queries the backend twice...
+o Shadow circle for every body or directly assign permissions to bodies
+o Body types as an additional filter option to bodies
+
+
+o Circle single view: only show child circles after a button click as that list might get long
+o Create campaigns frontend view
+o Create script to import bodies
 
 Idea towards cross-service auth: each service can create his own access tokens which are just cryptographically verified, not whether they were actually handed out by the loginservice. So when a service wants something directly from another service without user interaction, it could generate himself a token to do so...

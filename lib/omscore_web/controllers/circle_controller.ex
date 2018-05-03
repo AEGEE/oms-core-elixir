@@ -8,16 +8,16 @@ defmodule OmscoreWeb.CircleController do
   action_fallback OmscoreWeb.FallbackController
 
   def index(conn, %{"all" => all} = params) when all == true or all == "true" do
-    with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "view", "circle") do
+    with {:ok, %Core.Permission{filters: filters}} <- Core.search_permission_list(conn.assigns.permissions, "view", "circle") do
       circles = Core.list_circles(params)
-      render(conn, "index.json", circles: circles)
+      render(conn, "index.json", circles: circles, filters: filters)
     end
   end
 
   def index(conn, params) do
-    with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "view", "circle") do
+    with {:ok, %Core.Permission{filters: filters}} <- Core.search_permission_list(conn.assigns.permissions, "view", "circle") do
       circles = Core.list_free_circles(params)
-      render(conn, "index.json", circles: circles)
+      render(conn, "index.json", circles: circles, filters: filters)
     end
   end
 
@@ -32,9 +32,9 @@ defmodule OmscoreWeb.CircleController do
   end
 
   def show(conn, _params) do
-    with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "view", "circle") do
+    with {:ok, %Core.Permission{filters: filters}} <- Core.search_permission_list(conn.assigns.permissions, "view", "circle") do
       circle = conn.assigns.circle |> Omscore.Repo.preload([:body, :parent_circle, :child_circles, :permissions])
-      render(conn, "show.json", circle: circle)
+      render(conn, "show.json", circle: circle, filters: filters)
     end
   end
 
@@ -42,9 +42,9 @@ defmodule OmscoreWeb.CircleController do
     circle = conn.assigns.circle
     conn = is_circle_member(conn, circle)
 
-    with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "view_members", "circle") do
+    with {:ok, %Core.Permission{filters: filters}} <- Core.search_permission_list(conn.assigns.permissions, "view_members", "circle") do
       circle_memberships = Members.list_circle_memberships(circle, params)
-      render(conn, OmscoreWeb.CircleMembershipView, "index.json", circle_memberships: circle_memberships)
+      render(conn, OmscoreWeb.CircleMembershipView, "index.json", circle_memberships: circle_memberships, filters: filters)
     end
   end
 
@@ -85,7 +85,8 @@ defmodule OmscoreWeb.CircleController do
 
     conn = is_circle_admin(conn, circle)
 
-    with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "update_members", "circle"),
+    with {:ok, %Core.Permission{filters: filters}} <- Core.search_permission_list(conn.assigns.permissions, "update_members", "circle"),
+          circle_membership_attrs <- Core.apply_attribute_filters(circle_membership_attrs, filters),
          {:ok, cm} <- Members.update_circle_membership(cm, circle_membership_attrs) do
       render(conn, OmscoreWeb.CircleMembershipView, "show.json", circle_membership: cm)
     end
@@ -146,7 +147,8 @@ defmodule OmscoreWeb.CircleController do
     circle = conn.assigns.circle
     conn = is_circle_admin(conn, circle)
 
-    with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "update", "circle"),
+    with {:ok, %Core.Permission{filters: filters}} <- Core.search_permission_list(conn.assigns.permissions, "update", "circle"),
+         circle_params = Core.apply_attribute_filters(circle_params, filters),
          {:ok, %Circle{} = circle} <- Core.update_circle(circle, circle_params) do
       render(conn, "show.json", circle: circle)
     end
@@ -207,9 +209,9 @@ defmodule OmscoreWeb.CircleController do
 
 
   def index_bound(conn, params) do
-    with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "view", "circle") do
+    with {:ok, %Core.Permission{filters: filters}} <- Core.search_permission_list(conn.assigns.permissions, "view", "circle") do
       circles = Core.list_bound_circles(conn.assigns.body, params)
-      render(conn, "index.json", circles: circles)
+      render(conn, "index.json", circles: circles, filters: filters)
     end
   end
 

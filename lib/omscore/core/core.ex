@@ -80,20 +80,34 @@ defmodule Omscore.Core do
     reduce_permission_list(permission_list, %{})
   end
 
+  defp intersect_filters(filters_a, filters_b) do
+    filters_a
+    |> Enum.filter(fn(x) -> 
+      Enum.any?(filters_b, fn(y) ->
+        x.field == y.field
+      end)
+    end)
+  end
+
   # Returns the permission with the highest scope
-  defp highest_scope(a, b) do
-    if a.scope == "global" do
+  defp merge_permissions(a, b) do
+    filters = intersect_filters(a.filters, b.filters)
+
+    res = if a.scope == "global" do
       a
     else
       b
     end
+    Map.put(res, :filters, filters)
   end
 
   # Put all permissions into a Map, in  case the permission is already in put the one with the highest scope
+  # Also intersects permission filters
+  # After this please don't check on scopes of the permission anymore, as filter intersection might remove filters from a strongly filtered global permission through merging with an unfiltered local permission, effectively increasing user permissions
   defp reduce_permission_list([x | rest], found) do
     case Map.get(found, {x.action, x.object}) do
       nil -> reduce_permission_list(rest, Map.put(found, {x.action, x.object}, x))
-      y -> reduce_permission_list(rest, Map.put(found, {x.action, x.object}, highest_scope(x, y)))
+      y -> reduce_permission_list(rest, Map.put(found, {x.action, x.object}, merge_permissions(x, y)))
     end
   end
 
@@ -119,6 +133,40 @@ defmodule Omscore.Core do
       nil -> {:forbidden, "Permission " <> scope <> ":" <> action <> ":" <> object <> " required but not granted to you"}
       res -> {:ok, res}
     end
+  end
+
+  defp apply_filter_to_path([x], data) do
+      # Delete string version of the field if present
+      data = data
+      |> Map.delete(x)
+      
+      # Delete atom version of the field if present
+      try do
+        Map.delete(data, String.to_existing_atom(x))
+      rescue
+        _ -> data
+      end
+  end
+  defp apply_filter_to_path([x | path], data) do
+    # If the string is an atom and also exists, it might be a key
+    # Try the failing update method to update the data in there
+    # If not, just leave the data unchanged
+    try do
+      Map.update!(data, String.to_existing_atom(x), fn(data) -> apply_filter_to_path(path, data) end)
+    rescue
+      _ -> data
+    end
+  end
+
+  def apply_attribute_filters(data, filters) when is_list(data) do
+    Enum.map(data, fn(x) -> apply_attribute_filters(x, filters) end)
+  end
+  def apply_attribute_filters(%{} = data, filters) do
+    Enum.reduce(filters, data, fn(x, data) ->
+      x.field
+      |> String.split(".", trim: true)
+      |> apply_filter_to_path(data)
+    end)
   end
 
   alias Omscore.Core.Body

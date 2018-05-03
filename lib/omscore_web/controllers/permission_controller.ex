@@ -7,9 +7,9 @@ defmodule OmscoreWeb.PermissionController do
   action_fallback OmscoreWeb.FallbackController
 
   def index(conn, params) do
-    with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "view", "permission") do
+    with {:ok, %Core.Permission{filters: filters}} <- Core.search_permission_list(conn.assigns.permissions, "view", "permission") do
       permissions = Core.list_permissions(params)
-      render(conn, "index.json", permissions: permissions)
+      render(conn, "index.json", permissions: permissions, filters: filters)
     end
   end
 
@@ -24,14 +24,15 @@ defmodule OmscoreWeb.PermissionController do
   end
 
   def show(conn, %{"id" => id}) do
-    with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "view", "permission") do
+    with {:ok, %Core.Permission{filters: filters}} <- Core.search_permission_list(conn.assigns.permissions, "view", "permission") do
       permission = Core.get_permission!(id)
-      render(conn, "show.json", permission: permission)
+      render(conn, "show.json", permission: permission, filters: filters)
     end
   end
 
   def update(conn, %{"id" => id, "permission" => permission_params}) do
-    with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "update", "permission"),
+    with {:ok, %Core.Permission{filters: filters}} <- Core.search_permission_list(conn.assigns.permissions, "update", "permission"),
+         permission_params = Core.apply_attribute_filters(permission_params, filters),
          permission <- Core.get_permission!(id),
          {:ok, %Permission{} = permission} <- Core.update_permission(permission, permission_params) do
       render(conn, "show.json", permission: permission)

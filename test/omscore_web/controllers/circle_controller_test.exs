@@ -98,6 +98,33 @@ defmodule OmscoreWeb.CircleControllerTest do
       conn = get conn, circle_path(conn, :index)
       assert json_response(conn, 403)
     end
+
+    test "works with filtered permissions when listing all", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "view", object: "circle", filters: [%{field: "name"}]}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      circle_fixture()
+
+      body = body_fixture()
+      bound_circle_fixture(body)
+
+      conn = get conn, circle_path(conn, :index), all: true
+      circles = json_response(conn, 200)["data"]
+      assert is_list(circles)
+      assert !Enum.any?(circles, fn(x) -> Map.has_key?(x, "name") end)
+    end
+
+    test "works with filtered permissions when listing only free circles", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "view", object: "circle", filters: [%{field: "name"}]}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      circle_fixture()
+
+      conn = get conn, circle_path(conn, :index)
+      circles = json_response(conn, 200)["data"]
+      assert is_list(circles)
+      assert !Enum.any?(circles, fn(x) -> Map.has_key?(x, "name") end)
+    end
   end
 
   describe "show" do
@@ -114,6 +141,15 @@ defmodule OmscoreWeb.CircleControllerTest do
       assert Map.has_key?(res, "child_circles")
       assert Map.has_key?(res, "permissions")
     end
+
+    test "works with filtered permissions", %{conn: conn, circle: circle} do
+      %{token: token} = create_member_with_permissions([%{action: "view", object: "circle", filters: [%{field: "body"}]}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      conn = get conn, circle_path(conn, :show, circle)
+      assert res = json_response(conn, 200)["data"]
+      assert !Map.has_key?(res, "body")
+    end
   end
 
   describe "view_members" do
@@ -128,6 +164,7 @@ defmodule OmscoreWeb.CircleControllerTest do
       assert res = json_response(conn, 200)["data"]
       assert is_list(res)
       assert res |> Enum.any?(fn(x) -> x["member_id"] == member.id end)
+      assert res |> Enum.all?(fn(x) -> Map.has_key?(x, "position") end)
     end
 
     test "rejects viewing members to non-members without global view member permission", %{conn: conn, circle: circle} do
@@ -173,6 +210,17 @@ defmodule OmscoreWeb.CircleControllerTest do
 
       conn = get conn, circle_path(conn, :show_members, circle2.id)
       assert json_response(conn, 200)
+    end
+
+    test "works with filtered permissions", %{conn: conn, circle: circle} do
+      %{token: token} = create_member_with_permissions([%{action: "view_members", object: "circle", filters: [%{field: "position"}]}])
+      conn = put_req_header(conn, "x-auth-token", token)
+      member = member_fixture()
+      assert {:ok, _} = Omscore.Members.create_circle_membership(circle, member)
+
+      conn = get conn, circle_path(conn, :show_members, circle)
+      assert res = json_response(conn, 200)["data"]
+      assert res |> Enum.all?(fn(x) -> !Map.has_key?(x, "position") end)
     end
   end
 
@@ -279,6 +327,14 @@ defmodule OmscoreWeb.CircleControllerTest do
 
       conn = put conn, circle_path(conn, :update, circle), circle: @update_attrs
       assert json_response(conn, 200)
+    end
+
+    test "works with filtered permissions", %{conn: conn, circle: %Circle{} = circle} do
+      %{token: token} = create_member_with_permissions([%{action: "update", object: "circle", filters: [%{field: "description"}]}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      conn = put conn, circle_path(conn, :update, circle), circle: @update_attrs
+      assert %{"description" => "some description"} = json_response(conn, 200)["data"]
     end
   end
 
@@ -593,6 +649,22 @@ defmodule OmscoreWeb.CircleControllerTest do
       conn = put conn, circle_path(conn, :update_circle_membership, circle.id, cm.id), circle_membership: %{position: "some shitty position", circle_admin: false}
       assert json_response(conn, 403)
     end
+
+    test "works with filtered permissions", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "update_members", object: "circle", filters: [%{field: "position"}]}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      circle = circle_fixture()
+      member = member_fixture()
+      assert {:ok, cm} = Omscore.Members.create_circle_membership(circle, member, %{position: "some position"})
+
+      conn = put conn, circle_path(conn, :update_circle_membership, circle.id, cm.id), circle_membership: %{position: "some shitty position", circle_admin: false}
+      assert json_response(conn, 200)
+
+      cm = Omscore.Members.get_circle_membership!(cm.id)
+      assert cm.circle_admin == false
+      assert cm.position == "some position"
+    end
   end
 
   describe "delete circle_membership" do
@@ -737,6 +809,19 @@ defmodule OmscoreWeb.CircleControllerTest do
 
       conn = get conn, body_circle_path(conn, :index_bound, body.id), query: "some really exotic query that definitely doesn't match any object at all"
       assert json_response(conn, 200)["data"] == []
+    end
+
+    test "works with filtered permissions", %{conn: conn} do
+      body = body_fixture()
+      bound_circle_fixture(body)
+      circle_fixture()
+
+      %{token: token} = create_member_with_permissions([%{action: "view", object: "circle", filters: [%{field: "id"}]}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      conn = get conn, body_circle_path(conn, :index_bound, body.id)
+      assert res = json_response(conn, 200)["data"]
+      assert !Enum.any?(res, fn(x) -> Map.has_key?(x, "id") end)
     end
   end
 

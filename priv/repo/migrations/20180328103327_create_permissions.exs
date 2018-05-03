@@ -8,10 +8,11 @@ defmodule Omscore.Repo.Migrations.CreatePermissions do
       add :object, :string
       add :description, :text
       add :always_assigned, :boolean, null: false, default: false
+      add :filters, {:array, :map}, default: []
 
       timestamps()
     end
-    create unique_index(:permissions, [:scope, :action, :object])
+    create unique_index(:permissions, [:scope, :action, :object, :filters])
 
   end
 end

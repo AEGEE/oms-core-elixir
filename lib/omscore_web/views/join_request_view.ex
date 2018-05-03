@@ -3,13 +3,23 @@ defmodule OmscoreWeb.JoinRequestView do
   alias OmscoreWeb.JoinRequestView
   alias OmscoreWeb.Helper
 
-  def render("index.json", %{join_requests: join_requests}) do
-    %{success: true, data: render_many(join_requests, JoinRequestView, "join_request.json")}
-  end
+  def render("index.json", %{join_requests: join_requests, filters: filters}) do
+    data = join_requests
+    |> render_many(JoinRequestView, "join_request.json")
+    |> Omscore.Core.apply_attribute_filters(filters)
 
-  def render("show.json", %{join_request: join_request}) do
-    %{success: true, data: render_one(join_request, JoinRequestView, "join_request.json")}
+    %{success: true, data: data}
   end
+  def render("index.json", %{join_requests: join_requests}), do: render("index.json", %{join_requests: join_requests, filters: []})
+
+  def render("show.json", %{join_request: join_request, filters: filters}) do
+    data = join_request
+    |> render_one(JoinRequestView, "join_request.json")
+    |> Omscore.Core.apply_attribute_filters(filters)
+
+    %{success: true, data: data}
+  end
+  def render("show.json", %{join_request: join_request}), do: render("show.json", %{join_request: join_request, filters: []})
 
   def render("join_request.json", %{join_request: join_request}) do
     %{id: join_request.id,

@@ -7,6 +7,10 @@ defmodule Omscore.CoreTest do
     alias Omscore.Core.Permission
 
     @valid_attrs %{action: "some action", description: "some description", object: "some object", scope: "global"}
+    @valid_filters [%{field: "name"}, %{field: "description"}]
+    @valid_filters2 [%{field: "description"}, %{field: "body_id"}]
+    @valid_filters3 [%{field: "member.name"}]
+    @invalid_filters [%{field: "something.name"}]
     @update_attrs %{action: "some updated action", description: "some updated description", object: "some updated object", scope: "local"}
     @invalid_attrs %{action: nil, description: nil, object: nil, scope: nil}
 
@@ -42,6 +46,14 @@ defmodule Omscore.CoreTest do
       assert permission.scope == "global"
     end
 
+    test "create_permission/1 casts filters too" do
+      res = Core.create_permission(@valid_attrs |> Map.put(:filters, @valid_filters))
+      assert {:ok, %Permission{} = permission} = res
+      permission = Core.get_permission!(permission.id)
+      assert permission.filters |> Enum.any?(fn(%Core.AttributeFilter{} = x) -> x.field == Enum.at(@valid_filters, 0).field end)
+      assert permission.filters |> Enum.any?(fn(%Core.AttributeFilter{} = x) -> x.field == Enum.at(@valid_filters, 1).field end)
+    end
+
     test "create_permission/1 with invalid data returns error changeset" do
       assert {:error, %Ecto.Changeset{}} = Core.create_permission(@invalid_attrs)
     end
@@ -63,6 +75,13 @@ defmodule Omscore.CoreTest do
       assert permission.description == "some updated description"
       assert permission.object == "some updated object"
       assert permission.scope == "local"
+    end
+
+    test "update_permission/2 with filters updates filters" do
+      permission = permission_fixture()
+      assert {:ok, permission} = Core.update_permission(permission, %{filters: @valid_filters})
+      assert permission.filters |> Enum.any?(fn(%Core.AttributeFilter{} = x) -> x.field == Enum.at(@valid_filters, 0).field end)
+      assert permission.filters |> Enum.any?(fn(%Core.AttributeFilter{} = x) -> x.field == Enum.at(@valid_filters, 1).field end)
     end
 
     test "update_permission/2 with invalid data returns error changeset" do
@@ -113,6 +132,23 @@ defmodule Omscore.CoreTest do
       assert Enum.at(permission_list, 0).scope == "global"
     end
 
+    test "reduce_permissions/1 merges duplicate permissions with different filters and creates the set intersection of both" do
+      permission1 = permission_fixture(%{filters: @valid_filters})
+      permission2 = permission_fixture(%{filters: @valid_filters2})
+      permission3 = permission_fixture()
+
+      permission_list = [permission1, permission2, permission3]
+      permission_list = Core.reduce_permission_list(permission_list)
+      assert Enum.count(permission_list) == 1
+      assert Enum.at(permission_list, 0).filters == []
+
+      permission_list = [permission1, permission2]
+      permission_list = Core.reduce_permission_list(permission_list)
+      assert Enum.count(permission_list) == 1
+      assert Enum.at(permission_list, 0).filters |> Enum.count() == 1
+      assert %{field: "description"} = Enum.at(permission_list, 0).filters |> Enum.at(0)
+    end
+
     test "search_permission_list/3 finds permissions" do
       permission_list = [permission_fixture()] ++ [permission_fixture(@update_attrs)]
       assert {:ok, res} = Core.search_permission_list(permission_list, @valid_attrs.action, @valid_attrs.object)
@@ -127,6 +163,35 @@ defmodule Omscore.CoreTest do
       assert {:ok, res} = Core.search_permission_list(permission_list, @valid_attrs.action, @valid_attrs.object, "local")
       assert res.scope == "local"
       assert {:forbidden, _} = Core.search_permission_list(permission_list, @valid_attrs.action, @valid_attrs.object, "omniuberglobal")
+    end
+
+    test "apply_attribute_filters/2 applies a permission filter to input data" do
+      data = %{address: "somewhere", description: "somedesc", name: "somename"}
+      assert %{address: "somewhere"} == Core.apply_attribute_filters(data, @valid_filters)
+      assert data == Core.apply_attribute_filters(data, [])
+
+      data = %{"address" => "somewhere", "description" => "somedesc", "name" => "somename"}
+      assert %{"address" => "somewhere"} == Core.apply_attribute_filters(data, @valid_filters)
+      assert data == Core.apply_attribute_filters(data, [])
+    end
+
+    test "apply_attribute_filters/2 can deal with atom insertion attack" do
+      data = %{address: "somewhere", description: "somedesc", name: "somename"}
+      assert %{address: "somewhere"} == Core.apply_attribute_filters(data, @valid_filters ++ [%{field: "some_really_long_non_existing_atom_really_not_existing"}])
+    end
+
+    test "apply_attribute_filters/2 also works on arrays" do
+      data = [%{address: "somewhere", description: "somedesc", name: "somename"}, %{name: "othername", id: 2}]
+      assert [%{address: "somewhere"}, %{id: 2}] == Core.apply_attribute_filters(data, @valid_filters)
+      assert data == Core.apply_attribute_filters(data, [])
+    end
+
+    test "apply_attribute_filters/2 can work with nested data" do
+      data = %{member: %{name: "abc", address: "def"}}
+      assert %{member: %{address: "def"}} == Core.apply_attribute_filters(data, @valid_filters3)
+      assert data == Core.apply_attribute_filters(data, [])
+
+      assert data == Core.apply_attribute_filters(data, @invalid_filters)
     end
   end
 
