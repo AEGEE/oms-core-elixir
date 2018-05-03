@@ -140,18 +140,6 @@ defmodule Omscore.Core do
     Enum.map(data, fn(x) -> apply_filter_to_path(list, x) end)
   end
 
-  # Recurse down along the path until we are at a leaf
-  defp apply_filter_to_path([x | path], %{} = data) do
-    # If the string is an atom and also exists, it might be a key
-    # Try the failing update method to update the data in there
-    # If not, just leave the data unchanged
-    try do
-      Map.update!(data, String.to_existing_atom(x), fn(data) -> apply_filter_to_path(path, data) end)
-    rescue
-      _ -> data
-    end
-  end
-
   # If we have one single path element, actually do the filtering
   defp apply_filter_to_path([x], %{} = data) do
     # Delete string version of the field if present
@@ -165,6 +153,19 @@ defmodule Omscore.Core do
       _ -> data
     end
   end
+
+  # Recurse down along the path until we are at a leaf
+  defp apply_filter_to_path([x | path], %{} = data) do
+    # If the string is an atom and also exists, it might be a key
+    # Try the failing update method to update the data in there
+    # If not, just leave the data unchanged
+    try do
+      Map.update!(data, String.to_existing_atom(x), fn(data) -> apply_filter_to_path(path, data) end)
+    rescue
+      _ -> data
+    end
+  end
+
 
 
   # Filter data based on the filters passed in
