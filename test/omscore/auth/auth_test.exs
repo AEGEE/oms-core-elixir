@@ -96,6 +96,27 @@ defmodule Omscore.AuthTest do
       assert user.superadmin == false
     end
 
+    test "update_user_active/2 updates a users activation status" do
+      user = user_fixture(%{active: false})
+      assert {:ok, user} = Auth.update_user_active(user, true)
+      assert user == Auth.get_user!(user.id)
+      assert user.active == true
+
+      assert {:ok, user} = Auth.update_user_active(user, false)
+      assert user == Auth.get_user!(user.id)
+      assert user.active == false
+    end
+
+    test "update_user_active/2 logs out a user after deactivation" do
+      user = user_fixture(%{active: true})
+      assert {:ok, _, token} = Auth.create_refresh_token(user, "test")
+      assert {:ok, user} = Auth.update_user_active(user, false)
+
+      assert user == Auth.get_user!(user.id)
+      assert user.active == false
+      assert_raise Ecto.NoResultsError, fn -> Omscore.Repo.get!(Auth.RefreshToken, token.id) end
+    end
+
     test "delete_user/1 deletes the user" do
       user = user_fixture()
       assert {:ok, %User{}} = Auth.delete_user(user)

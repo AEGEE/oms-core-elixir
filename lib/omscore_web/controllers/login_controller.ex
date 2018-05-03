@@ -74,6 +74,21 @@ defmodule OmscoreWeb.LoginController do
     end
   end
 
+  def update_active(conn, %{"user_id" => user_id, "active" => active}) do
+    user = Auth.get_user!(user_id)
+
+    conn = if user.member_id do
+      OmscoreWeb.MemberPermissionPlug.call(Map.put(conn, :path_params, %{"member_id" => user.member_id}), [])
+    else
+      conn
+    end
+
+    with {:ok, _} <- Omscore.Core.search_permission_list(conn.assigns.permissions, "update_active", "user"),
+         {:ok, user} <- Auth.update_user_active(user, active) do
+      render(conn, "user.json", user: user)
+    end
+  end
+
   def delete_user(conn, %{"user_id" => user_id}) do
     user = Auth.get_user!(user_id)
 

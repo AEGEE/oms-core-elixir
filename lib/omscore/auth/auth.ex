@@ -55,6 +55,17 @@ defmodule Omscore.Auth do
     |> Repo.update()
   end
 
+  def update_user_active(%User{} = user, active) when is_boolean(active) do
+    if active == false do
+      {:ok, _} = logout_user(user)
+    end
+
+    user
+    |> User.changeset(%{})
+    |> Ecto.Changeset.put_change(:active, active)
+    |> Repo.update()
+  end
+
   def delete_user(%User{} = user) do
     Repo.delete(user)
   end

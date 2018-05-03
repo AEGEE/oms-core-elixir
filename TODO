@@ -25,7 +25,7 @@ x Filtering permissions
 o put_children request which allows to put circles that don't yet have a parent as a child
 
 o Circle single view: only show child circles after a button click as that list might get long
-o Create campaigns frontend view
+x Create campaigns frontend view
 o Create script to import bodies
 
 Idea towards cross-service auth: each service can create his own access tokens which are just cryptographically verified, not whether they were actually handed out by the loginservice. So when a service wants something directly from another service without user interaction, it could generate himself a token to do so...

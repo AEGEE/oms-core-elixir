@@ -15,6 +15,10 @@
                 <button type="button" ng-click="vm.showEditUserDataModal()" class="btn btn-warning btn-block btn-sm">Edit Userdata</button>
             </div>
             <div class="m-b-10" ng-show="vm.permissions.delete_profile">
+                <button ng-show="vm.member.user.active" type="button" ng-click="vm.updateActive(false)" class="btn btn-danger btn-block btn-sm">Suspend user</button>
+                <button ng-show="!vm.member.user.active" type="button" ng-click="vm.updateActive(true)" class="btn btn-primary btn-block btn-sm">Activate user</button>
+            </div>
+            <div class="m-b-10" ng-show="vm.permissions.delete_profile">
                 <button type="button" ng-click="vm.deleteProfile()" class="btn btn-danger btn-block btn-sm">Delete Profile</button>
             </div>
         </div>

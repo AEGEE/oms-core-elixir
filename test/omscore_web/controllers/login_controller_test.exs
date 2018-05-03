@@ -281,6 +281,59 @@ defmodule OmscoreWeb.LoginControllerTest do
     assert json_response(conn, 422)
   end
 
+  describe "update active"  do
+    test "can activate and deactivate chosen user", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "update_active", object: "user"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      member = member_fixture()
+      user = Omscore.Auth.get_user!(member.user_id)
+      assert user.active == true
+
+      conn = put conn, login_path(conn, :update_active, member.user_id), active: false
+      assert json_response(conn, 200)
+
+      user = Omscore.Auth.get_user!(member.user_id)
+      assert user.active == false
+
+      conn = conn
+      |> recycle()
+      |> put_req_header("x-auth-token", token)
+
+      conn = put conn, login_path(conn, :update_active, member.user_id), active: true
+      assert json_response(conn, 200)
+
+      user = Omscore.Auth.get_user!(member.user_id)
+      assert user.active == true
+    end
+
+    test "rejects on missing permissions", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      member = member_fixture()
+      user = Omscore.Auth.get_user!(member.user_id)
+      assert user.active == true
+
+      conn = put conn, login_path(conn, :update_active, member.user_id), active: false
+      assert json_response(conn, 403)
+    end
+
+    test "works also if the user has no member object", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "update_active", object: "user"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      user = user_fixture()
+      assert user.active == true
+
+      conn = put conn, login_path(conn, :update_active, user.id), active: false
+      assert json_response(conn, 200)
+
+      user = Omscore.Auth.get_user!(user.id)
+      assert user.active == false
+    end
+  end
+
   describe "delete user" do
     test "deletes chosen user", %{conn: conn} do
       %{token: token} = create_member_with_permissions([%{action: "view", object: "member"}, %{action: "delete", object: "user"}])
@@ -322,6 +375,19 @@ defmodule OmscoreWeb.LoginControllerTest do
 
       assert_raise Ecto.NoResultsError, fn ->
         Omscore.Auth.get_user!(7)
+      end
+    end
+
+    test "works also if user has no member object", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "delete", object: "user"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      user = user_fixture()
+      conn = delete conn, login_path(conn, :delete_user, user.id)
+      assert response(conn, 204)
+
+      assert_raise Ecto.NoResultsError, fn ->
+        Omscore.Auth.get_user!(user.id)
       end
     end
 

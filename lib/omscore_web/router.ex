@@ -71,6 +71,7 @@ defmodule OmscoreWeb.Router do
     # Compatibility request to the old core
     post "/tokens/user", MemberController, :show_by_token
 
+    put "/user/:user_id", LoginController, :update_active
     delete "/user/:user_id", LoginController, :delete_user
 
     get "/backend_campaigns", CampaignController, :index_full

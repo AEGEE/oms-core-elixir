@@ -153,11 +153,27 @@
 
         vm.deleteProfile = () => {
             $http({
-                url: apiUrl + '/user/' + vm.member.user.id,
+                url: apiUrl + '/user/' + vm.member.user_id,
                 method: 'DELETE'
             }).then((res) => {
                 showSuccess("Member deleted successfully. It might take some time until his login will be deactivated")
                 $state.go("app.dashboard")
+            }).catch((error) => {
+                showError(error);
+            })
+        }
+
+        vm.updateActive = (active) => {
+            $http({
+                url: apiUrl + '/user/' + vm.member.user_id,
+                method: 'PUT',
+                data: {active: active}
+            }).then((res) => {
+                if(active)
+                    showSuccess("User successfully activated")
+                else
+                    showSuccess("User successfully suspended. It might take a while until his login will be deactivated")
+                vm.getMember();
             }).catch((error) => {
                 showError(error);
             })
