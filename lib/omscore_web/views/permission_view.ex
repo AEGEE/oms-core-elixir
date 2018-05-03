@@ -1,6 +1,7 @@
 defmodule OmscoreWeb.PermissionView do
   use OmscoreWeb, :view
   alias OmscoreWeb.PermissionView
+  alias OmscoreWeb.Helper
 
   def render("index.json", %{permissions: permissions, filters: filters}) do
     data = permissions
@@ -27,7 +28,13 @@ defmodule OmscoreWeb.PermissionView do
       object: permission.object,
       description: permission.description,
       combined: permission.scope <> ":" <> permission.action <> ":" <> permission.object,
-      always_assigned: permission.always_assigned
+      always_assigned: permission.always_assigned,
+      circles: Helper.render_assoc_many(permission.circles, OmscoreWeb.CircleView, "circle.json"),
+      filters: Helper.render_assoc_many(permission.filters, OmscoreWeb.PermissionView, "filter.json")
     }
+  end
+
+  def render("filter.json", %{permission: filter}) do
+    %{field: filter.field}
   end
 end

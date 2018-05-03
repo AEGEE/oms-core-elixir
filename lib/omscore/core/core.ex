@@ -135,19 +135,13 @@ defmodule Omscore.Core do
     end
   end
 
-  defp apply_filter_to_path([x], data) do
-      # Delete string version of the field if present
-      data = data
-      |> Map.delete(x)
-      
-      # Delete atom version of the field if present
-      try do
-        Map.delete(data, String.to_existing_atom(x))
-      rescue
-        _ -> data
-      end
+  # In case of a list, apply the filter to every path item
+  defp apply_filter_to_path(list, data) when is_list(data) do
+    Enum.map(data, fn(x) -> apply_filter_to_path(list, x) end)
   end
-  defp apply_filter_to_path([x | path], data) do
+
+  # Recurse down along the path until we are at a leaf
+  defp apply_filter_to_path([x | path], %{} = data) do
     # If the string is an atom and also exists, it might be a key
     # Try the failing update method to update the data in there
     # If not, just leave the data unchanged
@@ -158,10 +152,25 @@ defmodule Omscore.Core do
     end
   end
 
-  def apply_attribute_filters(data, filters) when is_list(data) do
-    Enum.map(data, fn(x) -> apply_attribute_filters(x, filters) end)
+  # If we have one single path element, actually do the filtering
+  defp apply_filter_to_path([x], %{} = data) do
+    # Delete string version of the field if present
+    data = data
+    |> Map.delete(x)
+    
+    # Delete atom version of the field if present and if passed string is an atom
+    try do
+      Map.delete(data, String.to_existing_atom(x))
+    rescue
+      _ -> data
+    end
   end
-  def apply_attribute_filters(%{} = data, filters) do
+
+
+  # Filter data based on the filters passed in
+  # The data can be a map or a list, containing either string or atom keys
+  # In case fields from the filter are not present, they will be ommitted
+  def apply_attribute_filters(data, filters) do
     Enum.reduce(filters, data, fn(x, data) ->
       x.field
       |> String.split(".", trim: true)

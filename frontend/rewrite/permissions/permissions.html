@@ -1,6 +1,9 @@
 <h1 class="page-header">Permissions</h1>
 
+
 <div class="row">
+  <button type="button" class="btn btn-primary" ng-click="vm.showEditModal()">Create Permission</button>
+
   <div class="input-group">
     <span class="input-group-addon">
       <i class="fa fa-search"></i> 
@@ -15,8 +18,9 @@
   <ul>
       <li ng-repeat="permission in vm.infiniteScroll.data" class='animate-infinite-scroll'>
         <div class="m-b-20">
-          <b>{{ permission.combined }}</b>: {{ permission.description }}
-          <span ng-show="permission.always_assigned"><br />Always assigned</span>
+          <b><a ui-sref="app.permissions.single({id: permission.id})">{{ permission.combined }}</a></b> {{ permission.description }}
+          <span class="label label-info" ng-show="permission.always_assigned"><br />Always assigned</span>
+          <span class="label label-info" ng-show="permission.filters.length"><br />Has filters</span>
         </div>
       </li>
     </ul>
@@ -29,3 +33,5 @@
 <p ng-show="vm.infiniteScroll.loadingMoreResults">
   Loading more data...
 </p>
+
+<ng-include src="vm.baseUrl + 'rewrite/permissions/edit_permission_form.html'"></ng-include>

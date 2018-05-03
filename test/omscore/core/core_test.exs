@@ -193,6 +193,12 @@ defmodule Omscore.CoreTest do
 
       assert data == Core.apply_attribute_filters(data, @invalid_filters)
     end
+
+    test "apply_attribute_filters/2 can work with a nested array" do
+      data = %{member: [%{name: "abc", address: "def"}, %{address: "def"}, %{name: "abc", address: "def"}], name: "test"}
+      assert %{member: [%{address: "def"}, %{address: "def"}, %{address: "def"}], name: "test"} == Core.apply_attribute_filters(data, @valid_filters3)
+      assert data == Core.apply_attribute_filters(data, [])
+    end
   end
 
   describe "bodies" do

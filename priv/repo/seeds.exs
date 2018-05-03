@@ -12,7 +12,6 @@
 
 alias Omscore.Core.Permission
 alias Omscore.Members.Member
-alias Omscore.Core
 alias Omscore.Members
 alias Omscore.Repo
 alias Omscore.Auth.User
@@ -423,20 +422,4 @@ if Mix.env() == :dev && Repo.all(Member) == [] do
 
 
   {:ok, _} = Members.create_member(%{about_me: "I am a microservice. I have a user account so the system can access itself from within, don't delete me.", address: "Europe", date_of_birth: ~D[2010-04-17], first_name: "Microservice", gender: "machine", last_name: "Microservice", phone: "+123456789", user_id: 1})
-  {:ok, body} = Core.create_body(%{address: "Dresden", description: "Very prehistoric antenna", email: "info@aegee-dresden.org", legacy_key: "DRE", name: "AEGEE-Dresden", phone: "don't call us"})
-  {:ok, circle} = Core.create_circle(%{description: "basically doing nothing", joinable: false, name: "Board AEGEE-Dresden"}, body)
-  {:ok, circle2} = Core.create_circle(%{description: "This is the toplevel circle for all boards in the system", joinable: false, name: "General board circle"})
-  {:ok, _circle3} = Core.create_circle(%{description: "IT-interested people in the system", joinable: true, name: "IT interest group"})
-  {:ok, circle4} = Core.create_circle(%{description: "This circle holds all permissions in the system and thus effectively makes you superadmin", name: "Superadmins", joinable: false})
-  {:ok, _} = Core.put_parent_circle(circle, circle2)
-  {:ok, permission1} = Repo.all(Permission) |> Core.search_permission_list("view_full", "member", "local")
-  {:ok, permission2} = Repo.all(Permission) |> Core.search_permission_list("view", "join_request", "local")
-  {:ok, permission3} = Repo.all(Permission) |> Core.search_permission_list("process", "join_request", "local")
-  {:ok, permission4} = Repo.all(Permission) |> Core.search_permission_list("view_members", "body", "local")
-  {:ok, permission5} = Repo.all(Permission) |> Core.search_permission_list("delete_member", "body", "local")
-  {:ok, _} = Core.put_circle_permissions(circle2, [permission1, permission2, permission3, permission4, permission5])
-  {:ok, _} = Core.put_circle_permissions(circle4, Repo.all(Permission))
-  {:ok, token, _} = Omscore.Guardian.encode_and_sign(%{id: 1}, %{name: "some name", email: "some@email.com", superadmin: true}, token_type: "access", ttl: {100, :weeks})
-  IO.inspect("Use this token with superadmin access if you want to test the api:")
-  IO.inspect(token)
 end

@@ -1,0 +1,47 @@
+<h1 class="page-header">Permission {{ vm.permission.combined }}</h1>
+
+<div class="m-b-40">
+  <table class="table">
+    <tr>
+      <td>Code</td>
+      <td>{{ vm.permission.combined }}</td>
+    </tr>
+    <tr>
+      <td>Description</td>
+      <td>{{ vm.permission.description }}</td>
+    </tr>
+    <tr>
+      <td>Always assigned</td>
+      <td>{{ vm.permission.always_assigned }}</td>
+    </tr>
+    <tr>
+      <td>Filters</td>
+      <td>
+        <ul ng-show="vm.permission.filters.length">
+          <li ng-repeat="filter in vm.permission.filters">
+            {{ filter.field }}
+          </li>
+        </ul>
+        <span ng-show="!vm.permission.filters.length">No filters attached</span>
+      </td>
+    </tr>
+    <tr>
+      <td>Directly attached to</td>
+      <td>
+        <ul ng-show="vm.permission.circles.length">
+          <li ng-repeat="circle in vm.permission.circles">
+            <a ui-sref="app.circles.single({id: circle.seo_url})">{{ circle.name }}</a>
+          </li>
+        </ul>
+        <span ng-show="!vm.permission.circles.length">Not attached to any circle</span>
+      </td>
+    </tr>
+  </table>
+</div>
+
+<button class="btn btn-warning" type="button" ng-click="vm.showEditModal()">Edit Permission</button>
+<button class="btn btn-danger" type="button" ng-click="vm.deletePermission()">Delete Permission</button>
+
+<ng-include src="vm.baseUrl + 'rewrite/permissions/edit_permission_form.html'"></ng-include>
+
+

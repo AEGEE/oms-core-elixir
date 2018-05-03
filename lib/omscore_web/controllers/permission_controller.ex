@@ -25,7 +25,7 @@ defmodule OmscoreWeb.PermissionController do
 
   def show(conn, %{"id" => id}) do
     with {:ok, %Core.Permission{filters: filters}} <- Core.search_permission_list(conn.assigns.permissions, "view", "permission") do
-      permission = Core.get_permission!(id)
+      permission = Core.get_permission!(id) |> Omscore.Repo.preload([:circles])
       render(conn, "show.json", permission: permission, filters: filters)
     end
   end

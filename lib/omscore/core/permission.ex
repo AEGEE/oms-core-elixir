@@ -11,7 +11,7 @@ defmodule Omscore.Core.Permission do
     field :always_assigned, :boolean, default: false
 
     many_to_many :circles, Omscore.Core.Circle, join_through: Omscore.Core.CirclePermission
-    embeds_many :filters, Omscore.Core.AttributeFilter
+    embeds_many :filters, Omscore.Core.AttributeFilter, on_replace: :delete
 
     timestamps()
   end

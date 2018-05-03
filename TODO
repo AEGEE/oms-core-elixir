@@ -21,7 +21,8 @@ o When creating a bound circle, update the view
 o Circles listing for some reason queries the backend twice...
 o Shadow circle for every body or directly assign permissions to bodies
 o Body types as an additional filter option to bodies
-
+x Filtering permissions
+o put_children request which allows to put circles that don't yet have a parent as a child
 
 o Circle single view: only show child circles after a button click as that list might get long
 o Create campaigns frontend view
