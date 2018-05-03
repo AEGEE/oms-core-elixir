@@ -7,6 +7,8 @@ defmodule Omscore.Interfaces.Mail do
   end
 
   def sendgrid(to, subject, content, _content_type) do
+    IO.inspect(Application.get_env(:omscore, Omscore.Interfaces.Mail)[:sendgrid_key])
+
     new_email(
       to: to,
       from: Application.get_env(:omscore, Omscore.Interfaces.Mail)[:from],
