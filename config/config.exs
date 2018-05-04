@@ -36,16 +36,16 @@ config :omscore, OmscoreWeb.Endpoint,
 
 config :omscore, Omscore.Guardian,
   issuer: System.get_env("JWT_ISSUER") || "OMS", 
-  secret_key: Helper.read_secret_from_file(System.get_env("JWT_SECRET_KEY_FILE"), "rrSTfyfvFlFj1JCl8QW/ritOLKzIncRPC5ic0l0ENVUoiSIPBCDrdU6Su5vZHngY")
+  secret_key: String.trim(Helper.read_secret_from_file(System.get_env("JWT_SECRET_KEY_FILE"), "rrSTfyfvFlFj1JCl8QW/ritOLKzIncRPC5ic0l0ENVUoiSIPBCDrdU6Su5vZHngY"))
 
 config :omscore, Omscore.Interfaces.Mail,
   from: "oms@aegee.org",
-  sendgrid_key: Helper.read_secret_from_file(System.get_env("SENDGRID_KEY_FILE"), "censored"),
+  sendgrid_key: String.trim(Helper.read_secret_from_file(System.get_env("SENDGRID_KEY_FILE"), "censored")),
   mail_service: :sendgrid
 
 config :omscore, Omscore.Mailer,
   adapter: Bamboo.SendgridAdapter,
-  api_key: Helper.read_secret_from_file(System.get_env("SENDGRID_KEY_FILE"), "censored")
+  api_key: String.trim(Helper.read_secret_from_file(System.get_env("SENDGRID_KEY_FILE"), "censored"))
 
 # Configures Elixir's Logger
 config :logger, :console,
