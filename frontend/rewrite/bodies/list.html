@@ -5,6 +5,7 @@
 
 <div class="row">
 	<button type="button" class="btn btn-primary" ng-if="vm.permissions.create_body" ng-click="vm.showBodyModal()">Create new body</button>
+	<button type="button" class="btn btn-primary" ng-click="vm.showBulkImportModal()">Bulk import</button>
 	<div class="pull-left">
 		<label class="checkbox-inline" ng-repeat="type in vm.body_types">
 			<input type="checkbox" ng-model="type.filter_active" ng-change="vm.resetData()" />
@@ -38,3 +39,4 @@
 
 
 <ng-include src="vm.baseUrl + 'rewrite/bodies/edit_body_form.html'"></ng-include>
+<ng-include src="vm.baseUrl + 'rewrite/bodies/bulk_import_form.html'"></ng-include>

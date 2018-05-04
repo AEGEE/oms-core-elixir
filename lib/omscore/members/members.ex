@@ -31,6 +31,10 @@ defmodule Omscore.Members do
 
   # Creates a member
   def create_member(attrs) do
+    attrs = attrs
+    |> Map.delete(:primary_body_id)
+    |> Map.delete("primary_body_id")
+
     %Member{}
     |> Member.changeset(attrs)
     |> Repo.insert()

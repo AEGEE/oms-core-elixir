@@ -1,0 +1,27 @@
+
+<!-- #modal-dialog -->
+<div class="modal fade" id="bulkImportModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title">Bulk import</h4>
+            </div>
+            <div class="alert alert-danger" ng-show="vm.errors.message">
+                Errors, the backend responded: {{ vm.errors.message }}
+            </div>
+            <form name="bulkImportForm" ng-submit="vm.performBulkImport(bulkImportData)" class="margin-bottom-0" novalidate>
+                <div class="modal-body">
+                    <div class="form-group m-b-20">
+                        <label for="data">Data</label>
+                        <textarea class="form-control" rows="10" ng-model="bulkImportData"></textarea>                        
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <!--<button class="btn btn-sm btn-danger" data-dismiss="modal"><i class="fa fa-ban"></i> Close</button>-->
+                    <button class="btn btn-sm btn-success" type="submit"><i class="fa fa-save"></i> Perform bulk input</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

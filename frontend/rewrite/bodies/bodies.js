@@ -117,6 +117,38 @@
         vm.showBodyModal = function() {
             $('#editBodyModal').modal('show');
         }
+
+        vm.showBulkImportModal = function() {
+            $('#bulkImportModal').modal('show');
+        }
+
+        vm.performBulkImport = (data) => {
+            data = JSON.parse(data)
+            let total = data.length;
+            let success = 0;
+            let fail = 0;
+
+            let showres = (success, fail) => {
+                if(success + fail >= total)
+                    showSuccess("Bulk import finished, " + success + " successful, " + fail + " failed");
+            }
+            data.forEach((item) => {
+                vm.body = item;
+                // Create the body
+                $http({
+                    method: 'POST',
+                    url: apiUrl + '/bodies',
+                    data: {body: vm.body}
+                })
+                .then(() => {
+                    success++;
+                    showres(success, fail)
+                }).catch(function(err) {
+                    fail++;
+                    showres(success, fail)
+                });
+            })
+        }
     }
 
     function BodySingleController($http, $scope, $stateParams, $state) {
@@ -340,6 +372,38 @@
                     vm.errors = error.data.errors;
                 else
                     showError(error);
+            })
+        }
+
+        vm.showBulkImportModal = function() {
+            $('#bulkImportModal').modal('show');
+        }
+
+        vm.performBulkImport = (data) => {
+            data = JSON.parse(data)
+            let total = data.length;
+            let success = 0;
+            let fail = 0;
+
+            let showres = (success, fail) => {
+                if(success + fail >= total)
+                    showSuccess("Bulk import finished, " + success + " successful, " + fail + " failed");
+            }
+            data.forEach((item) => {
+                item;
+                // Create the body
+                $http({
+                    method: 'POST',
+                    url: apiUrl + '/bodies/' + $stateParams.id + '/new_member',
+                    data: {member: item, user: item}
+                })
+                .then(() => {
+                    success++;
+                    showres(success, fail)
+                }).catch(function(err) {
+                    fail++;
+                    showres(success, fail)
+                });
             })
         }
     }
