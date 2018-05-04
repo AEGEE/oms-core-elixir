@@ -315,6 +315,20 @@ defmodule OmscoreWeb.CampaignControllerTest do
       assert json_response(conn, 422)["errors"]["last_name"]
     end
 
+    test "submission ignores fields other than username, password and email on user creation", %{conn: conn, campaign: campaign} do
+      params = @valid_submission
+      |> Map.put(:active, true)
+      |> Map.put(:superadmin, true)
+
+      conn = post conn, campaign_path(conn, :submit, campaign.url), submission: params
+      assert json_response(conn, 201)
+
+      user = Repo.get_by(User, name: @valid_submission.name)
+      assert user != nil
+      assert user.active == false
+      assert user.superadmin == false
+    end
+
     test "a valid submission creates a user object, a submission and a mail confirmation in db", %{conn: conn, campaign: campaign} do
       conn = post conn, campaign_path(conn, :submit, campaign.url), submission: @valid_submission
       assert json_response(conn, 201)
@@ -322,6 +336,7 @@ defmodule OmscoreWeb.CampaignControllerTest do
       user = Repo.get_by(User, name: @valid_submission.name)
       assert user != nil
       assert user.active == false
+      assert user.superadmin == false
 
       submission = Repo.get_by(Omscore.Registration.Submission, user_id: user.id)
       assert submission != nil

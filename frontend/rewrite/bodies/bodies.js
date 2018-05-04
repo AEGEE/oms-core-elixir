@@ -320,6 +320,28 @@
             })
         }
 
+        vm.showCreateMemberModal = () => {
+            $('#createMemberModal').modal('show');
+            vm.edited_member = {}
+            vm.edited_user = {}
+        }
+
+        vm.saveMemberForm = () => {
+            $http({
+                url: apiUrl + '/bodies/' + $stateParams.id + '/new_member',
+                method: 'POST',
+                data: {member: vm.edited_member, user: vm.edited_user}
+            }).then((res) => {
+                showSuccess("Successfully created member. He received a mail with instructions on how to log in")
+                vm.resetData();
+                $('#createMemberModal').modal('hide');
+            }).catch((error) => {
+                if(error.status == 422)
+                    vm.errors = error.data.errors;
+                else
+                    showError(error);
+            })
+        }
     }
 
 })();

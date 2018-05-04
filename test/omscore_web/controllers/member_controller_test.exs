@@ -3,6 +3,8 @@ defmodule OmscoreWeb.MemberControllerTest do
 
   alias Omscore.Members
 
+  @user_attrs %{email: "newuser@email.com", name: "newuser"}
+  @invalid_user_attrs %{email: nil, name: nil}
   @create_attrs %{about_me: "some about_me", address: "some address", date_of_birth: ~D[2010-04-17], first_name: "some first_name", gender: "some gender", last_name: "some last_name", phone: "+1212345678", user_id: 42}
   @update_attrs %{about_me: "some updated about_me", address: "some updated address", date_of_birth: ~D[2011-05-18], first_name: "some updated first_name", gender: "some updated gender", last_name: "some updated last_name", phone: "+1212345679", seo_url: "some_updated_seo_url", user_id: 43}
   @invalid_attrs %{about_me: nil, address: nil, date_of_birth: nil, first_name: nil, gender: nil, last_name: nil, phone: nil, seo_url: nil, user_id: nil}
@@ -86,20 +88,21 @@ defmodule OmscoreWeb.MemberControllerTest do
   end
 
   describe "create member" do
-    test "renders member when data is valid", %{conn: conn} do
+    test "renders member and user when data is valid and assigns them to the body", %{conn: conn} do
       %{token: token} = create_member_with_permissions([%{action: "create", object: "member"}, %{action: "view", object: "member"}])
       conn = put_req_header(conn, "x-auth-token", token)
+      :ets.delete_all_objects(:saved_mail)
 
-      user = user_fixture()
+      body = body_fixture()
 
-      conn = post conn, member_path(conn, :create), member: Map.put(@create_attrs, :user_id, user.id)
+      conn = post conn, body_member_path(conn, :create, body.id), member: @create_attrs, user: @user_attrs
       assert %{"id" => id} = json_response(conn, 201)["data"]
 
       conn = recycle(conn) |> put_req_header("x-auth-token", token)
 
       conn = get conn, member_path(conn, :show, id)
-      assert json_response(conn, 200)["data"] |> map_inclusion(%{
-        "id" => id,
+      assert %{
+        "id" => ^id,
         "about_me" => "some about_me",
         "address" => "some address",
         "date_of_birth" => "2010-04-17",
@@ -107,14 +110,39 @@ defmodule OmscoreWeb.MemberControllerTest do
         "gender" => "some gender",
         "last_name" => "some last_name",
         "phone" => "+1212345678",
-        "user_id" => user.id})
+        "user_id" => user_id} = json_response(conn, 200)["data"]
+
+      assert user = Omscore.Auth.get_user!(user_id)
+      assert user.email == @user_attrs.email
+      assert user.name == @user_attrs.name
+      assert user.active == true
+
+      assert member = Omscore.Members.get_member!(id)
+      assert member.primary_body_id == body.id
+      assert Omscore.Members.get_body_membership(body, member) != nil
+
+      assert :ets.lookup(:saved_mail, @user_attrs.email) != []
     end
 
-    test "renders errors when data is invalid", %{conn: conn} do
+    test "renders errors when member data is invalid and doesn't create a user object", %{conn: conn} do
       %{token: token} = create_member_with_permissions([%{action: "create", object: "member"}])
       conn = put_req_header(conn, "x-auth-token", token)
 
-      conn = post conn, member_path(conn, :create), member: @invalid_attrs
+      body = body_fixture()
+
+      conn = post conn, body_member_path(conn, :create, body.id), member: @invalid_attrs, user: @user_attrs
+      assert json_response(conn, 422)["errors"] != %{}
+
+      assert_raise Ecto.NoResultsError, fn -> Omscore.Auth.get_user_by_email!(@user_attrs.email) end
+    end
+
+    test "renders errors when user data is invalid", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "create", object: "member"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      body = body_fixture()
+
+      conn = post conn, body_member_path(conn, :create, body.id), member: @create_attrs, user: @invalid_user_attrs
       assert json_response(conn, 422)["errors"] != %{}
     end
 
@@ -122,42 +150,10 @@ defmodule OmscoreWeb.MemberControllerTest do
       %{token: token} = create_member_with_permissions([])
       conn = put_req_header(conn, "x-auth-token", token)
 
-      conn = post conn, member_path(conn, :create), member: @create_attrs
+      body = body_fixture()
+
+      conn = post conn, body_member_path(conn, :create, body.id), member: @create_attrs, user: @user_attrs
       assert json_response(conn, 403)
-    end
-
-    test "only validates but not creates a member if only_validate query param is passed", %{conn: conn} do
-      %{token: token} = create_member_with_permissions([%{action: "create", object: "member"}, %{action: "view", object: "member"}])
-      conn = put_req_header(conn, "x-auth-token", token)
-
-      before_count = Omscore.Repo.all(Members.Member) |> Enum.count
-
-      conn = post conn, member_path(conn, :create), member: @create_attrs, only_validate: true
-      assert json_response(conn, 200)["data"]["valid"] == true
-
-      after_count = Omscore.Repo.all(Members.Member) |> Enum.count
-      assert before_count == after_count
-    end
-
-    test "only_validate also checks for user_id uniqueness", %{conn: conn} do
-      %{token: token, member: member} = create_member_with_permissions([%{action: "create", object: "member"}, %{action: "view", object: "member"}])
-      conn = put_req_header(conn, "x-auth-token", token)
-
-      conn = post conn, member_path(conn, :create), member: Map.put(@create_attrs, :user_id, member.user_id), only_validate: true
-      assert json_response(conn, 422)
-    end
-
-    test "returns validation error on only_validate request with invalid data", %{conn: conn} do
-      %{token: token} = create_member_with_permissions([%{action: "create", object: "member"}, %{action: "view", object: "member"}])
-      conn = put_req_header(conn, "x-auth-token", token)
-
-      before_count = Omscore.Repo.all(Members.Member) |> Enum.count
-
-      conn = post conn, member_path(conn, :create), member: @invalid_attrs, only_validate: true
-      assert json_response(conn, 422)
-
-      after_count = Omscore.Repo.all(Members.Member) |> Enum.count
-      assert before_count == after_count
     end
   end
 

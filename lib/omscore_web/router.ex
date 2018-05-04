@@ -66,7 +66,6 @@ defmodule OmscoreWeb.Router do
     post "/bodies", BodyController, :create
 
     get "/members", MemberController, :index
-    post "/members", MemberController, :create
 
     # Compatibility request to the old core
     post "/tokens/user", MemberController, :show_by_token
@@ -120,6 +119,7 @@ defmodule OmscoreWeb.Router do
     put "/", BodyController, :update
     delete "/", BodyController, :delete
     get "/members", BodyController, :show_members
+    post "/new_member", MemberController, :create
     put "/members/:membership_id", BodyController, :update_member
     delete "/members/:membership_id", BodyController, :delete_member
     delete "/members", BodyController, :delete_myself

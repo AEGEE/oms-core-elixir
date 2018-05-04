@@ -136,19 +136,10 @@ defmodule Omscore.Members do
       |> Ecto.Changeset.put_change(:approved, true)
       |> Repo.update!()
 
-      membership = case create_body_membership(join_request.body, join_request.member) do
+      case create_body_membership(join_request.body, join_request.member) do
         {:ok, membership} -> membership # Repo.transaction will wrap it in an {:ok, bm} tuple
         {:error, msg} -> Repo.rollback(msg)
       end
-
-      if join_request.body.shadow_circle != nil do
-        case create_circle_membership(join_request.body.shadow_circle, join_request.member) do
-          {:ok, _} -> :ok
-          {:error, msg} -> Repo.rollback(msg)
-        end
-      end
-
-      membership
     end
   end
 
@@ -191,12 +182,30 @@ defmodule Omscore.Members do
 
   # Creates a membership with a body
   # Should not be used directly, only by tests and approve_join_request
+  # If circle membership creation fails for some reason, also the body membership is not created
   def create_body_membership(%Omscore.Core.Body{} = body, %Member{} = member) do
-    %BodyMembership{}
-    |> BodyMembership.changeset(%{})
-    |> Ecto.Changeset.put_assoc(:body, body)
-    |> Ecto.Changeset.put_assoc(:member, member)
-    |> Repo.insert()
+    body = Repo.preload(body, [:shadow_circle])
+
+    Repo.transaction(fn ->
+      res = %BodyMembership{}
+      |> BodyMembership.changeset(%{})
+      |> Ecto.Changeset.put_assoc(:body, body)
+      |> Ecto.Changeset.put_assoc(:member, member)
+      |> Repo.insert()
+
+      case res do
+        {:ok, %BodyMembership{} = bm} ->
+          if body.shadow_circle != nil do
+            case create_circle_membership(body.shadow_circle, member) do
+              {:ok, _} -> :ok
+              {:error, msg} -> Repo.rollback(msg)
+            end
+          end
+          bm
+        {:error, error} ->
+          Repo.rollback(error)
+      end
+    end)
   end
 
   def update_body_membership(%BodyMembership{} = bm, attrs \\ %{}) do

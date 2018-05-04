@@ -319,7 +319,14 @@ if Repo.all(Permission) == [] do
     scope: "global",
     action: "create",
     object: "member",
-    description: "Create members to the system. This is usually only assigned to the login microservice"
+    description: "Create members to any body in the system, even if you are not member in that body"
+  })
+
+  Repo.insert!(%Permission{
+    scope: "local",
+    action: "create",
+    object: "member",
+    description: "Create members the body that you got this permission from."
   })
 
   Repo.insert!(%Permission{

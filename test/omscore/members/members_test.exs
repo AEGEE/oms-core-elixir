@@ -268,6 +268,16 @@ defmodule Omscore.MembersTest do
       assert {:ok, _} = Members.create_body_membership(body, member)
     end
 
+    test "create_body_membership/2 assigns the user to a shadow circle if there is one" do
+      member = member_fixture()
+      body = body_fixture()
+      circle = bound_circle_fixture(body)
+      assert {:ok, body} = Omscore.Core.update_body(body, %{shadow_circle_id: circle.id})
+
+      assert {:ok, _} = Members.create_body_membership(body, member)
+      assert Members.get_circle_membership(circle, member) != nil
+    end
+
     test "get_body_membership/2 returns a body membership if existing" do
       member1 = member_fixture()
       member2 = member_fixture()
