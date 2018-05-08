@@ -37,7 +37,7 @@ defmodule OmscoreWeb.CampaignController do
 
   def show_full(conn, %{"campaign_id" => campaign_id}) do
     campaign = Registration.get_campaign!(campaign_id)
-    |> Omscore.Repo.preload([:submissions, :autojoin_body])
+    |> Omscore.Repo.preload([submissions: [:user], autojoin_body: []])
     with {:ok, %Core.Permission{filters: filters}} <- Core.search_permission_list(conn.assigns.permissions, "view", "campaign") do
       render(conn, "show.json", campaign: campaign, filters: filters)
     end

@@ -456,6 +456,60 @@ defmodule Omscore.CoreTest do
       assert circle2.parent_circle == nil
     end
 
+    test "put_child_circles/2 forbids creating a loop" do
+      circle1 = circle_fixture()
+      circle2 = circle_fixture()
+      circle3 = circle_fixture()
+
+      assert {:ok, _} = Core.put_child_circles(circle1, [circle2])
+      assert {:ok, _} = Core.put_child_circles(circle2, [circle3])
+      assert {:error, _} = Core.put_child_circles(circle3, [circle1])
+    end
+
+    test "put_child_circles/2 forbids assigning the own circle as a child" do
+      circle1 = circle_fixture()
+
+      assert {:error, _} = Core.put_child_circles(circle1, [circle1])
+    end
+
+    test "put_child_circles/2 does nothing if one of the childs is invalid" do
+      circle1 = circle_fixture()
+      circle2 = circle_fixture()
+
+      assert {:error, _} = Core.put_child_circles(circle1, [circle2, circle1])
+      assert circle2 = Core.get_circle!(circle2.id)
+      assert circle2.parent_circle_id == nil
+    end
+
+    test "put_child_circles/2 can remove child circles" do
+      circle1 = circle_fixture()
+      circle2 = circle_fixture()
+      circle3 = circle_fixture()
+
+      assert {:ok, _} = Core.put_child_circles(circle1, [circle2, circle3])
+      assert {:ok, _} = Core.put_child_circles(circle1, [circle2])
+
+      assert circle3 = Core.get_circle!(circle3.id)
+      assert circle3.parent_circle_id == nil
+    end
+
+    test "put_child_circles/2 does not allow putting circles which are not in the db" do
+      circle = circle_fixture()
+
+      assert {:error, :not_found, _} = Core.put_child_circles(circle, [%Circle{name: "some cool circle", description: "cool circle", joinable: true}])
+      assert_raise Ecto.NoResultsError, fn ->
+        Repo.get_by!(Circle, name: "some cool circle")
+      end
+    end
+
+    test "put_child_circles/2 does not allow putting non-orphan childs" do
+      circle1 = circle_fixture()
+      circle2 = circle_fixture()
+      circle3 = circle_fixture()
+      assert {:ok, _} = Core.put_parent_circle(circle2, circle3)
+      assert {:error, :unprocessable_entity, _} = Core.put_child_circles(circle1, [circle2])
+    end
+
     test "put_parent_circle/2 assigns a parent to a circle" do
       circle1 = circle_fixture()
       circle2 = circle_fixture()
@@ -476,6 +530,16 @@ defmodule Omscore.CoreTest do
       assert {:ok, _} = Core.put_parent_circle(circle1, nil)
       assert circle1 = Core.get_circle!(circle1.id)
       assert circle1.parent_circle_id == nil
+    end
+
+    test "put_parent_circle/2 forbids creating a loop" do
+      circle1 = circle_fixture()
+      circle2 = circle_fixture()
+      circle3 = circle_fixture()
+
+      assert {:ok, _} = Core.put_parent_circle(circle1, circle2)
+      assert {:ok, _} = Core.put_parent_circle(circle2, circle3)
+      assert {:error, _} = Core.put_parent_circle(circle3, circle1)
     end
 
     test "is_parent_recursive? checks if a circle is parent of another one" do

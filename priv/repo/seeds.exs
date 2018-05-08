@@ -87,6 +87,13 @@ if Repo.all(Permission) == [] do
 
   Repo.insert!(%Permission{
     scope: "global",
+    action: "put_child",
+    object: "circle",
+    description: "Add any orphan circle in the system as a child to any circle you are circle admin in."
+  })
+
+  Repo.insert!(%Permission{
+    scope: "global",
     action: "delete",
     object: "circle",
     description: "Delete any circle, even those that you are not in a circle_admin position in. Should only be assigned in case of an abandoned toplevel circle as circle_admins automatically get this permission"

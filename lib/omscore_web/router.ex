@@ -97,6 +97,7 @@ defmodule OmscoreWeb.Router do
     put "/", CircleController, :update
     delete "/", CircleController, :delete
     put "/parent", CircleController, :put_parent
+    put "/children", CircleController, :put_child
     get "/members", CircleController, :show_members
     post "/members", CircleController, :join_circle
     post "/add_member", CircleController, :add_to_circle

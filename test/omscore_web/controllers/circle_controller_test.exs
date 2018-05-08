@@ -431,6 +431,82 @@ defmodule OmscoreWeb.CircleControllerTest do
     end
   end
 
+  describe "put child circles" do
+    test "puts several childs at once as child circles", %{conn: conn} do
+      circle1 = circle_fixture()
+      circle2 = circle_fixture()
+      circle3 = circle_fixture()
+
+      %{token: token, member: member} = create_member_with_permissions([%{action: "put_child", object: "circle"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+      assert {:ok, _} = Members.create_circle_membership(circle1, member, %{circle_admin: true})
+
+      conn = put conn, circle_path(conn, :put_child, circle1), child_circles: [%{id: circle2.id}, %{id: circle3.id}]
+      assert json_response(conn, 200)
+
+      circle2 = Core.get_circle!(circle2.id)
+      assert circle2.parent_circle_id == circle1.id
+
+      circle3 = Core.get_circle!(circle3.id)
+      assert circle3.parent_circle_id == circle1.id
+    end
+
+    test "removes child circles", %{conn: conn} do
+      circle1 = circle_fixture()
+      circle2 = circle_fixture()
+      circle3 = circle_fixture()
+
+      assert {:ok, _} = Core.put_child_circles(circle1, [circle2, circle3])
+      
+      %{token: token, member: member} = create_member_with_permissions([%{action: "put_child", object: "circle"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+      assert {:ok, _} = Members.create_circle_membership(circle1, member, %{circle_admin: true})
+
+      conn = put conn, circle_path(conn, :put_child, circle1), child_circles: []
+      assert json_response(conn, 200)
+
+      circle2 = Core.get_circle!(circle2.id)
+      assert circle2.parent_circle_id == nil
+
+      circle3 = Core.get_circle!(circle3.id)
+      assert circle3.parent_circle_id == nil
+    end
+
+    test "rejects on missing permissions", %{conn: conn} do
+      circle1 = circle_fixture()
+
+      %{token: token} = create_member_with_permissions([])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      conn = put conn, circle_path(conn, :put_child, circle1), child_circles: []
+      assert json_response(conn, 403)
+    end
+
+    test "rejects on not being circle admin", %{conn: conn} do
+      circle1 = circle_fixture()
+      %{token: token} = create_member_with_permissions([%{action: "put_child", object: "circle"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      conn = put conn, circle_path(conn, :put_child, circle1), child_circles: []
+      assert json_response(conn, 403)
+    end
+
+    test "rejects when attempting to put a child which already has a parent", %{conn: conn} do
+      circle1 = circle_fixture()
+      circle2 = circle_fixture()
+      circle3 = circle_fixture()
+
+      assert {:ok, _} = Core.put_parent_circle(circle2, circle3)
+
+      %{token: token, member: member} = create_member_with_permissions([%{action: "put_child", object: "circle"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+      assert {:ok, _} = Members.create_circle_membership(circle1, member, %{circle_admin: true})
+
+      conn = put conn, circle_path(conn, :put_child, circle1), child_circles: [circle2]
+      assert json_response(conn, 422)
+    end
+  end
+
   describe "delete circle" do
     setup [:create_circle]
 

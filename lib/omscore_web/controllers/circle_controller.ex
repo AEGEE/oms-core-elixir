@@ -40,18 +40,11 @@ defmodule OmscoreWeb.CircleController do
 
   def show_members(conn, params) do
     circle = conn.assigns.circle
-    conn = is_circle_member(conn, circle)
+    conn = add_circle_member_permissions(conn, circle)
 
     with {:ok, %Core.Permission{filters: filters}} <- Core.search_permission_list(conn.assigns.permissions, "view_members", "circle") do
       circle_memberships = Members.list_circle_memberships(circle, params)
       render(conn, OmscoreWeb.CircleMembershipView, "index.json", circle_memberships: circle_memberships, filters: filters)
-    end
-  end
-
-  defp is_circle_joinable(circle) do
-    case circle.joinable do
-      true -> {:ok, nil}
-      false -> {:forbidden, "This circle is not joinable, entering is not possible"}
     end
   end
 
@@ -83,7 +76,7 @@ defmodule OmscoreWeb.CircleController do
     circle = conn.assigns.circle
     cm = Members.get_circle_membership!(membership_id)
 
-    conn = is_circle_admin(conn, circle)
+    conn = add_circle_admin_permissions(conn, circle)
 
     with {:ok, %Core.Permission{filters: filters}} <- Core.search_permission_list(conn.assigns.permissions, "update_members", "circle"),
           circle_membership_attrs <- Core.apply_attribute_filters(circle_membership_attrs, filters),
@@ -96,7 +89,7 @@ defmodule OmscoreWeb.CircleController do
     circle = conn.assigns.circle
     cm = Members.get_circle_membership!(membership_id)
 
-    conn = is_circle_admin(conn, circle)
+    conn = add_circle_admin_permissions(conn, circle)
 
     permissions = if cm.member_id == conn.assigns.member.id do
       conn.assigns.permissions ++ [%Core.Permission{scope: "circle_membership", action: "delete_members", object: "circle"}]
@@ -110,9 +103,6 @@ defmodule OmscoreWeb.CircleController do
     end
   end
 
-  defp is_circle_membership_nil(nil), do: {:error, :not_found, "You are not member of this circle"}
-  defp is_circle_membership_nil(_), do: {:ok}
-
   def delete_myself(conn, _params) do
     circle = conn.assigns.circle
     cm = Members.get_circle_membership(circle, conn.assigns.member)
@@ -123,29 +113,10 @@ defmodule OmscoreWeb.CircleController do
     end
   end
 
-  # When being circle admin in the circle or any of the parent circles, updating is permitted
-  defp is_circle_admin(conn, circle) do
-    admin_permissions = [%Core.Permission{scope: "circle", action: "update", object: "circle"}, 
-      %Core.Permission{scope: "circle", action: "delete", object: "circle"},
-      %Core.Permission{scope: "circle", action: "update_members", object: "circle"},
-      %Core.Permission{scope: "circle", action: "delete_members", object: "circle"}]
-    case Members.is_circle_admin(circle, conn.assigns.member) do
-      {true, _} -> Plug.Conn.assign(conn, :permissions, conn.assigns.permissions ++ admin_permissions)
-      {false, _} -> conn
-    end
-  end
-
-  defp is_circle_member(conn, circle) do
-    member_permissions = [%Core.Permission{scope: "circle", action: "view_members", object: "circle"}]
-    case Members.is_circle_member(circle, conn.assigns.member) do
-      {true, _} -> Plug.Conn.assign(conn, :permissions, conn.assigns.permissions ++ member_permissions)
-      {false, _} -> conn
-    end
-  end
 
   def update(conn, %{"circle" => circle_params}) do
     circle = conn.assigns.circle
-    conn = is_circle_admin(conn, circle)
+    conn = add_circle_admin_permissions(conn, circle)
 
     with {:ok, %Core.Permission{filters: filters}} <- Core.search_permission_list(conn.assigns.permissions, "update", "circle"),
          circle_params = Core.apply_attribute_filters(circle_params, filters),
@@ -154,29 +125,7 @@ defmodule OmscoreWeb.CircleController do
     end
   end
 
-  # Those who have general parent circle assignment permissions don't have to undergo further tests
-  defp put_parent_free(conn, circle, parent_circle) do
-    with {:ok, circle} <- Core.put_parent_circle(circle, parent_circle),
-         circle <- Core.get_circle!(circle.id) do
-      render(conn, "show.json", circle: circle)
-    end
-  end
 
-  defp circles_have_same_body(circles) do
-    case Core.circles_have_same_body?(circles) do
-      true -> {:ok}
-      false -> {:forbidden, "With the bound permission you can only assign circles from your body as parents"}
-    end
-  end
-
-  # If only bound permissions are found, restrict parent circle and circle to same body
-  defp put_parent_bound(conn, circle, parent_circle) do
-    with {:ok} <- circles_have_same_body([circle, parent_circle]),
-         {:ok, circle} <- Core.put_parent_circle(circle, parent_circle),
-         circle <- Core.get_circle!(circle.id) do
-      render(conn, "show.json", circle: circle)
-    end
-  end
 
   def put_parent(conn, %{"parent_circle_id" => parent_circle_id}) do
     circle = conn.assigns.circle
@@ -197,9 +146,17 @@ defmodule OmscoreWeb.CircleController do
     end    
   end
 
+  def put_child(conn, %{"child_circles" => child_circles}) do
+    with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "put_child", "circle"),
+         {:ok} <- require_circle_admin(conn.assigns.member, conn.assigns.circle),
+         {:ok, circle} <- Core.put_child_circles(conn.assigns.circle, child_circles) do
+      render(conn, "show.json", circle: circle)
+    end
+  end
+
   def delete(conn, _params) do
     circle = conn.assigns.circle
-    conn = is_circle_admin(conn, circle)
+    conn = add_circle_admin_permissions(conn, circle)
 
     with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "delete", "circle"),
          {:ok, %Circle{}} <- Core.delete_circle(circle) do
@@ -226,8 +183,8 @@ defmodule OmscoreWeb.CircleController do
   end
 
   def index_my_permissions(conn, _params) do
-    conn = is_circle_member(conn, conn.assigns.circle)
-    conn = is_circle_admin(conn, conn.assigns.circle)
+    conn = add_circle_member_permissions(conn, conn.assigns.circle)
+    conn = add_circle_admin_permissions(conn, conn.assigns.circle)
 
     render(conn, OmscoreWeb.PermissionView, "index.json", permissions: conn.assigns.permissions)
   end
@@ -241,6 +198,69 @@ defmodule OmscoreWeb.CircleController do
     with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "put_permissions", "circle"),
          {:ok, permissions} <- Core.find_permissions(permissions),
          {:ok, circle} <- Core.put_circle_permissions(conn.assigns.circle, permissions),
+         circle <- Core.get_circle!(circle.id) do
+      render(conn, "show.json", circle: circle)
+    end
+  end
+
+  #### Helper functions
+  defp require_circle_admin(%Omscore.Members.Member{} = member, %Omscore.Core.Circle{} = circle) do
+    case Members.is_circle_member(circle, member) do
+      {true, _} -> {:ok}
+      {false, _} -> {:error, :forbidden, "You need to be circle admin to execute this request"}
+    end
+  end
+
+  defp is_circle_joinable(%Omscore.Core.Circle{} = circle) do
+    case circle.joinable do
+      true -> {:ok, nil}
+      false -> {:forbidden, "This circle is not joinable, entering is not possible"}
+    end
+  end
+
+  defp is_circle_membership_nil(nil), do: {:error, :not_found, "You are not member of this circle"}
+  defp is_circle_membership_nil(_), do: {:ok}
+
+
+  # When being circle admin in the circle or any of the parent circles, updating is permitted
+  defp add_circle_admin_permissions(conn, circle) do
+    admin_permissions = [%Core.Permission{scope: "circle", action: "update", object: "circle"}, 
+      %Core.Permission{scope: "circle", action: "delete", object: "circle"},
+      %Core.Permission{scope: "circle", action: "update_members", object: "circle"},
+      %Core.Permission{scope: "circle", action: "delete_members", object: "circle"}]
+    case Members.is_circle_admin(circle, conn.assigns.member) do
+      {true, _} -> Plug.Conn.assign(conn, :permissions, conn.assigns.permissions ++ admin_permissions)
+      {false, _} -> conn
+    end
+  end
+
+  defp add_circle_member_permissions(conn, circle) do
+    member_permissions = [%Core.Permission{scope: "circle", action: "view_members", object: "circle"}]
+    case Members.is_circle_member(circle, conn.assigns.member) do
+      {true, _} -> Plug.Conn.assign(conn, :permissions, conn.assigns.permissions ++ member_permissions)
+      {false, _} -> conn
+    end
+  end
+
+  # Those who have general parent circle assignment permissions don't have to undergo further tests
+  defp put_parent_free(conn, circle, parent_circle) do
+    with {:ok, circle} <- Core.put_parent_circle(circle, parent_circle),
+         circle <- Core.get_circle!(circle.id) do
+      render(conn, "show.json", circle: circle)
+    end
+  end
+
+  defp circles_have_same_body(circles) do
+    case Core.circles_have_same_body?(circles) do
+      true -> {:ok}
+      false -> {:forbidden, "With the bound permission you can only assign circles from your body as parents"}
+    end
+  end
+
+  # If only bound permissions are found, restrict parent circle and circle to same body
+  defp put_parent_bound(conn, circle, parent_circle) do
+    with {:ok} <- circles_have_same_body([circle, parent_circle]),
+         {:ok, circle} <- Core.put_parent_circle(circle, parent_circle),
          circle <- Core.get_circle!(circle.id) do
       render(conn, "show.json", circle: circle)
     end

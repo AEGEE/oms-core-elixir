@@ -328,6 +328,27 @@
         })
       }
     }
+
+    vm.updateChildCircles = () => {
+      $http({
+        url: apiUrl + '/circles/' + $stateParams.id + '/children',
+        method: 'PUT',
+        data: {child_circles: vm.circle.child_circles}
+      }).then((res) => {
+        showSuccess("Child circles updated successfully")
+        vm.loadCircle()
+      }).catch((error) => {
+        showError(error);
+        vm.loadCircle();
+      });
+    }
+
+    vm.addChildCircle = ($item) => {
+      if($item) {
+        vm.circle.child_circles.push($item.originalObject);
+        vm.updateChildCircles();
+      }
+    }
   }
 
   function ListCircleMembershipsController($http, $scope) {

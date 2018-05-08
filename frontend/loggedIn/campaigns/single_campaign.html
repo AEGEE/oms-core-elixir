@@ -46,6 +46,26 @@
 <button class="btn btn-warning" type="button" ng-click="vm.showEditModal()">Edit Campaign</button>
 <button class="btn btn-danger" type="button" ng-click="vm.deleteCampaign()">Delete Campaign</button>
 
+<hr />
+<h2>Submissions</h2>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>User</th>
+      <th>Motivation</th>
+      <th>Mail confirmed</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr ng-repeat="submission in vm.campaign.submissions">
+      <td><a ui-sref="submission.user.member_id">{{ submission.first_name }} {{ submission.last_name }}</a></td>
+      <td>{{ submission.motivation }}</td>
+      <td>{{ submission.mail_confirmed }}</td>
+    </tr>
+  </tbody>
+</table>
+
 <ng-include src="vm.baseUrl + 'loggedIn/campaigns/edit_campaign_form.html'"></ng-include>
 
 

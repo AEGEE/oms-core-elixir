@@ -24,7 +24,7 @@ defmodule Omscore.Core do
 
     case Enum.find(res, :not_found, fn(x) -> x == nil end) do
       :not_found -> {:ok, res}
-      _ -> {:error, :not_found, "One of the permissions could not be found in the db"}
+      _ -> {:error, :not_found, "One of the objects could not be found in the db"}
     end
   end
 
@@ -318,30 +318,45 @@ defmodule Omscore.Core do
   # This is useful for put_child_circles
   def find_circles(input_data), do: find_array(Circle, input_data)
 
+  def all_orphan_circles?(circles) do
+    Enum.all?(circles, fn(x) -> x.parent_circle_id == nil end)
+  end
+
   # Puts child circles for a circle
   # You should preload circles with find_circles if the data came from the user
-  # TODO: Doesn't check for loops yet!
   def put_child_circles(%Circle{} = circle, child_circles) do
-    with {:ok} <- check_joinable_consistency(circle, child_circles),
-        circle <- put_child_circles_unchecked(circle, child_circles) do
-      circle
-    end
-  end
+    case Repo.transaction(fn ->
+      child_circles = case find_circles(child_circles) do
+        {:error, message} -> Repo.rollback(message)
+        {:error, code, message} -> Repo.rollback({code, message})
+        {:ok, res} -> res
+      end
 
-  defp check_joinable_consistency(circle, child_circles) do
-    if !circle.joinable && Enum.any?(child_circles, fn(x) -> x.joinable end) do
-      {:error, "A non-joinable parent circle can not have a joinable child"}
-    else
-      {:ok}
-    end
-  end
+      if !Enum.all?(child_circles, fn(x) -> x.parent_circle_id == nil || x.parent_circle_id == circle.id end) do
+        Repo.rollback({:unprocessable_entity, "Can only assign orphan circles as childs"})
+      end
 
-  defp put_child_circles_unchecked(circle, child_circles) do
-    circle
-    |> Repo.preload([:child_circles])
-    |> Circle.changeset(%{})
-    |> Ecto.Changeset.put_assoc(:child_circles, child_circles)
-    |> Repo.update()
+      # Remove all old child circles
+      circle = circle
+      |> Repo.preload([:child_circles])
+      |> Circle.changeset(%{})
+      |> Ecto.Changeset.put_assoc(:child_circles, [])
+      |> Repo.update!()
+
+      error = child_circles
+      |> Enum.map(&put_parent_circle(&1, circle))
+      |> Enum.find(nil, &elem(&1, 0) == :error)
+
+      if error != nil do
+        Repo.rollback(elem(error, 1))
+      end
+
+      get_circle!(circle.id)
+      |> Repo.preload([:child_circles])
+    end) do
+      {:error, {code, message}} -> {:error, code, message}
+      res -> res
+    end
   end
 
   # Removes the parent circle for a circle
@@ -354,11 +369,9 @@ defmodule Omscore.Core do
   # Puts the parent circle for a circle while maintaining joinable consistency
   # Returns {:ok, circle} or {:error, error-data}
   def put_parent_circle(%Circle{} = circle, %Circle{} = parent_circle) do
-    with {:ok} <- check_joinable_consistency(parent_circle, [circle]) do
-      circle
-      |> Circle.changeset(%{parent_circle_id: parent_circle.id})
-      |> Repo.update()
-    end
+    circle
+    |> Circle.changeset(%{parent_circle_id: parent_circle.id})
+    |> Repo.update()
   end
 
   # Checks if the parent circle actually is a parent of circle
