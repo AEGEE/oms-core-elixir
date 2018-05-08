@@ -52,7 +52,7 @@
         <ul ng-show="vm.circle.child_circles.length">
           <li ng-repeat="child in vm.circle.child_circles">
             <a ui-sref="app.circles.single({id: child.seo_url})">{{ child.name }}</a>
-            <a href="javascript:;" ng-click="vm.circle.child_circles.splice($index, 1); vm.putChildCircles()" ng-show="vm.editChildCircles"><i class="fa fa-minus"></i></a>
+            <a href="javascript:;" ng-click="vm.circle.child_circles.splice($index, 1); vm.updateChildCircles()" ng-show="vm.editChildCircles"><i class="fa fa-minus"></i></a>
           </li>
         </ul>
         <span ng-show="!vm.circle.child_circles.length && !vm.editChildCircles">No child circles found</span>
