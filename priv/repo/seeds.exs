@@ -9,7 +9,7 @@
 #
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
-
+dump = true
 alias Omscore.Core.Permission
 alias Omscore.Members.Member
 alias Omscore.Members
@@ -17,7 +17,7 @@ alias Omscore.Repo
 alias Omscore.Auth.User
 
 # Seed permissions
-if Repo.all(Permission) == [] do
+if Repo.all(Permission) == [] && !dump do
   # Permissions
   Repo.insert!(%Permission{
     scope: "global",
@@ -412,7 +412,7 @@ end
 
 
 # Create test-data so it's possible to experiment with the api without having to boot up the whole system
-if Mix.env() == :dev && Repo.all(Member) == [] do
+if Mix.env() == :dev && Repo.all(Member) == [] && !dump do
   Repo.insert!(%Omscore.Registration.Campaign{
     name: "Default recruitment campaign",
     url: "default",
@@ -436,4 +436,13 @@ if Mix.env() == :dev && Repo.all(Member) == [] do
 
 
   {:ok, _} = Members.create_member(%{about_me: "I am a microservice. I have a user account so the system can access itself from within, don't delete me.", address: "Europe", date_of_birth: ~D[2010-04-17], first_name: "Microservice", gender: "machine", last_name: "Microservice", phone: "+123456789", user_id: 1})
+end
+
+if Repo.all(Permission) == [] && dump do
+  {:ok, qry} = File.read("dumps/dump.sql")
+  qry
+  |> String.split("\n", trim: true)
+  |> Enum.map(fn(x) -> 
+    Ecto.Adapters.SQL.query!(Repo, x, [])
+  end)
 end
