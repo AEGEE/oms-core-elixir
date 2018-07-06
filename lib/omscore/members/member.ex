@@ -12,8 +12,8 @@ defmodule Omscore.Members.Member do
     field :last_name, :string
     field :phone, :string
     field :seo_url, :string
-    field :user_id, :integer
 
+    belongs_to :user, Omscore.Auth.User
     belongs_to :primary_body, Omscore.Core.Body
     many_to_many :bodies, Omscore.Core.Body, join_through: Omscore.Members.BodyMembership, on_replace: :delete, on_delete: :delete_all
     has_many :join_requests, Omscore.Members.JoinRequest
@@ -31,12 +31,12 @@ defmodule Omscore.Members.Member do
     |> generate_seo_url
     |> validate_required([:first_name, :last_name, :seo_url, :user_id])
     |> validate_format(:seo_url, ~r/^[\w-]*[a-zA-Z_][\w-]*$/, message: "has invalid format. It needs at least 3 characters, only numbers and letters with at least one letter in it.")
-    |> validate_exclusion(:seo_url, ["me"])
+    |> validate_exclusion(:seo_url, ["me"], message: "you cannot use me as seo_url")
     |> validate_length(:seo_url, min: 3)
     |> validate_format(:phone, ~r/^(\+|00){0,2}(9[976]\d|8[987530]\d|6[987]\d|5[90]\d|42\d|3[875]\d|2[98654321]\d|9[8543210]|8[6421]|6[6543210]|5[87654321]|4[987654310]|3[9643210]|2[70]|7|1)\d{1,14}$/, message: "is not a valid phone number. Please enter a valid international phone number") # Thanks stackoverflow
     |> validate_primary_body()
     |> unique_constraint(:seo_url)
-    |> unique_constraint(:user_id)
+    |> foreign_key_constraint(:user_id)
     |> foreign_key_constraint(:primary_body_id)
   end
 

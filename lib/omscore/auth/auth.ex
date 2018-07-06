@@ -55,6 +55,17 @@ defmodule Omscore.Auth do
     |> Repo.update()
   end
 
+  def update_user_active(%User{} = user, active) when is_boolean(active) do
+    if active == false do
+      {:ok, _} = logout_user(user)
+    end
+
+    user
+    |> User.changeset(%{})
+    |> Ecto.Changeset.put_change(:active, active)
+    |> Repo.update()
+  end
+
   def delete_user(%User{} = user) do
     Repo.delete(user)
   end
@@ -157,20 +168,20 @@ defmodule Omscore.Auth do
     # Even if user wasn't found perform a dummy pw check to make timing attacks more difficult
     # Which in the end is utter bullshit because there is an endpoint to check for user existence...
     Comeonin.Bcrypt.dummy_checkpw
-    {:error, "Incorrect username or password"}
+    {:error, :unprocessable_entity, "Incorrect username or password"}
   end
 
   defp check_password(%User{} = user, plain_text_password) do
     case Comeonin.Bcrypt.checkpw(plain_text_password, user.password) do
       true -> {:ok, user}
-      false -> {:error, "Incorrect username or password"}
+      false -> {:error, :unprocessable_entity, "Incorrect username or password"}
     end
   end
 
   defp check_active(%User{} = user) do
     case user.active do
       true -> :ok
-      false -> {:error, "User not activated"}
+      false -> {:error, :bad_request, "User not activated"}
     end
   end
 

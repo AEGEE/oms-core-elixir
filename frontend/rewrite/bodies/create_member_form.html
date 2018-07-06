@@ -1,0 +1,78 @@
+
+<!-- #modal-dialog -->
+<div class="modal fade" id="createMemberModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title">Body add/edit</h4>
+            </div>
+            <div class="alert alert-info">
+                This form is only for creating members that are not yet signed up to a system. If you want to add an existing member to your body, ask them to create a join request and approve that join request!
+            </div>
+            <div class="alert alert-danger" ng-show="vm.errors.message">
+                Errors, the backend responded: {{ vm.errors.message }}
+            </div>
+            <form name="memberForm" ng-submit="vm.saveMemberForm()" class="margin-bottom-0" novalidate>
+                <div class="modal-body">
+                    <div class="form-group m-b-20">
+                        <label for="first_name">First Name*</label>
+                        <input type="text" id="first_name" class="form-control" ng-model="vm.edited_member.first_name" placeholder="First Name" required/>
+                        <p class="label label-danger" ng-show="vm.errors.first_name">{{ vm.errors.first_name }}</p>
+                    </div>
+                    <div class="form-group m-b-20">
+                        <label for="last_name">Last Name*</label>
+                        <input type="text" id="last_name" class="form-control" ng-model="vm.edited_member.last_name" placeholder="Last Name" required/>
+                        <p class="label label-danger" ng-show="vm.errors.last_name">{{ vm.errors.last_name }}</p>
+                    </div>
+                    <div class="form-group m-b-20">
+                        <label for="seo_url">Profile Link</label>
+                        <input type="text" id="seo_url" class="form-control" ng-model="vm.edited_member.seo_url" placeholder="Profile Link" required/>
+                        <p class="label label-danger" ng-show="vm.errors.seo_url">{{ vm.errors.seo_url }}</p>
+                    </div>
+                    <div class="form-group m-b-20">
+                        <label for="email">Phone</label>
+                        <input type="text" id="phone" class="form-control" ng-model="vm.edited_member.phone" placeholder="Phone" />
+                        <p class="label label-danger" ng-show="vm.errors.phone">{{ vm.errors.phone }}</p>
+                    </div>
+                    <div class="form-group m-b-20">
+                        <label for="date_of_birth">Date of birth</label>
+                        <datetimepicker ng-model="vm.edited_member.date_of_birth" hidden-time="true" readonly-time="true"></datetimepicker>
+                        <p class="label label-danger" ng-show="vm.errors.date_of_birth">{{ vm.errors.date_of_birth }}</p>
+                    </div>
+                    <div class="form-group m-b-20">
+                        <label for="email">Gender</label>
+                        <input type="text" id="gender" class="form-control" ng-model="vm.edited_member.gender" placeholder="Gender" />
+                        <p class="label label-danger" ng-show="vm.errors.gender">{{ vm.errors.gender }}</p>
+                    </div>
+                    <div class="form-group m-b-20">
+                        <label for="address">Address</label>
+                        <input type="text" id="address" class="form-control" ng-model="vm.edited_member.address" placeholder="Address" required/>
+                        <p class="label label-danger" ng-show="vm.errors.address">{{ vm.errors.address }}</p>
+                    </div>
+                    <div class="form-group m-b-20">
+                        <label for="description">About me</label>
+                        <input type="text" id="description" class="form-control" ng-model="vm.edited_member.about_me" placeholder="About me"/>
+                        <p class="label label-danger" ng-show="vm.errors.about_me">{{ vm.errors.about_me }}</p>
+                    </div>
+                    <hr />
+                    <div class="form-group m-b-20">
+                        <label for="email">Email*</label>
+                        <input type="text" id="email" class="form-control" ng-model="vm.edited_user.email" placeholder="Email of the user"/>
+                        <p class="label label-danger" ng-show="vm.errors.email">{{ vm.errors.email }}</p>
+                    </div>
+                    <div class="form-group m-b-20">
+                        <label for="name">Username*</label>
+                        <input type="text" id="name" class="form-control" ng-model="vm.edited_user.name" placeholder="Username of the user"/>
+                        <p class="label label-danger" ng-show="vm.errors.name">{{ vm.errors.name }}</p>
+                    </div>
+                    
+                </div>
+                <div class="modal-footer">
+                    <!--<button class="btn btn-sm btn-danger" data-dismiss="modal"><i class="fa fa-ban"></i> Close</button>-->
+                    <button class="btn btn-sm btn-success" type="submit"><i class="fa fa-save"></i> Create member</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

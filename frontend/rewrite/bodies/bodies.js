@@ -117,6 +117,38 @@
         vm.showBodyModal = function() {
             $('#editBodyModal').modal('show');
         }
+
+        vm.showBulkImportModal = function() {
+            $('#bulkImportModal').modal('show');
+        }
+
+        vm.performBulkImport = (data) => {
+            data = JSON.parse(data)
+            let total = data.length;
+            let success = 0;
+            let fail = 0;
+
+            let showres = (success, fail) => {
+                if(success + fail >= total)
+                    showSuccess("Bulk import finished, " + success + " successful, " + fail + " failed");
+            }
+            data.forEach((item) => {
+                vm.body = item;
+                // Create the body
+                $http({
+                    method: 'POST',
+                    url: apiUrl + '/bodies',
+                    data: {body: vm.body}
+                })
+                .then(() => {
+                    success++;
+                    showres(success, fail)
+                }).catch(function(err) {
+                    fail++;
+                    showres(success, fail)
+                });
+            })
+        }
     }
 
     function BodySingleController($http, $scope, $stateParams, $state) {
@@ -130,6 +162,7 @@
         vm.body = {};
         vm.countries = [];
         vm.body_types = [];
+        vm.single_view = true;
 
         vm.getBody = function(id) {
             $http({
@@ -198,7 +231,6 @@
               showError(error);
           });
         }
-
         
         vm.joinBody = () => {
             $('#joinRequestModal').modal('show');
@@ -219,6 +251,38 @@
                     showError(error);
             })
         }
+
+        vm.fetchCircles = (query, timeout) => {
+          return $http({
+            url: apiUrl + '/bodies/' + $stateParams.id + '/circles',
+            method: 'GET',
+            params: {
+              limit: 8,
+              offset: 0,
+              query: query
+            },
+            transformResponse: appendHttpResponseTransform($http.defaults.transformResponse, function (res) {
+              if(res && res.data) {
+                return res.data;
+              } else {
+                return [];
+              }
+            }),
+            timeout: timeout,
+          });
+        }
+
+        vm.assignShadowCircle = ($item) => {
+            if($item) {
+                vm.body.shadow_circle = $item.originalObject;
+                vm.body.shadow_circle_id = vm.body.shadow_circle.id;
+            }
+            else {
+                vm.body.shadow_circle = null;
+                vm.body.shadow_circle_id = null;
+            }
+        }
+
     }
 
     function BodyJoinRequestsController($http, $stateParams) {
@@ -288,6 +352,60 @@
             })
         }
 
+        vm.showCreateMemberModal = () => {
+            $('#createMemberModal').modal('show');
+            vm.edited_member = {}
+            vm.edited_user = {}
+        }
+
+        vm.saveMemberForm = () => {
+            $http({
+                url: apiUrl + '/bodies/' + $stateParams.id + '/new_member',
+                method: 'POST',
+                data: {member: vm.edited_member, user: vm.edited_user}
+            }).then((res) => {
+                showSuccess("Successfully created member. He received a mail with instructions on how to log in")
+                vm.resetData();
+                $('#createMemberModal').modal('hide');
+            }).catch((error) => {
+                if(error.status == 422)
+                    vm.errors = error.data.errors;
+                else
+                    showError(error);
+            })
+        }
+
+        vm.showBulkImportModal = function() {
+            $('#bulkImportModal').modal('show');
+        }
+
+        vm.performBulkImport = (data) => {
+            data = JSON.parse(data)
+            let total = data.length;
+            let success = 0;
+            let fail = 0;
+
+            let showres = (success, fail) => {
+                if(success + fail >= total)
+                    showSuccess("Bulk import finished, " + success + " successful, " + fail + " failed");
+            }
+            data.forEach((item) => {
+                item;
+                // Create the body
+                $http({
+                    method: 'POST',
+                    url: apiUrl + '/bodies/' + $stateParams.id + '/new_member',
+                    data: {member: item, user: item}
+                })
+                .then(() => {
+                    success++;
+                    showres(success, fail)
+                }).catch(function(err) {
+                    fail++;
+                    showres(success, fail)
+                });
+            })
+        }
     }
 
 })();

@@ -6,27 +6,11 @@ defmodule Omscore.MembersTest do
   describe "members" do
     alias Omscore.Members.Member
 
-    @permission_attrs %{action: "some action", description: "some description", object: "some object", scope: "global"}
 
     @valid_attrs %{about_me: "some about_me", address: "some address", date_of_birth: ~D[2010-04-17], first_name: "some first_name", gender: "some gender", last_name: "some last_name", phone: "+1212345678", user_id: 1}
     @update_attrs %{about_me: "some updated about_me", address: "some updated address", date_of_birth: ~D[2011-05-18], first_name: "some updated first_name", gender: "some updated gender", last_name: "some updated last_name", phone: "+1212345679", seo_url: "some_updated_seo_url", user_id: 43}
     @invalid_attrs %{about_me: nil, address: nil, date_of_birth: nil, first_name: nil, gender: nil, last_name: nil, phone: nil, seo_url: nil, user_id: nil}
 
-    def member_fixture(attrs \\ %{}) do
-      attrs = Enum.into(attrs, @valid_attrs)
-      {:ok, member} = Members.create_member(attrs |> Map.put(:user_id, :rand.uniform(1000000)))
-
-      member
-    end
-
-    def permission_fixture(attrs \\ %{}) do
-      {:ok, permission} =
-        attrs
-        |> Enum.into(@permission_attrs)
-        |> Omscore.Core.create_permission()
-
-      permission
-    end
 
     test "list_members/0 returns all members" do
       member = member_fixture()
@@ -49,7 +33,8 @@ defmodule Omscore.MembersTest do
     end
 
     test "create_member/1 with valid data creates a member" do
-      assert {:ok, %Member{} = member} = Members.create_member(@valid_attrs |> Map.put(:seo_url, "some_seo_url"))
+      user = user_fixture()
+      assert {:ok, %Member{} = member} = Members.create_member(@valid_attrs |> Map.put(:seo_url, "some_seo_url") |> Map.put(:user_id, user.id))
       assert member.about_me == "some about_me"
       assert member.address == "some address"
       assert member.date_of_birth == ~D[2010-04-17]
@@ -174,29 +159,10 @@ defmodule Omscore.MembersTest do
 
     @valid_attrs %{motivation: "some motivation"}
     @update_attrs %{approved: false, motivation: "some updated motivation"}
-    @body_attrs %{address: "some address", description: "some description", email: "some email", legacy_key: "some legacy_key", name: "some name", phone: "some phone"}
 
 
-    def join_request_fixture(attrs \\ %{}) do
-      body = body_fixture()
-      member = member_fixture()
 
-      attrs = attrs
-      |> Enum.into(@valid_attrs)
-        
-       {:ok, join_request} = Members.create_join_request(body, member, attrs)
 
-      {join_request, body, member}
-    end
-
-    def body_fixture(attrs \\ %{}) do
-      {:ok, body} =
-        attrs
-        |> Enum.into(@body_attrs)
-        |> Omscore.Core.create_body()
-
-      body
-    end
 
     test "list_join_requests/1 returns all join_requests" do
       {join_request, body, _} = join_request_fixture()
@@ -267,6 +233,21 @@ defmodule Omscore.MembersTest do
       assert Omscore.Core.get_body_members(body) |> Enum.any?(fn(x) -> x.id == member.id end)
     end
 
+    test "approve_join_request/1 also adds the user to the shadow_circle in case there is one" do
+      {join_request, body, member} = join_request_fixture()
+      circle = bound_circle_fixture(body)
+      {:ok, body} = Omscore.Core.update_body(body, %{shadow_circle_id: circle.id})
+      assert body.shadow_circle_id != nil
+
+      join_request = Members.get_join_request!(join_request.id)
+
+      assert {:ok, body_membership} = Members.approve_join_request(join_request)
+      assert join_request = Members.get_join_request!(join_request.id)
+      assert join_request.approved == true
+      assert Members.get_body_membership!(body_membership.id)
+      assert Members.get_circle_membership(circle, member) != nil
+    end
+
     test "approve_join_request/1 cancels in case somehow the user already got a body membership" do
       {join_request, body, member} = join_request_fixture()
       assert {:ok, _} = Members.create_body_membership(body, member)
@@ -285,6 +266,16 @@ defmodule Omscore.MembersTest do
       body = body_fixture()
 
       assert {:ok, _} = Members.create_body_membership(body, member)
+    end
+
+    test "create_body_membership/2 assigns the user to a shadow circle if there is one" do
+      member = member_fixture()
+      body = body_fixture()
+      circle = bound_circle_fixture(body)
+      assert {:ok, body} = Omscore.Core.update_body(body, %{shadow_circle_id: circle.id})
+
+      assert {:ok, _} = Members.create_body_membership(body, member)
+      assert Members.get_circle_membership(circle, member) != nil
     end
 
     test "get_body_membership/2 returns a body membership if existing" do
@@ -361,37 +352,7 @@ defmodule Omscore.MembersTest do
 
     @valid_attrs %{circle_admin: true, position: "some position"}
     @update_attrs %{circle_admin: false, position: "some updated position"}
-    @circle_attrs %{description: "some description", joinable: true, name: "some name"}
 
-    
-    def circle_fixture(attrs \\ %{}) do
-      {:ok, circle} =
-        attrs
-        |> Enum.into(@circle_attrs)
-        |> Omscore.Core.create_circle()
-
-      circle
-    end
-
-    def bound_circle_fixture(body, attrs \\ %{}) do
-      {:ok, circle} =
-        attrs
-        |> Enum.into(@circle_attrs)
-        |> Omscore.Core.create_circle(body)
-
-      circle
-    end
-
-    def circle_membership_fixture(attrs \\ %{}) do
-      member = member_fixture()
-      circle = circle_fixture()
-      
-      attrs = Enum.into(attrs, @valid_attrs)
-      
-      {:ok, circle_membership} = Members.create_circle_membership(circle, member, attrs)
-
-      {circle_membership, circle, member}
-    end
 
     test "list_circle_memberships/1 returns all circle_memberships for a circle" do
       {circle_membership, circle, _member} = circle_membership_fixture()

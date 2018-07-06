@@ -1,0 +1,71 @@
+
+<!-- #modal-dialog -->
+<div class="modal fade" id="editCampaignModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title">Campaign add/edit</h4>
+            </div>
+            <div class="alert alert-danger" ng-show="vm.errors.message">
+                Errors, the backend responded: {{ vm.errors.message }}
+            </div>
+            <form name="campaignForm" ng-submit="vm.saveCampaignForm()" class="margin-bottom-0" novalidate>
+                <div class="modal-body">
+                    <div class="form-group m-b-20">
+                        <label for="name">Name*</label>
+                        <input type="text" id="name" class="form-control" ng-model="vm.edited_campaign.name" placeholder="Permission name" required/>
+                        <p class="label label-danger" ng-show="vm.errors.name">{{ vm.errors.name }}</p>
+                    </div>
+                    <div class="form-group m-b-20">
+                        <label for="description_short">Short Description*</label>
+                        <input type="text" id="description_short" class="form-control" ng-model="vm.edited_campaign.description_short" placeholder="A short phrase to advertise the campaign" required/>
+                        <p class="label label-danger" ng-show="vm.errors.description_short">{{ vm.errors.description_short }}</p>
+                    </div>
+                    <div class="form-group m-b-20">
+                        <label for="description_long">Long Description</label>
+                        <input type="text" id="description_long" class="form-control" ng-model="vm.edited_campaign.description_long" placeholder="A long description telling why you should sign up here" required/>
+                        <p class="label label-danger" ng-show="vm.errors.description_long">{{ vm.errors.description_long }}</p>
+                    </div>
+                    <div class="form-group m-b-20">
+                        <label for="url">URL*</label>
+                        <div class="input-group">
+                            <span class="input-group-addon">/signup/</span>
+                            <input type="text" id="url" class="form-control" ng-model="vm.edited_campaign.url" placeholder="Where the campaign is reachable"/>
+                        </div>
+                        <p class="label label-danger" ng-show="vm.errors.url">{{ vm.errors.url }}</p>
+                    </div>
+                    <div class="form-group m-b-20">
+                        <label>Body ({{ vm.edited_campaign.autojoin_body.name }})</label>
+                        <angucomplete-alt 
+                            id="autojoinBodyTypeahead" 
+                            placeholder="Type to set body the user will autojoin" 
+                            pause="50" 
+                            selected-object="vm.assignBody" 
+                            remote-api-handler="vm.fetchBodies" 
+                            title-field="name" 
+                            description-field="description" 
+                            minlength="1" 
+                            input-class="form-control form-control-small"> 
+                          </angucomplete-alt>
+                          <p class="label label-danger" ng-show="vm.errors.autojoin_body_id">{{ vm.errors.autojoin_body_id }}</p>
+                    </div>
+                    <div class="form-group m-b-20">
+                        <label for="activate_user" class="form-check-label">Autoactivate user</label>
+                        <input type="checkbox" id="activate_user" class="form-check-input" ng-model="vm.edited_campaign.activate_user" ng-init="vm.edited_campaign.activate_user = vm.edited_campaign.activate_user || false" />
+                        <p class="label label-danger" ng-show="vm.errors.activate_user">{{ vm.errors.activate_user }}</p>
+                    </div>
+                    <div class="form-group m-b-20">
+                        <label for="active" class="form-check-label">Active</label>
+                        <input type="checkbox" id="active" class="form-check-input" ng-model="vm.edited_campaign.active" ng-init="vm.edited_campaign.active = vm.edited_campaign.active || false" />
+                        <p class="label label-danger" ng-show="vm.errors.active">{{ vm.errors.active }}</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <!--<button class="btn btn-sm btn-danger" data-dismiss="modal"><i class="fa fa-ban"></i> Close</button>-->
+                    <button class="btn btn-sm btn-success" type="submit"><i class="fa fa-save"></i> Save campaign</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

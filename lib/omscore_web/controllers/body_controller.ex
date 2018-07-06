@@ -8,9 +8,9 @@ defmodule OmscoreWeb.BodyController do
   action_fallback OmscoreWeb.FallbackController
 
   def index(conn, params) do
-    with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "view", "body") do
+    with {:ok, %Core.Permission{filters: filters}} <- Core.search_permission_list(conn.assigns.permissions, "view", "body") do
       bodies = Core.list_bodies(params)
-      render(conn, "index.json", bodies: bodies)
+      render(conn, "index.json", bodies: bodies, filters: filters)
     end
   end
 
@@ -25,17 +25,18 @@ defmodule OmscoreWeb.BodyController do
   end
 
   def show(conn, _params) do
-    body = conn.assigns.body |> Omscore.Repo.preload([:circles])
+    body = conn.assigns.body |> Omscore.Repo.preload([:circles, :shadow_circle])
 
-    with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "view", "body") do
-      render(conn, "show.json", body: body)
+    with {:ok, %Core.Permission{filters: filters}} <- Core.search_permission_list(conn.assigns.permissions, "view", "body") do
+      render(conn, "show.json", body: body, filters: filters)
     end
   end
 
   def update(conn, %{"body" => body_params}) do
     body = conn.assigns.body
 
-    with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "update", "body"),
+    with {:ok, %Core.Permission{filters: filters}} <- Core.search_permission_list(conn.assigns.permissions, "update", "body"),
+         body_params <- Core.apply_attribute_filters(body_params, filters),
          {:ok, %Body{} = body} <- Core.update_body(body, body_params) do
       render(conn, "show.json", body: body)
     end
@@ -51,14 +52,15 @@ defmodule OmscoreWeb.BodyController do
 
   def show_members(conn, params) do
     body_memberships = Members.list_body_memberships(conn.assigns.body, params)
-    with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "view_members", "body") do
-      render(conn, OmscoreWeb.BodyMembershipView, "index.json", body_memberships: body_memberships)
+    with {:ok, %Core.Permission{filters: filters}} <- Core.search_permission_list(conn.assigns.permissions, "view_members", "body") do
+      render(conn, OmscoreWeb.BodyMembershipView, "index.json", body_memberships: body_memberships, filters: filters)
     end
   end
 
   def update_member(conn, %{"membership_id" => membership_id, "body_membership" => bm_attrs}) do
     bm = Members.get_body_membership_safe!(conn.assigns.body.id, membership_id) |> Omscore.Repo.preload([:member])
-    with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "update_member", "body"),
+    with {:ok, %Core.Permission{filters: filters}} <- Core.search_permission_list(conn.assigns.permissions, "update_member", "body"),
+         bm_attrs <- Core.apply_attribute_filters(bm_attrs, filters),
          {:ok, bm} <- Members.update_body_membership(bm, bm_attrs) do
       render(conn, OmscoreWeb.BodyMembershipView, "show.json", body_membership: bm)
     end

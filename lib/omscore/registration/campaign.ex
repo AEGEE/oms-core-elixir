@@ -6,13 +6,13 @@ defmodule Omscore.Registration.Campaign do
   schema "campaigns" do
     field :active, :boolean, default: false
     field :activate_user, :boolean, default: false
-    field :autojoin_body_id, :integer
     field :name, :string
     field :description_short, :string
     field :description_long, :string
     field :url, :string
 
-    has_many(:submissions, Omscore.Registration.Submission)
+    belongs_to :autojoin_body, Omscore.Core.Body
+    has_many :submissions, Omscore.Registration.Submission
 
     timestamps()
   end
@@ -22,7 +22,8 @@ defmodule Omscore.Registration.Campaign do
     campaign
     |> cast(attrs, [:name, :url, :active, :activate_user, :autojoin_body_id, :description_long, :description_short])
     |> validate_required([:name, :url, :active, :description_short])
-    |> validate_format(:url, ~r/^[A-Za-z0-9_-]*$/)
+    |> validate_format(:url, ~r/^[A-Za-z0-9_-]*$/, message: "no special characters allowed in url")
     |> unique_constraint(:url)
+    |> foreign_key_constraint(:autojoin_body_id)
   end
 end

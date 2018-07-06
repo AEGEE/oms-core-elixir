@@ -15,15 +15,17 @@ defmodule OmscoreWeb.AuthorizePlug do
     with token <- get_req_header(conn, "x-auth-token"),
       {:ok, _} <- check_nil(token),
       token <- Enum.at(token, 0),
-      {:ok, user, _claims} <- check_access_token(token)
+      {:ok, user, claims} <- check_access_token(token)
     do
       conn 
       |> assign(:user, user)
+      |> assign(:token, token)
+      |> assign(:refresh_token_id, claims["refresh"])
     else
-      {:error, msg} -> 
+      {:error, _} -> 
         conn
         |> put_resp_content_type("application/json")
-        |> send_resp(401, Poison.encode!(%{success: false, error: "Invalid access token", msg: to_string(msg)}))
+        |> send_resp(401, Poison.encode!(%{success: false, error: "Invalid access token"}))
         |> halt
     end
   end

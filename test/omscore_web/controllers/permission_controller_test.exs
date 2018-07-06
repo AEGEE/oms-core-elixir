@@ -14,7 +14,7 @@ defmodule OmscoreWeb.PermissionControllerTest do
   end
 
   def create_many_permissions(range) do
-    Enum.map(range, fn(_) -> permission_fixture() end)
+    Enum.map(range, fn(x) -> permission_fixture(%{object: to_string(x)}) end)
   end
 
   setup %{conn: conn} do
@@ -86,6 +86,30 @@ defmodule OmscoreWeb.PermissionControllerTest do
       
       conn = get conn, permission_path(conn, :index)
       assert json_response(conn, 403)
+    end
+
+    test "works with filtered permissions", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "view", object: "permission", filters: [%{field: "id"}]}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      create_many_permissions(0..3)
+
+      conn = get conn, permission_path(conn, :index)
+      assert res = json_response(conn, 200)["data"]
+      assert res |> Enum.all?(fn(x) -> !Map.has_key?(x, "id") end)
+    end
+  end
+
+  describe "show permission" do
+    test "works with filtered permissions", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "view", object: "permission", filters: [%{field: "id"}]}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      permission = permission_fixture()
+
+      conn = get conn, permission_path(conn, :show, permission.id)
+      assert res = json_response(conn, 200)["data"]
+      assert !Map.has_key?(res, "id")
     end
   end
 
@@ -166,6 +190,28 @@ defmodule OmscoreWeb.PermissionControllerTest do
 
       conn = put conn, permission_path(conn, :update, permission), permission: @update_attrs
       assert json_response(conn, 403)
+    end
+
+    test "works with filtered permissions", %{conn: conn, permission: permission} do
+      %{token: token} = create_member_with_permissions([%{action: "update", object: "permission", filters: [%{field: "action"}]}, %{action: "view", object: "permission"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+      id = permission.id
+
+      conn = put conn, permission_path(conn, :update, permission), permission: @update_attrs
+      assert %{"id" => ^id} = json_response(conn, 200)["data"]
+
+      conn = conn
+      |> recycle()
+      |> put_req_header("x-auth-token", token)
+
+      conn = get conn, permission_path(conn, :show, id)
+      assert json_response(conn, 200)["data"] |> map_inclusion(%{
+        "id" => id,
+        "action" => "some action",
+        "description" => "some updated description",
+        "object" => "some updated object",
+        "scope" => "local",
+        "always_assigned" => true})
     end
   end
 

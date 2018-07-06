@@ -71,6 +71,17 @@ defmodule OmscoreWeb.BodyControllerTest do
       conn = get conn, body_path(conn, :index)
       assert json_response(conn, 403)
     end
+
+    test "works with filtered permissions", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "view", object: "body", filters: [%{field: "name"}]}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      body_fixture()
+
+      conn = get conn, body_path(conn, :index)
+      assert res = json_response(conn, 200)["data"]
+      assert !Enum.any?(res, fn(x) -> Map.has_key?(x, "name") end)
+    end
   end
 
   describe "show" do
@@ -91,6 +102,15 @@ defmodule OmscoreWeb.BodyControllerTest do
 
       conn = get conn, body_body_path(conn, :show, body.id)
       assert json_response(conn, 403)
+    end
+
+    test "works with filtered permissions", %{conn: conn, body: body} do
+      %{token: token} = create_member_with_permissions([%{action: "view", object: "body", filters: [%{field: "name"}]}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      conn = get conn, body_body_path(conn, :show, body.id)
+      assert res = json_response(conn, 200)["data"]
+      assert !Map.has_key?(res, "name")
     end
   end
 
@@ -170,6 +190,26 @@ defmodule OmscoreWeb.BodyControllerTest do
       conn = put conn, body_body_path(conn, :update, body.id), body: @update_attrs
       assert json_response(conn, 403)
     end
+
+    test "works with filtered permissions", %{conn: conn, body: %Body{id: id} = body} do
+      %{token: token} = create_member_with_permissions([%{action: "update", object: "body", filters: [%{field: "address"}]}, %{action: "view", object: "body"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      conn = put conn, body_body_path(conn, :update, body.id), body: @update_attrs
+      assert json_response(conn, 200)["data"]
+
+      conn = recycle(conn) |> put_req_header("x-auth-token", token)
+
+      conn = get conn, body_body_path(conn, :show, body.id)
+      assert %{
+        "id" => ^id,
+        "address" => "some address",
+        "description" => "some updated description",
+        "email" => "some updated email",
+        "legacy_key" => "some updated legacy_key",
+        "name" => "some updated name",
+        "phone" => "some updated phone"} = json_response(conn, 200)["data"]
+    end
   end
 
   describe "delete body" do
@@ -229,6 +269,20 @@ defmodule OmscoreWeb.BodyControllerTest do
 
       assert res == []
     end
+
+    test "works with filtered permissions", %{conn: conn, body: body} do
+      member = member_fixture()
+      assert {:ok, _} = Omscore.Members.create_body_membership(body, member)
+
+      %{token: token} = create_member_with_permissions([%{action: "view_members", object: "body", filters: [%{field: "comment"}, %{field: "member.gender"}]}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      conn = get conn, body_body_path(conn, :show_members, body.id)
+      assert res = json_response(conn, 200)["data"]
+
+      assert Enum.all?(res, fn(x) -> !Map.has_key?(x, "comment") end)
+      assert Enum.all?(res, fn(x) -> !Map.has_key?(x["member"], "gender") end)
+    end
   end
 
   describe "update body membership" do
@@ -241,9 +295,9 @@ defmodule OmscoreWeb.BodyControllerTest do
       %{token: token} = create_member_with_permissions([%{action: "update_member", object: "body"}])
       conn = put_req_header(conn, "x-auth-token", token)
 
-      conn = put conn, body_body_path(conn, :update_member, body.id, bm.id), body_membership: %{comment: "some comment"}
+      conn = put conn, body_body_path(conn, :update_member, body.id, bm.id), body_membership: %{comment: "some updated comment"}
       assert res = json_response(conn, 200)["data"]
-      assert res["comment"] == "some comment"
+      assert res["comment"] == "some updated comment"
     end
 
     test "rejects on missing permissions", %{conn: conn, body: body} do
@@ -268,6 +322,18 @@ defmodule OmscoreWeb.BodyControllerTest do
       assert_raise Ecto.NoResultsError, fn ->
         put conn, body_body_path(conn, :update_member, body2.id, bm.id), body_membership: %{comment: "some comment"}
       end
+    end
+
+    test "works with filtered permissions", %{conn: conn, body: body} do
+      member = member_fixture()
+      assert {:ok, bm} = Omscore.Members.create_body_membership(body, member)
+
+      %{token: token} = create_member_with_permissions([%{action: "update_member", object: "body", filters: [%{field: "comment"}]}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      conn = put conn, body_body_path(conn, :update_member, body.id, bm.id), body_membership: %{comment: "some updated comment"}
+      assert res = json_response(conn, 200)["data"]
+      assert res["comment"] == bm.comment
     end
   end
 

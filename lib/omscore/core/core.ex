@@ -24,7 +24,7 @@ defmodule Omscore.Core do
 
     case Enum.find(res, :not_found, fn(x) -> x == nil end) do
       :not_found -> {:ok, res}
-      _ -> {:error, :not_found, "One of the permissions could not be found in the db"}
+      _ -> {:error, :not_found, "One of the objects could not be found in the db"}
     end
   end
 
@@ -80,20 +80,34 @@ defmodule Omscore.Core do
     reduce_permission_list(permission_list, %{})
   end
 
+  defp intersect_filters(filters_a, filters_b) do
+    filters_a
+    |> Enum.filter(fn(x) -> 
+      Enum.any?(filters_b, fn(y) ->
+        x.field == y.field
+      end)
+    end)
+  end
+
   # Returns the permission with the highest scope
-  defp highest_scope(a, b) do
-    if a.scope == "global" do
+  defp merge_permissions(a, b) do
+    filters = intersect_filters(a.filters, b.filters)
+
+    res = if a.scope == "global" do
       a
     else
       b
     end
+    Map.put(res, :filters, filters)
   end
 
   # Put all permissions into a Map, in  case the permission is already in put the one with the highest scope
+  # Also intersects permission filters
+  # After this please don't check on scopes of the permission anymore, as filter intersection might remove filters from a strongly filtered global permission through merging with an unfiltered local permission, effectively increasing user permissions
   defp reduce_permission_list([x | rest], found) do
     case Map.get(found, {x.action, x.object}) do
       nil -> reduce_permission_list(rest, Map.put(found, {x.action, x.object}, x))
-      y -> reduce_permission_list(rest, Map.put(found, {x.action, x.object}, highest_scope(x, y)))
+      y -> reduce_permission_list(rest, Map.put(found, {x.action, x.object}, merge_permissions(x, y)))
     end
   end
 
@@ -121,6 +135,50 @@ defmodule Omscore.Core do
     end
   end
 
+  # In case of a list, apply the filter to every path item
+  defp apply_filter_to_path(list, data) when is_list(data) do
+    Enum.map(data, fn(x) -> apply_filter_to_path(list, x) end)
+  end
+
+  # If we have one single path element, actually do the filtering
+  defp apply_filter_to_path([x], %{} = data) do
+    # Delete string version of the field if present
+    data = data
+    |> Map.delete(x)
+    
+    # Delete atom version of the field if present and if passed string is an atom
+    try do
+      Map.delete(data, String.to_existing_atom(x))
+    rescue
+      _ -> data
+    end
+  end
+
+  # Recurse down along the path until we are at a leaf
+  defp apply_filter_to_path([x | path], %{} = data) do
+    # If the string is an atom and also exists, it might be a key
+    # Try the failing update method to update the data in there
+    # If not, just leave the data unchanged
+    try do
+      Map.update!(data, String.to_existing_atom(x), fn(data) -> apply_filter_to_path(path, data) end)
+    rescue
+      _ -> data
+    end
+  end
+
+
+
+  # Filter data based on the filters passed in
+  # The data can be a map or a list, containing either string or atom keys
+  # In case fields from the filter are not present, they will be ommitted
+  def apply_attribute_filters(data, filters) do
+    Enum.reduce(filters, data, fn(x, data) ->
+      x.field
+      |> String.split(".", trim: true)
+      |> apply_filter_to_path(data)
+    end)
+  end
+
   alias Omscore.Core.Body
 
   # Returns all bodies
@@ -142,6 +200,10 @@ defmodule Omscore.Core do
 
   # Creates a body.
   def create_body(attrs \\ %{}) do
+    attrs = attrs
+    |> Map.delete(:shadow_circle_id)
+    |> Map.delete("shadow_circle_id")
+
     %Body{}
     |> Body.changeset(attrs)
     |> Repo.insert()
@@ -256,30 +318,45 @@ defmodule Omscore.Core do
   # This is useful for put_child_circles
   def find_circles(input_data), do: find_array(Circle, input_data)
 
+  def all_orphan_circles?(circles) do
+    Enum.all?(circles, fn(x) -> x.parent_circle_id == nil end)
+  end
+
   # Puts child circles for a circle
   # You should preload circles with find_circles if the data came from the user
-  # TODO: Doesn't check for loops yet!
   def put_child_circles(%Circle{} = circle, child_circles) do
-    with {:ok} <- check_joinable_consistency(circle, child_circles),
-        circle <- put_child_circles_unchecked(circle, child_circles) do
-      circle
-    end
-  end
+    case Repo.transaction(fn ->
+      child_circles = case find_circles(child_circles) do
+        {:error, message} -> Repo.rollback(message)
+        {:error, code, message} -> Repo.rollback({code, message})
+        {:ok, res} -> res
+      end
 
-  defp check_joinable_consistency(circle, child_circles) do
-    if !circle.joinable && Enum.any?(child_circles, fn(x) -> x.joinable end) do
-      {:error, "A non-joinable parent circle can not have a joinable child"}
-    else
-      {:ok}
-    end
-  end
+      if !Enum.all?(child_circles, fn(x) -> x.parent_circle_id == nil || x.parent_circle_id == circle.id end) do
+        Repo.rollback({:unprocessable_entity, "Can only assign orphan circles as childs"})
+      end
 
-  defp put_child_circles_unchecked(circle, child_circles) do
-    circle
-    |> Repo.preload([:child_circles])
-    |> Circle.changeset(%{})
-    |> Ecto.Changeset.put_assoc(:child_circles, child_circles)
-    |> Repo.update()
+      # Remove all old child circles
+      circle = circle
+      |> Repo.preload([:child_circles])
+      |> Circle.changeset(%{})
+      |> Ecto.Changeset.put_assoc(:child_circles, [])
+      |> Repo.update!()
+
+      error = child_circles
+      |> Enum.map(&put_parent_circle(&1, circle))
+      |> Enum.find(nil, &elem(&1, 0) == :error)
+
+      if error != nil do
+        Repo.rollback(elem(error, 1))
+      end
+
+      get_circle!(circle.id)
+      |> Repo.preload([:child_circles])
+    end) do
+      {:error, {code, message}} -> {:error, code, message}
+      res -> res
+    end
   end
 
   # Removes the parent circle for a circle
@@ -292,11 +369,9 @@ defmodule Omscore.Core do
   # Puts the parent circle for a circle while maintaining joinable consistency
   # Returns {:ok, circle} or {:error, error-data}
   def put_parent_circle(%Circle{} = circle, %Circle{} = parent_circle) do
-    with {:ok} <- check_joinable_consistency(parent_circle, [circle]) do
-      circle
-      |> Circle.changeset(%{parent_circle_id: parent_circle.id})
-      |> Repo.update()
-    end
+    circle
+    |> Circle.changeset(%{parent_circle_id: parent_circle.id})
+    |> Repo.update()
   end
 
   # Checks if the parent circle actually is a parent of circle

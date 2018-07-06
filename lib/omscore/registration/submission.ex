@@ -5,7 +5,9 @@ defmodule Omscore.Registration.Submission do
 
   schema "submissions" do
 
-    field :responses, :string
+    field :first_name, :string
+    field :last_name, :string
+    field :motivation, :string
     field :mail_confirmed, :boolean
 
     belongs_to :user, Omscore.Auth.User
@@ -19,8 +21,8 @@ defmodule Omscore.Registration.Submission do
   @doc false
   def changeset(submission, attrs) do
     submission
-    |> cast(attrs, [:responses, :mail_confirmed, :user_id, :campaign_id])
-    |> validate_required([:user_id, :campaign_id])
+    |> cast(attrs, [:first_name,  :last_name, :motivation, :mail_confirmed])
+    |> validate_required([:first_name, :last_name, :motivation, :user_id, :campaign_id])
     |> foreign_key_constraint(:user_id)
     |> foreign_key_constraint(:campaign_id)
   end

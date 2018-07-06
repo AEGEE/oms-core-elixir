@@ -1,0 +1,74 @@
+<h1 class="page-header">{{ vm.campaign.name }}</h1>
+
+<div class="m-b-40">
+  <table class="table">
+    <tr>
+      <td>Name</td>
+      <td>{{ vm.campaign.name }}</td>
+    </tr>
+    <tr>
+      <td>Description short</td>
+      <td>{{ vm.campaign.description_short }}</td>
+    </tr>
+    <tr>
+      <td>Description long</td>
+      <td>{{ vm.campaign.description_long }}</td>
+    </tr>
+    <tr>
+      <td>URL</td>
+      <td>/signup/{{ vm.campaign.url }}</td>
+    </tr>
+    <tr>
+      <td>Body</td>
+      <td>
+        <span ng-show="vm.campaign.autojoin_body"><a ui-sref="app.bodies.single({id: vm.campaign.autojoin_body.seo_url})">{{ vm.campaign.autojoin_body.name }}</a></span>
+        <span ng-show="!vm.campaign.autojoin_body">This campaign will not create a join request to a body after signup</span>
+      </td>
+    </tr>
+    <tr>
+      <td>Activate User</td>
+      <td>
+        <span ng-show="vm.campaign.activate_user">User will be activated automatically after mail confirmation</span>
+        <span ng-show="!vm.campaign.activate_user">User will remain inactive even after mail confirmation</span>
+      </td>
+    </tr>
+    <tr>
+      <td>Status</td>
+      <td>
+        <span ng-show="vm.campaign.active">Active</span>
+        <span ng-show="!vm.campaign.active">Inactive</span>
+      </td>
+    </tr>
+  </table>
+</div>
+
+
+<button class="btn btn-warning" type="button" ng-click="vm.showEditModal()">Edit Campaign</button>
+<button class="btn btn-danger" type="button" ng-click="vm.deleteCampaign()">Delete Campaign</button>
+
+<hr />
+<h2>Submissions</h2>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>User</th>
+      <th>Motivation</th>
+      <th>Mail confirmed</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr ng-repeat="submission in vm.campaign.submissions">
+      <td><a ui-sref="submission.user.member_id">{{ submission.first_name }} {{ submission.last_name }}</a></td>
+      <td>{{ submission.motivation }}</td>
+      <td>{{ submission.mail_confirmed }}</td>
+    </tr>
+  </tbody>
+</table>
+
+<ng-include src="vm.baseUrl + 'loggedIn/campaigns/edit_campaign_form.html'"></ng-include>
+
+
+
+
+

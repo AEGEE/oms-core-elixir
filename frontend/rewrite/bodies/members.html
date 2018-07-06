@@ -1,6 +1,9 @@
 <h1 class="page-header">Body members</h1>
 
 <div class="row">
+  <button type="button" class="btn btn-primary" ng-click="vm.showCreateMemberModal()">Create Member</button>
+  <button type="button" class="btn btn-primary" ng-click="vm.showBulkImportModal()">Bulk Import</button>
+
   <div class="input-group">
     <span class="input-group-addon"><i class="fa fa-search"></i> Search</span>
     <input type="text" class="form-control" placeholder="Type any keywords" ng-model="vm.query" ng-change="vm.resetData()" />
@@ -33,3 +36,5 @@
 
 
 <ng-include src="vm.baseUrl + 'rewrite/bodies/edit_body_membership_form.html'"></ng-include>
+<ng-include src="vm.baseUrl + 'rewrite/bodies/create_member_form.html'"></ng-include>
+<ng-include src="vm.baseUrl + 'rewrite/bodies/bulk_import_form.html'"></ng-include>

@@ -9,6 +9,7 @@ defmodule Omscore.Registration do
   alias Omscore.Registration.Campaign
   alias Omscore.Registration.MailConfirmation
   alias Omscore.Registration.Submission
+  alias OmscoreWeb.Helper
 
   @doc """
   Returns the list of campaigns.
@@ -19,8 +20,18 @@ defmodule Omscore.Registration do
       [%Campaign{}, ...]
 
   """
-  def list_campaigns do
-    Repo.all(Campaign)
+  def list_campaigns(params \\ %{}) do
+    from(u in Campaign, order_by: [:name])
+    |> Helper.paginate(params)
+    |> Helper.search(params, [:name, :description_short, :url])
+    |> Repo.all
+  end
+
+  def list_active_campaigns(params \\ %{}) do
+    from(u in Campaign, order_by: [:name], where: u.active == true)
+    |> Helper.paginate(params)
+    |> Helper.search(params, [:name, :description_short, :url])
+    |> Repo.all
   end
 
   @doc """
@@ -108,21 +119,21 @@ defmodule Omscore.Registration do
     Campaign.changeset(campaign, %{})
   end
 
+  def get_confirmation!(confirmation_id), do: Repo.get!(MailConfirmation, confirmation_id)
   def get_confirmation_by_url!(confirmation_url) do
     hash = Omscore.hash_without_salt(confirmation_url)
 
     Repo.get_by!(MailConfirmation, url: hash)
-    |> Repo.preload([submission: [:campaign, :user]])
   end
 
-  def create_submission(campaign, user, responses) do
-    attrs = %{responses: responses,
+  def get_submission!(submission_id), do: Repo.get!(Submission, submission_id)
+
+  def create_submission(campaign, user, submission_attrs) do
+    %Submission{
       user_id: user.id,
       campaign_id: campaign.id
     }
-
-    %Submission{}
-    |> Submission.changeset(attrs)
+    |> Submission.changeset(submission_attrs)
     |> Repo.insert()
   end
 
@@ -133,12 +144,12 @@ defmodule Omscore.Registration do
   end
 
   defp dispatch_confirmation_mail(user, token) do
-    url = Application.get_env(:omscore, :url_prefix) <> "/signup?token=" <> token
+    url = Application.get_env(:omscore, :url_prefix) <> "/confirm_signup?token=" <> token
     Omscore.Interfaces.Mail.send_mail(user.email, "Confirm your email address", 
       "To confirm your email, visit " <> url <> " or copy&paste the token into the form on the website: " <> token)
   end
 
-  defp create_confirmation_object(submission) do
+  def create_confirmation_object(submission) do
     url = Omscore.random_url()
 
     res = %MailConfirmation{}
@@ -152,17 +163,28 @@ defmodule Omscore.Registration do
   end
 
   def confirm_mail(confirmation) do
+    confirmation = confirmation
+    |> Repo.preload([submission: [campaign: [:autojoin_body], user: []]])
+
     confirmation.submission
     |> Submission.changeset(%{mail_confirmed: true})
     |> Repo.update!
 
+    {:ok, member} = Omscore.Members.create_member(%{first_name: confirmation.submission.first_name, 
+                                                    last_name: confirmation.submission.last_name,
+                                                    user_id: confirmation.submission.user.id})
+
+    {:ok, user} = Omscore.Auth.update_user_member_id(confirmation.submission.user, member.id)
+
     if confirmation.submission.campaign.activate_user do
-      confirmation.submission.user
+      user
       |> Omscore.Auth.User.changeset(%{active: true})
       |> Repo.update!
     end
 
-    #Omscore.Interfaces.UserActivationAction.user_activation_action(confirmation.submission)
+    if confirmation.submission.campaign.autojoin_body_id do
+      Omscore.Members.create_join_request(confirmation.submission.campaign.autojoin_body, member, %{motivation: confirmation.submission.motivation})
+    end
 
     confirmation 
     |> Repo.delete!

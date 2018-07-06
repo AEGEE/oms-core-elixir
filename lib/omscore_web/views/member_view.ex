@@ -3,16 +3,25 @@ defmodule OmscoreWeb.MemberView do
   alias OmscoreWeb.MemberView
   alias OmscoreWeb.Helper
 
-  def render("index.json", %{members: members}) do
-    %{success: true, data: render_many(members, MemberView, "member.json")}
-  end
+  def render("index.json", %{members: members, filters: filters}) do
+    data = members
+    |> render_many(MemberView, "member.json")
+    |> Omscore.Core.apply_attribute_filters(filters)
 
-  def render("show.json", %{member: member}) do
-    %{success: true, data: render_one(member, MemberView, "member.json")}
+    %{success: true, data: data}
   end
+  #def render("index.json", %{members: members}), do: render("index.json", %{members: members, filters: []})
+
+  def render("show.json", %{member: member, filters: filters}) do
+    data = member
+    |> render_one(MemberView, "member.json")
+    |> Omscore.Core.apply_attribute_filters(filters)
+
+    %{success: true, data: data}
+  end
+  def render("show.json", %{member: member}), do: render("show.json", %{member: member, filters: []})
 
   def render("member.json", %{member: member}) do
-
     %{id: member.id,
       user_id: member.user_id,
       first_name: member.first_name,
@@ -29,6 +38,7 @@ defmodule OmscoreWeb.MemberView do
       circle_memberships: Helper.render_assoc_many(member.circle_memberships, OmscoreWeb.CircleMembershipView, "circle_membership.json"),
       bodies: Helper.render_assoc_many(member.bodies, OmscoreWeb.BodyView, "body.json"),
       body_memberships: Helper.render_assoc_many(member.body_memberships, OmscoreWeb.BodyMembershipView, "body_membership.json"),
-      join_requests: Helper.render_assoc_many(member.join_requests, OmscoreWeb.JoinRequestView, "join_request.json")}
+      join_requests: Helper.render_assoc_many(member.join_requests, OmscoreWeb.JoinRequestView, "join_request.json"),
+      user: Helper.render_assoc_one(member.user, OmscoreWeb.LoginView, "user_data.json")}
   end
 end

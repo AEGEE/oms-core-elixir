@@ -47,14 +47,28 @@
       </td>
     </tr>
     <tr>
-      <td>Child Circles</td>
+      <td>Child Circles <a href="javascript:;" ng-click="vm.editChildCircles = !vm.editChildCircles"><i class="fa fa-pencil"></i></a></td>
       <td>
         <ul ng-show="vm.circle.child_circles.length">
           <li ng-repeat="child in vm.circle.child_circles">
             <a ui-sref="app.circles.single({id: child.seo_url})">{{ child.name }}</a>
+            <a href="javascript:;" ng-click="vm.circle.child_circles.splice($index, 1); vm.updateChildCircles()" ng-show="vm.editChildCircles"><i class="fa fa-minus"></i></a>
           </li>
         </ul>
-        <span ng-show="!vm.circle.child_circles.length">No child circles found</span>
+        <span ng-show="!vm.circle.child_circles.length && !vm.editChildCircles">No child circles found</span>
+        <span ng-show="vm.editChildCircles">
+          <angucomplete-alt 
+            id="childCircleTypeahead" 
+            placeholder="Type to add child circle" 
+            pause="50" 
+            selected-object="vm.addChildCircle" 
+            remote-api-handler="vm.fetchCircles" 
+            title-field="name" 
+            description-field="description" 
+            minlength="1" 
+            input-class="form-control form-control-small"> 
+          </angucomplete-alt>
+        </span>
       </td>
     </tr>
     <tr>

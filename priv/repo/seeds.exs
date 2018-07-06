@@ -9,16 +9,15 @@
 #
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
-
+dump = true
 alias Omscore.Core.Permission
 alias Omscore.Members.Member
-alias Omscore.Core
 alias Omscore.Members
 alias Omscore.Repo
 alias Omscore.Auth.User
 
 # Seed permissions
-if Repo.all(Permission) == [] do
+if Repo.all(Permission) == [] && !dump do
   # Permissions
   Repo.insert!(%Permission{
     scope: "global",
@@ -88,6 +87,13 @@ if Repo.all(Permission) == [] do
 
   Repo.insert!(%Permission{
     scope: "global",
+    action: "put_child",
+    object: "circle",
+    description: "Add any orphan circle in the system as a child to any circle you are circle admin in."
+  })
+
+  Repo.insert!(%Permission{
+    scope: "global",
     action: "delete",
     object: "circle",
     description: "Delete any circle, even those that you are not in a circle_admin position in. Should only be assigned in case of an abandoned toplevel circle as circle_admins automatically get this permission"
@@ -153,8 +159,7 @@ if Repo.all(Permission) == [] do
     scope: "global", 
     action: "join",
     object: "circle",
-    description: "Allows to join circles which are joinable. Non-joinable circles can never be joined",
-    always_assigned: true
+    description: "Allows to join circles which are joinable. Non-joinable circles can never be joined"
   })
 
   Repo.insert!(%Permission{
@@ -314,28 +319,21 @@ if Repo.all(Permission) == [] do
     scope: "local",
     action: "view",
     object: "member",
-    description: "View basic information about all members in the body. This does not allow you to perform a members listing, you might however hold the list body_memberships permission"
-  })
-
-  Repo.insert!(%Permission{
-    scope: "global",
-    action: "view_full",
-    object: "member",
-    description: "View all details of any member in the system. Assign this role to trusted persons only to avoid disclosure."
-  })
-
-  Repo.insert!(%Permission{
-    scope: "local",
-    action: "view_full",
-    object: "member",
-    description: "View all details of any member in the body that you got this permission from"
+    description: "View information about all members in the body. This does not allow you to perform a members listing, you might however hold the list:body_memberships permission to perform a members listing of the members in the body"
   })
 
   Repo.insert!(%Permission{
     scope: "global",
     action: "create",
     object: "member",
-    description: "Create members to the system. This is usually only assigned to the login microservice"
+    description: "Create members to any body in the system, even if you are not member in that body"
+  })
+
+  Repo.insert!(%Permission{
+    scope: "local",
+    action: "create",
+    object: "member",
+    description: "Create members the body that you got this permission from."
   })
 
   Repo.insert!(%Permission{
@@ -351,41 +349,20 @@ if Repo.all(Permission) == [] do
     object: "member",
     description: "Update any member in the body you got this permission from. Notice that member information is global and several bodies might have the permission to access the same member. Also don't assign it when not necessary, the member can update his own profile anyways."
   })
-
+  
+  # User permissions
   Repo.insert!(%Permission{
     scope: "global",
     action: "delete",
-    object: "member",
+    object: "user",
     description: "Remove an account from the system. Don't assign this as any member can delete his own account anyways."
   })
 
   Repo.insert!(%Permission{
     scope: "local",
     action: "delete",
-    object: "member",
+    object: "user",
     description: "Delete any member in your body from the system. This allows to also delete members that are in other bodies and have a quarrel in that one body with the board admin, so be careful in granting this permission. The member can delete his own profile anyways"
-  })
-
-  # Permissions of the loginservice
-  Repo.insert!(%Permission{
-    scope: "global",
-    action: "create",
-    object: "recruitment_campaign",
-    description: "Create recruitment campaigns through which users can sign into the system."
-  })
-
-  Repo.insert!(%Permission{
-    scope: "global",
-    action: "update",
-    object: "recruitment_campaign",
-    description: "Edit recruitment campaigns"
-  })
-
-  Repo.insert!(%Permission{
-    scope: "global",
-    action: "delete",
-    object: "recruitment_campaign",
-    description: "Delete a recruitment campaign"
   })
 
   Repo.insert!(%Permission{
@@ -401,11 +378,41 @@ if Repo.all(Permission) == [] do
     object: "user",
     description: "Allows to suspend or activate users that are member in the body that you got this permission from"
   })
+
+  # Recruitment campaigns
+  Repo.insert!(%Permission{
+    scope: "global",
+    action: "view",
+    object: "campaign",
+    description: "View all campaigns in the system, no matter if active or not."
+  })
+
+  Repo.insert!(%Permission{
+    scope: "global",
+    action: "create",
+    object: "campaign",
+    description: "Create recruitment campaigns through which users can sign into the system."
+  })
+
+  Repo.insert!(%Permission{
+    scope: "global",
+    action: "update",
+    object: "campaign",
+    description: "Edit recruitment campaigns"
+  })
+
+  Repo.insert!(%Permission{
+    scope: "global",
+    action: "delete",
+    object: "campaign",
+    description: "Delete a recruitment campaign"
+  })
+
 end
 
 
 # Create test-data so it's possible to experiment with the api without having to boot up the whole system
-if Mix.env() == :dev && Repo.all(Member) == [] do
+if Mix.env() == :dev && Repo.all(Member) == [] && !dump do
   Repo.insert!(%Omscore.Registration.Campaign{
     name: "Default recruitment campaign",
     url: "default",
@@ -429,20 +436,13 @@ if Mix.env() == :dev && Repo.all(Member) == [] do
 
 
   {:ok, _} = Members.create_member(%{about_me: "I am a microservice. I have a user account so the system can access itself from within, don't delete me.", address: "Europe", date_of_birth: ~D[2010-04-17], first_name: "Microservice", gender: "machine", last_name: "Microservice", phone: "+123456789", user_id: 1})
-  {:ok, body} = Core.create_body(%{address: "Dresden", description: "Very prehistoric antenna", email: "info@aegee-dresden.org", legacy_key: "DRE", name: "AEGEE-Dresden", phone: "don't call us"})
-  {:ok, circle} = Core.create_circle(%{description: "basically doing nothing", joinable: false, name: "Board AEGEE-Dresden"}, body)
-  {:ok, circle2} = Core.create_circle(%{description: "This is the toplevel circle for all boards in the system", joinable: false, name: "General board circle"})
-  {:ok, circle3} = Core.create_circle(%{description: "IT-interested people in the system", joinable: true, name: "IT interest group"})
-  {:ok, circle4} = Core.create_circle(%{description: "This circle holds all permissions in the system and thus effectively makes you superadmin", name: "Superadmins", joinable: false})
-  {:ok, _} = Core.put_parent_circle(circle, circle2)
-  {:ok, permission1} = Repo.all(Permission) |> Core.search_permission_list("view_full", "member", "local")
-  {:ok, permission2} = Repo.all(Permission) |> Core.search_permission_list("view", "join_request", "local")
-  {:ok, permission3} = Repo.all(Permission) |> Core.search_permission_list("process", "join_request", "local")
-  {:ok, permission4} = Repo.all(Permission) |> Core.search_permission_list("view_members", "body", "local")
-  {:ok, permission5} = Repo.all(Permission) |> Core.search_permission_list("delete_member", "body", "local")
-  {:ok, _} = Core.put_circle_permissions(circle2, [permission1, permission2, permission3, permission4, permission5])
-  {:ok, _} = Core.put_circle_permissions(circle4, Repo.all(Permission))
-  {:ok, token, _} = Omscore.Guardian.encode_and_sign(%{id: 1}, %{name: "some name", email: "some@email.com", superadmin: true}, token_type: "access", ttl: {100, :weeks})
-  IO.inspect("Use this token with superadmin access if you want to test the api:")
-  IO.inspect(token)
+end
+
+if Repo.all(Permission) == [] && dump do
+  {:ok, qry} = File.read("dumps/dump.sql")
+  qry
+  |> String.split("\n", trim: true)
+  |> Enum.map(fn(x) -> 
+    Ecto.Adapters.SQL.query!(Repo, x, [])
+  end)
 end

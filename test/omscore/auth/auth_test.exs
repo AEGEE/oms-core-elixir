@@ -11,15 +11,6 @@ defmodule Omscore.AuthTest do
     @invalid_attrs %{email: nil, name: nil, password: nil}
     @invalid_token "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJBbGFzdGFpciIsImV4cCI6MTUyMjg0NzMyMCwiaWF0IjoxNTIwNDI4MTIwLCJpc3MiOiJBbGFzdGFpciIsImp0aSI6IjI4ZDM3YTIyLTExMzEtNGFjNy04YTlmLWQ2YzU0YTEyZjM1OCIsIm5hbWUiOiJzb21lIG5hbWUiLCJuYmYiOjE1MjA0MjgxMTksInN1YiI6IjcyIiwidHlwIjoiYWNjZXNzIn0.CN5aB844O2_LgYF7Z4lmBOsurjSSBtCmHd2MisahmZkYPSP2AinlcRcCCMpw-wPs_frBi4nwzB-_0CCuNvtHqg"
 
-    def user_fixture(attrs \\ %{}) do
-      {:ok, user} =
-        attrs
-        |> Enum.into(@valid_attrs)
-        |> Auth.create_user()
-
-      Repo.get!(User, user.id)
-    end
-
     test "list_users/0 returns all users" do
       user = user_fixture()
       assert Auth.list_users() |> Enum.any?(fn(x) -> x == user end)
@@ -105,6 +96,27 @@ defmodule Omscore.AuthTest do
       assert user.superadmin == false
     end
 
+    test "update_user_active/2 updates a users activation status" do
+      user = user_fixture(%{active: false})
+      assert {:ok, user} = Auth.update_user_active(user, true)
+      assert user == Auth.get_user!(user.id)
+      assert user.active == true
+
+      assert {:ok, user} = Auth.update_user_active(user, false)
+      assert user == Auth.get_user!(user.id)
+      assert user.active == false
+    end
+
+    test "update_user_active/2 logs out a user after deactivation" do
+      user = user_fixture(%{active: true})
+      assert {:ok, _, token} = Auth.create_refresh_token(user, "test")
+      assert {:ok, user} = Auth.update_user_active(user, false)
+
+      assert user == Auth.get_user!(user.id)
+      assert user.active == false
+      assert_raise Ecto.NoResultsError, fn -> Omscore.Repo.get!(Auth.RefreshToken, token.id) end
+    end
+
     test "delete_user/1 deletes the user" do
       user = user_fixture()
       assert {:ok, %User{}} = Auth.delete_user(user)
@@ -124,8 +136,8 @@ defmodule Omscore.AuthTest do
 
     test "refute bad credentials" do
       user_fixture()
-      assert {:error, _msg} = Omscore.Auth.login_user("some name", "some invalid password")
-      assert {:error, _msg} = Omscore.Auth.login_user("some invalid name", "some password")
+      assert {:error, :unprocessable_entity, _msg} = Omscore.Auth.login_user("some name", "some invalid password")
+      assert {:error, :unprocessable_entity, _msg} = Omscore.Auth.login_user("some invalid name", "some password")
     end
 
     test "login provides user with working access and refresh tokens" do
@@ -185,7 +197,7 @@ defmodule Omscore.AuthTest do
 
     test "inactive user is rejected login" do
       user_fixture(%{active: false})
-      assert {:error, _msg} = Omscore.Auth.login_user("some name", "some password")
+      assert {:error, :bad_request, _msg} = Omscore.Auth.login_user("some name", "some password")
     end
 
     test "trigger_password_reset triggers a password reset for a known user" do

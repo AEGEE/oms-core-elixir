@@ -35,36 +35,11 @@ defmodule Omscore.ExpireTokens do
     query = from u in Omscore.Registration.MailConfirmation,
       where: u.inserted_at < ^expiry
 
-    # Try to delete as many member objects as possible, save the fails
-    {deletes, fails} = query 
+    # Deleting the user object will cascade through to submission, mail_confirmation, member if already created and a lot more
+    query 
     |> Omscore.Repo.all()
     |> Enum.map(fn(x) -> Omscore.Repo.preload(x, [submission: [:user]]) end)
-    |> Enum.map(fn(x) ->
-      member_deletion = if x.submission.user.member_id do
-        #Omscore.Interfaces.MemberFetch.delete_member(x.submission.user.member_id)
-        {:ok}
-      else
-        {:ok}
-      end
-
-      {x, member_deletion}
-    end)
-    |> Enum.split_with(fn({_, res}) -> res == {:ok} end)
-    
-    # Deleting the user object will cascade through to submission and mail_confirmation
-    deletes = deletes
-    |> Enum.map(fn({x, _}) -> 
-      Omscore.Repo.delete(x.submission.user)
-    end)
-
-    # Output the fails to command line hoping someone will see it
-    fails = fails
-    |> Enum.map(fn({x, res}) -> 
-      IO.inspect("Could not delete member " <> to_string(x.submission.user.member_id) <> " from core, core responded") 
-      IO.inspect(res)
-    end)
-
-    {deletes, fails}
+    |> Enum.map(fn(x) -> Omscore.Repo.delete(x.submission.user) end)
   end
 
   def expire_password_resets() do

@@ -34,6 +34,15 @@
 					{{ vm.body.address }}
 				</td>
 			</tr>
+			<tr>
+				<td>Shadow Circle</td>
+				<td>
+					<span ng-show="!vm.body.shadow_circle">No shadow circle assigned</span>
+					<span ng-show="vm.body.shadow_circle">
+						<a ui-sref="app.circles.single({id: vm.body.shadow_circle.seo_url})">{{ vm.body.shadow_circle.name }}</a>
+					</span>
+				</td>
+			</tr>
 		</table>
 	</div>
 </div>

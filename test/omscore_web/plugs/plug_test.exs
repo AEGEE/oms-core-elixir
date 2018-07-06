@@ -5,7 +5,9 @@ defmodule OmscoreWeb.PlugTest do
   setup %{conn: conn} do
     {:ok, conn: put_req_header(conn, "accept", "application/json")}
   end
-  @user_attrs %{id: 3, email: "some@email.com", superadmin: false, name: "some name"}
+  @user_attrs %{id: 3, email: "some@email.com", superadmin: false, name: "some name"} 
+  @circle_attrs %{description: "some description", joinable: true, name: "some name"}
+
 
   test "auth plug successfully decodes a valid access token", %{conn: conn} do
     token = create_token(@user_attrs)
@@ -17,6 +19,8 @@ defmodule OmscoreWeb.PlugTest do
     assert conn.assigns.user.email == @user_attrs.email
     assert conn.assigns.user.name == @user_attrs.name
     assert conn.assigns.user.superadmin == @user_attrs.superadmin
+    assert conn.assigns.token == token
+    assert conn.assigns.refresh_token_id
   end
 
   test "init functions of all the plug exist and do nothing", %{conn: conn} do
@@ -35,6 +39,12 @@ defmodule OmscoreWeb.PlugTest do
   test "auth plug rejects an invalid access token", %{conn: conn} do
     # This token is expired
     token = "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJPTVMiLCJlbWFpbCI6InNvbWVAZW1haWwuY29tIiwiZXhwIjoxNTIyNjU5MjUyLCJpYXQiOjE1MjI2NTkxNTIsImlzcyI6Ik9NUyIsImp0aSI6IjJiMWFmNTY4LTY4MWYtNGVlMC04ZWQyLWU2YzQxMzUwZmQ1OSIsIm5hbWUiOiJzb21lIG5hbWUiLCJuYmYiOjE1MjI2NTkxNTEsInN1YiI6IjMiLCJzdXBlcmFkbWluIjpmYWxzZSwidHlwIjoiYWNjZXNzIn0.jCxBvQqYOBsQiGm5WRnrcCx4PV0hlPsCYP9zC84K5R00en-3uUwfwe3YR6IA8Hpy5fkRlHNBsDfZQCOm8ORubQ"
+    conn = put_req_header(conn, "x-auth-token", token)
+    conn = OmscoreWeb.AuthorizePlug.call(conn, nil)
+    assert json_response(conn, 401)
+
+    token = "random-invalid-token"
+    conn = recycle(conn)
     conn = put_req_header(conn, "x-auth-token", token)
     conn = OmscoreWeb.AuthorizePlug.call(conn, nil)
     assert json_response(conn, 401)
@@ -174,9 +184,9 @@ defmodule OmscoreWeb.PlugTest do
 
     assert conn.assigns.target_member
     assert conn.assigns.target_member == conn.assigns.member
-    assert Enum.any?(conn.assigns.permissions, fn(x) -> x.action == "view_full" && x.object == "member" end)
+    assert Enum.any?(conn.assigns.permissions, fn(x) -> x.action == "view" && x.object == "member" end)
     assert Enum.any?(conn.assigns.permissions, fn(x) -> x.action == "update" && x.object == "member" end)
-    assert Enum.any?(conn.assigns.permissions, fn(x) -> x.action == "delete" && x.object == "member" end)
+    assert Enum.any?(conn.assigns.permissions, fn(x) -> x.action == "delete" && x.object == "user" end)
   end
 
   test "raises when trying to fetch unknown member", %{conn: conn} do

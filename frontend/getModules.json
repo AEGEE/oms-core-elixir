@@ -26,8 +26,13 @@
     "code": "permissions",
     "module_link": "rewrite/permissions/permissions.js",
     "icon": "fa fa-key"
+  }, {
+    "name": "Campaigns",
+    "code": "campaigns",
+    "module_link": "loggedIn/campaigns/campaigns.js",
+    "icon": "fa fa-sign-in"
   }],
-  "js": ["loggedIn/profile/profile.js"],
-  "modules": ["app.profile"],
+  "js": ["loggedIn/profile/profile.js", "public/signup/signup.js", "public/password_reset/password_reset.js"],
+  "modules": ["app.profile", "public.password_reset", "public.signup"],
   "menu_position": 1
 }

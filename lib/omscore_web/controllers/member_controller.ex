@@ -8,21 +8,59 @@ defmodule OmscoreWeb.MemberController do
   action_fallback OmscoreWeb.FallbackController
 
   def index(conn, params) do
-    with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "view", "member") do
+    with {:ok, %Core.Permission{filters: filters}} <- Core.search_permission_list(conn.assigns.permissions, "view", "member") do
       members = Members.list_members(params)
-      render(conn, "index.json", members: members)
+      render(conn, "index.json", members: members, filters: filters)
     end
   end
 
-  def create(conn, %{"member" => member_params, "only_validate" => true}) do
-    with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "create", "member") do
-      Members.validate_create_member(member_params)
-    end
+  defp create_transaction(%Omscore.Core.Body{} = body, %{} = member_params, %{} = user_params) do
+    Omscore.Repo.transaction(fn ->
+      # First create the user
+      user_params = user_params
+      |> Map.put("password", Omscore.random_url())
+      |> Map.put("active", true)
+
+      user = case Omscore.Auth.create_user(user_params) do
+        {:ok, user} -> user
+        {:error, error} -> Omscore.Repo.rollback(error)
+      end
+
+      # Then create the member
+      member_params = member_params
+      |> Map.put("user_id", user.id)
+
+      member = case Omscore.Members.create_member(member_params) do
+        {:ok, member} -> member
+        {:error, error} -> Omscore.Repo.rollback(error)
+      end
+
+      # Then create a body membership
+      case Omscore.Members.create_body_membership(body, member) do
+        {:ok, %Omscore.Members.BodyMembership{}} -> :ok
+        {:error, error} -> Omscore.Repo.rollback(error)
+      end
+
+      # Set the body as the primary body for the member
+      member = case Omscore.Members.update_member(member, %{primary_body_id: body.id}) do
+        {:ok, member} -> member
+        {:error, error} -> Omscore.Repo.rollback(error)
+      end
+
+      # Then send him a mail that everything went well
+      Omscore.Interfaces.Mail.send_mail(user.email, 
+        "Your new account in OMS", 
+        "You have received a new account to OMS as a member of " <> body.name <> "."
+        <> " If you want to log in, please use the reset password function to create yourself a password using your email address " <> user.email <> "."
+        <> " You can do so by visiting " <> Application.get_env(:omscore, :url_prefix) <> "/password_reset")
+
+      member
+    end)
   end
 
-  def create(conn, %{"member" => member_params}) do
+  def create(conn, %{"member" => member_params, "user" => user_params}) do
     with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "create", "member"),
-         {:ok, %Member{} = member} <- Members.create_member(member_params) do
+         {:ok, %Member{} = member} <- create_transaction(conn.assigns.body, member_params, user_params) do
       conn
       |> put_status(:created)
       |> put_resp_header("location", member_path(conn, :show, member))
@@ -30,39 +68,18 @@ defmodule OmscoreWeb.MemberController do
     end
   end
 
-  defp show_full(conn, member) do
-    member = member 
+  def show(conn, _params) do
+    member = conn.assigns.target_member 
     |> Omscore.Repo.preload([join_requests: [:body], 
                              body_memberships: [:body], 
                              circle_memberships: [:circle], 
                              bodies: [], 
                              circles: [], 
-                             primary_body: []])
-    
-    render(conn, "show.json", member: member)
-  end
+                             primary_body: [],
+                             user: []])
 
-  defp show_restricted(conn, member) do
-    member = member
-    |> Map.put(:bodies, nil)
-    |> Map.put(:circles, nil)
-    |> Map.put(:join_requests, nil)
-    |> Map.put(:body_memberships, nil)
-    |> Map.put(:primary_body, nil)
-    |> Map.put(:circle_memberships, nil)
-
-    render(conn, "show.json", member: member)
-  end
-
-  def show(conn, _params) do
-    member = conn.assigns.target_member
-    {match1, _} = Core.search_permission_list(conn.assigns.permissions, "view_full", "member")
-    {match2, msg} = Core.search_permission_list(conn.assigns.permissions, "view", "member")
-
-    cond do
-      match1 == :ok -> show_full(conn, member)
-      match2 == :ok -> show_restricted(conn, member)
-      true -> {match2, msg}
+    with {:ok, %Core.Permission{filters: filters}} <- Core.search_permission_list(conn.assigns.permissions, "view", "member") do
+      render(conn, "show.json", member: member, filters: filters)
     end
   end
 
@@ -99,19 +116,14 @@ defmodule OmscoreWeb.MemberController do
   def update(conn, %{"member" => member_params}) do
     member = conn.assigns.target_member
 
-    with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "update", "member"),
+    with {:ok, %Core.Permission{filters: filters}} <- Core.search_permission_list(conn.assigns.permissions, "update", "member"),
+         member_params <- Core.apply_attribute_filters(member_params, filters),
          {:ok, %Member{} = member} <- Members.update_member(member, member_params) do
       render(conn, "show.json", member: member)
     end
   end
 
-  def delete(conn, _params) do
-    member = conn.assigns.target_member
-
-    with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "delete", "member"),
-         {:ok} <- Omscore.Interfaces.Loginservice.delete_user(member.id),
-         {:ok, %Member{}} <- Members.delete_member(member) do
-      send_resp(conn, :no_content, "")
-    end
+  def index_permissions(conn, _params) do
+    render(conn, OmscoreWeb.PermissionView, "index.json", permissions: conn.assigns.permissions)
   end
 end
