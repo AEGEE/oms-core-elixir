@@ -510,6 +510,16 @@ defmodule Omscore.CoreTest do
       assert {:error, :unprocessable_entity, _} = Core.put_child_circles(circle1, [circle2])
     end
 
+    test "put_child_circles/2 handles old childs well" do
+      circle1 = circle_fixture()
+      circle2 = circle_fixture()
+      circle3 = circle_fixture()
+
+      assert {:ok, _} = Core.put_parent_circle(circle2, circle1)
+      assert {:ok, %Circle{} = res} = Core.put_child_circles(circle1, [circle2, circle3])
+      assert Enum.count(res.child_circles) == 2
+    end
+
     test "put_parent_circle/2 assigns a parent to a circle" do
       circle1 = circle_fixture()
       circle2 = circle_fixture()
