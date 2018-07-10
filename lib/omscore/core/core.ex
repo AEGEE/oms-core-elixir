@@ -326,22 +326,26 @@ defmodule Omscore.Core do
   # You should preload circles with find_circles if the data came from the user
   def put_child_circles(%Circle{} = circle, child_circles) do
     case Repo.transaction(fn ->
-      child_circles = case find_circles(child_circles) do
-        {:error, message} -> Repo.rollback(message)
-        {:error, code, message} -> Repo.rollback({code, message})
-        {:ok, res} -> res
-      end
-
-      if !Enum.all?(child_circles, fn(x) -> x.parent_circle_id == nil || x.parent_circle_id == circle.id end) do
-        Repo.rollback({:unprocessable_entity, "Can only assign orphan circles as childs"})
-      end
-
       # Remove all old child circles
       circle = circle
       |> Repo.preload([:child_circles])
       |> Circle.changeset(%{})
       |> Ecto.Changeset.put_assoc(:child_circles, [])
       |> Repo.update!()
+
+      # Fecth child circles from db
+      # Has to happen after removing child rircles, as a later put_parent_circle needs up to date Db records
+      child_circles = case find_circles(child_circles) do
+        {:error, message} -> Repo.rollback(message)
+        {:error, code, message} -> Repo.rollback({code, message})
+        {:ok, res} -> res
+      end
+
+      # Check for non-orphans
+      if !Enum.all?(child_circles, fn(x) -> x.parent_circle_id == nil end) do
+        Repo.rollback({:unprocessable_entity, "Can only assign orphan circles as childs"})
+      end
+
 
       error = child_circles
       |> Enum.map(&put_parent_circle(&1, circle))

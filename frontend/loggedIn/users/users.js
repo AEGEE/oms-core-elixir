@@ -47,7 +47,7 @@
                 if(!value)
                     return;
                 $http({
-                    url: apiUrl + '/users/' + value,
+                    url: apiUrl + '/members/' + value,
                     method: 'GET'
                 }).then(function(response) {
                     scope.fetched_user=response.data.data;
