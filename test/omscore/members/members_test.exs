@@ -345,6 +345,26 @@ defmodule Omscore.MembersTest do
       assert {:ok, _} = Members.delete_body_membership(bm)
       assert nil == Members.get_body_membership(body, member)
     end
+
+    test "body membership has an expiration date and a fee" do
+      member = member_fixture()
+      body = body_fixture()
+      assert {:ok, bm} = Members.create_body_membership(body, member)
+
+      assert {:ok, bm} = Members.update_body_membership(bm, %{fee: 12.0, fee_currency: "euro", expiration: Omscore.ecto_date_in_past(-10)})
+      assert bm = Members.get_body_membership!(bm.id)
+      assert Decimal.equal?(bm.fee, 12)
+      assert bm.fee_currency == "euro"
+      assert bm.expiration
+      assert bm.has_expired == false
+    end
+
+    test "does not allow setting an expiration in the past" do
+      member = member_fixture()
+      body = body_fixture()
+      assert {:ok, bm} = Members.create_body_membership(body, member)
+      assert {:error, _bm} = Members.update_body_membership(bm, %{fee: 12.0, fee_currency: "euro", expiration: Omscore.ecto_date_in_past(10)})
+    end
   end
 
   describe "circle_memberships" do
