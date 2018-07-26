@@ -33,6 +33,7 @@ defmodule Omscore.Core do
     from(u in Permission, order_by: [:object, :action, :scope])
     |> OmscoreWeb.Helper.paginate(params)
     |> OmscoreWeb.Helper.search(params, [:object, :action, :scope], ":")
+    |> OmscoreWeb.Helper.filter(params, Permission.__schema__(:fields))
     |> Repo.all()
   end
 
@@ -185,7 +186,8 @@ defmodule Omscore.Core do
   def list_bodies(params \\ %{}) do
     from(u in Body, order_by: [:name])
     |> OmscoreWeb.Helper.paginate(params)
-    |> OmscoreWeb.Helper.search(params, [:name, :legacy_key])
+    |> OmscoreWeb.Helper.search(params, [:name, :legacy_key], " ")
+    |> OmscoreWeb.Helper.filter(params, Body.__schema__(:fields))
     |> Repo.all
   end
 
@@ -232,7 +234,8 @@ defmodule Omscore.Core do
   def list_circles(params \\ %{}) do
     from(u in Circle, order_by: :name)
     |> OmscoreWeb.Helper.paginate(params)
-    |> OmscoreWeb.Helper.search(params, [:name])
+    |> OmscoreWeb.Helper.search(params, [:name], " ")
+    |> OmscoreWeb.Helper.filter(params, Circle.__schema__(:fields))
     |> Repo.all
   end
 
@@ -240,7 +243,8 @@ defmodule Omscore.Core do
   def list_free_circles(params \\ %{}) do
     from(u in Circle, where: is_nil(u.body_id), order_by: :name)
     |> OmscoreWeb.Helper.paginate(params)
-    |> OmscoreWeb.Helper.search(params, [:name])
+    |> OmscoreWeb.Helper.search(params, [:name], " ")
+    |> OmscoreWeb.Helper.filter(params, Circle.__schema__(:fields))
     |> Repo.all
   end
 
@@ -250,7 +254,8 @@ defmodule Omscore.Core do
   def list_bound_circles_(body_id, params) do
     from(u in Circle, where: u.body_id == ^body_id, order_by: :name)
     |> OmscoreWeb.Helper.paginate(params)
-    |> OmscoreWeb.Helper.search(params, [:name])
+    |> OmscoreWeb.Helper.search(params, [:name], " ")
+    |> OmscoreWeb.Helper.filter(params, Circle.__schema__(:fields))
     |> Repo.all
   end
 

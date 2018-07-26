@@ -82,6 +82,16 @@ defmodule OmscoreWeb.BodyControllerTest do
       assert res = json_response(conn, 200)["data"]
       assert !Enum.any?(res, fn(x) -> Map.has_key?(x, "name") end)
     end
+
+    test "filters the result if filters are passed", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "view", object: "body"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      create_many_bodies(0..100)
+
+      conn = get conn, body_path(conn, :index), [{"filter.name", "some really exotic query that definitely doesn't match any member at all"}]
+      assert json_response(conn, 200)["data"] == []
+    end
   end
 
   describe "show" do
