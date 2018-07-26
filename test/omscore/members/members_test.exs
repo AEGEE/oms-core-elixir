@@ -366,7 +366,6 @@ defmodule Omscore.MembersTest do
       assert {:error, _bm} = Members.update_body_membership(bm, %{fee: 12.0, fee_currency: "euro", expiration: Omscore.ecto_date_in_past(10)})
     end
 
-    @tag only: 1
     test "automatically sets the has_expired flag to false when membership expired" do
       member = member_fixture()
       body = body_fixture()
