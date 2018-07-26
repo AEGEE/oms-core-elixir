@@ -16,9 +16,27 @@ defmodule Omscore.ExpireTokens do
     expire_mail_confirmations()
     expire_password_resets()
     expire_refresh_tokens()
+    expire_memberships()
 
     schedule_work() # Reschedule once more
     {:noreply, state}
+  end
+
+  def expire_memberships() do
+    now = Omscore.ecto_date_in_past(0)
+    query = from u in Omscore.Members.BodyMembership,
+      where: not is_nil(u.expiration) and u.expiration < ^now and u.has_expired != true
+
+    {:ok, items} = Omscore.Repo.transaction(fn ->
+      items = Omscore.Repo.all(query)  |> Omscore.Repo.preload([member: [:user], body: []])
+      Omscore.Repo.update_all(query, set: [has_expired: true])
+      items
+    end)
+
+    items
+    |> Enum.map(fn(x) -> 
+      Omscore.Interfaces.Mail.send_mail(x.member.user.email, "Membership expired", "Your membership in body " <> x.body.name <> " has expired")
+    end)
   end
 
   def expire_refresh_tokens() do

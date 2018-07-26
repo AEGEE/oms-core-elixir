@@ -30,6 +30,7 @@ defmodule OmscoreWeb.BodyMembershipView do
       fee_currency: body_membership.fee_currency,
       expiration: body_membership.expiration,
       has_expired: body_membership.has_expired,
+      inserted_at: body_membership.inserted_at,
       member_id: body_membership.member_id,
       body_id: body_membership.body_id,
       member: Helper.render_assoc_one(body_membership.member, OmscoreWeb.MemberView, "member.json"),
