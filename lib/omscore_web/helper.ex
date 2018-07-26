@@ -50,4 +50,18 @@ defmodule OmscoreWeb.Helper do
   end
   def search(query, _params, attrs) when length(attrs) != 0, do: query
 
+  # Filters the result based attribute-value filters and not a fuzzy search
+  # It checks for occurances like filter.attribute=value in params
+  def filter(query, params, [attribute | remaining_attributes]) do
+    key = "filter." <> Atom.to_string(attribute)
+    query = if Map.has_key?(params, key) do
+      querystring = params[key]
+      from q in query, where: ilike(field(q, ^attribute), ^"#{querystring}")
+    else
+      query
+    end
+    filter(query, params, remaining_attributes)
+  end
+  def filter(query, _params, []), do: query
+
 end

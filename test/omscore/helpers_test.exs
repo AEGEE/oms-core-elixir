@@ -138,4 +138,42 @@ defmodule Omscore.HelpersTest do
 
     end
   end
+
+  describe "filter" do
+    test "filters by a field" do
+      member1 = member_fixture(%{first_name: "hans"})
+      member2 = member_fixture(%{first_name: "hAnS"})
+      member3 = member_fixture(%{first_name: "Peter"})
+      member4 = member_fixture(%{first_name: "Hanseatic"})
+      member5 = member_fixture(%{first_name: "antihans"})
+
+      res = from(u in Members.Member)
+      |> Helper.filter(%{"filter.first_name" => "hans"}, Omscore.Members.Member.__schema__(:fields))
+      |> Repo.all
+
+      assert Enum.any?(res, fn(x) -> x.id == member1.id end)
+      assert Enum.any?(res, fn(x) -> x.id == member2.id end)
+      assert !Enum.any?(res, fn(x) -> x.id == member3.id end)
+      assert !Enum.any?(res, fn(x) -> x.id == member4.id end)
+      assert !Enum.any?(res, fn(x) -> x.id == member5.id end)
+    end
+
+    test "does no weird things if you pass a nonexisting filter field" do
+      member1 = member_fixture(%{first_name: "hans"})
+      member2 = member_fixture(%{first_name: "hAnS"})
+      member3 = member_fixture(%{first_name: "Peter"})
+      member4 = member_fixture(%{first_name: "Hanseatic"})
+      member5 = member_fixture(%{first_name: "antihans"})
+
+      res = from(u in Members.Member)
+      |> Helper.filter(%{"filter.first_name" => "hans", "filter.__meta__" => "'; OR TRUE"}, Omscore.Members.Member.__schema__(:fields))
+      |> Repo.all
+
+      assert Enum.any?(res, fn(x) -> x.id == member1.id end)
+      assert Enum.any?(res, fn(x) -> x.id == member2.id end)
+      assert !Enum.any?(res, fn(x) -> x.id == member3.id end)
+      assert !Enum.any?(res, fn(x) -> x.id == member4.id end)
+      assert !Enum.any?(res, fn(x) -> x.id == member5.id end)
+    end
+  end
 end
