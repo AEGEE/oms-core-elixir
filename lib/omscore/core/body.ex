@@ -10,6 +10,7 @@ defmodule Omscore.Core.Body do
     field :legacy_key, :string
     field :name, :string
     field :phone, :string
+    field :type, :string
 
     has_many :circles, Omscore.Core.Circle
     many_to_many :members, Omscore.Members.Member, join_through: Omscore.Members.BodyMembership
@@ -23,7 +24,7 @@ defmodule Omscore.Core.Body do
   @doc false
   def changeset(body, attrs) do
     body
-    |> cast(attrs, [:name, :email, :phone, :address, :description, :legacy_key, :shadow_circle_id])
+    |> cast(attrs, [:name, :email, :phone, :address, :description, :legacy_key, :shadow_circle_id, :type])
     |> validate_required([:name, :legacy_key, :address, :email])
     |> validate_shadow_circle()
   end

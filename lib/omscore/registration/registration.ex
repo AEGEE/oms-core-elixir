@@ -23,14 +23,16 @@ defmodule Omscore.Registration do
   def list_campaigns(params \\ %{}) do
     from(u in Campaign, order_by: [:name])
     |> Helper.paginate(params)
-    |> Helper.search(params, [:name, :description_short, :url])
+    |> Helper.search(params, [:name, :description_short, :url], " ")
+    |> OmscoreWeb.Helper.filter(params, Campaign.__schema__(:fields))
     |> Repo.all
   end
 
   def list_active_campaigns(params \\ %{}) do
     from(u in Campaign, order_by: [:name], where: u.active == true)
     |> Helper.paginate(params)
-    |> Helper.search(params, [:name, :description_short, :url])
+    |> Helper.search(params, [:name, :description_short, :url], " ")
+    |> OmscoreWeb.Helper.filter(params, Campaign.__schema__(:fields))
     |> Repo.all
   end
 

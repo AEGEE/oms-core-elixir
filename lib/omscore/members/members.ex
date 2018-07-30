@@ -14,7 +14,8 @@ defmodule Omscore.Members do
   def list_members(params \\ %{}) do
     from(u in Member, order_by: [:last_name, :first_name])
     |> Helper.paginate(params)
-    |> Helper.search(params, [:first_name, :last_name])
+    |> Helper.search(params, [:first_name, :last_name], " ")
+    |> OmscoreWeb.Helper.filter(params, Member.__schema__(:fields))
     |> Repo.all
   end
 
@@ -105,7 +106,8 @@ defmodule Omscore.Members do
   # Get all join requests for a body
   def list_join_requests(%Omscore.Core.Body{} = body, params \\ %{}) do
     members_query = from(u in Member)
-    |> Helper.search(params, [:first_name, :last_name])
+    |> Helper.search(params, [:first_name, :last_name], " ")
+    |> OmscoreWeb.Helper.filter(params, Member.__schema__(:fields))
 
     jr_query = from(jr in JoinRequest, where: jr.body_id == ^body.id)
     |> Ecto.Query.join(:inner, [jr], u in subquery(members_query), jr.member_id == u.id)
@@ -174,7 +176,8 @@ defmodule Omscore.Members do
   def list_body_memberships(%Omscore.Core.Body{} = body, params), do: list_body_memberships(body.id, params)
   def list_body_memberships(body_id, params) do
     members_query = from(u in Member)
-    |> Helper.search(params, [:first_name, :last_name])
+    |> Helper.search(params, [:first_name, :last_name], " ")
+    |> OmscoreWeb.Helper.filter(params, Member.__schema__(:fields))
 
     bm_query = from(bm in BodyMembership, where: bm.body_id == ^body_id)
     |> Ecto.Query.join(:inner, [bm], u in subquery(members_query), bm.member_id == u.id)
@@ -233,7 +236,8 @@ defmodule Omscore.Members do
   # Searching is done in the fields of the member
   def list_circle_memberships(%Circle{} = circle, params) do
     members_query = from(u in Member)
-    |> Helper.search(params, [:first_name, :last_name])
+    |> Helper.search(params, [:first_name, :last_name], " ")
+    |> OmscoreWeb.Helper.filter(params, Member.__schema__(:fields))
 
     cm_query = from(cm in CircleMembership, where: cm.circle_id == ^circle.id)
     |> Ecto.Query.join(:inner, [cm], u in subquery(members_query), cm.member_id == u.id)
@@ -247,7 +251,8 @@ defmodule Omscore.Members do
   # Searches in the circle fields in case a search is passed
   def list_circle_memberships(%Member{} = member, params) do
     circle_query = from(u in Circle)
-    |> Helper.search(params, [:name, :description])
+    |> Helper.search(params, [:name, :description], " ")
+    |> OmscoreWeb.Helper.filter(params, Circle.__schema__(:fields))
 
     cm_query = from(cm in CircleMembership, where: cm.member_id == ^member.id)
     |> Ecto.Query.join(:inner, [cm], u in subquery(circle_query), cm.circle_id == u.id)

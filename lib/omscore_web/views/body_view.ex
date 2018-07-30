@@ -30,6 +30,7 @@ defmodule OmscoreWeb.BodyView do
       address: body.address,
       description: body.description,
       legacy_key: body.legacy_key,
+      type: body.type,
       shadow_circle_id: body.shadow_circle_id,
       circles: Helper.render_assoc_many(body.circles, OmscoreWeb.CircleView, "circle.json"),
       shadow_circle: Helper.render_assoc_one(body.shadow_circle, OmscoreWeb.CircleView, "circle.json")
