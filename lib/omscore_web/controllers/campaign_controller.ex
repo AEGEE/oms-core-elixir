@@ -21,8 +21,24 @@ defmodule OmscoreWeb.CampaignController do
     end
   end
 
+  defp update_local_permissions(_member, permissions, nil), do: permissions
+  defp update_local_permissions(member, permissions, autojoin_body_id) do
+
+    body = Omscore.Repo.get(Omscore.Core.Body, autojoin_body_id)
+
+    if Kernel.match?(%Omscore.Core.Body{}, body) do
+      permissions
+      |> Enum.into(Omscore.Members.get_local_permissions(member, body))
+      |> Omscore.Core.reduce_permission_list()
+    else
+      permissions
+    end
+  end
+
   def create(conn, %{"campaign" => campaign_params}) do
-    with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "create", "campaign"),
+    permissions = update_local_permissions(conn.assigns.member, conn.assigns.permissions, campaign_params["autojoin_body_id"])
+
+    with {:ok, _} <- Core.search_permission_list(permissions, "create", "campaign"),
         {:ok, %Campaign{} = campaign} <- Registration.create_campaign(campaign_params) do
       conn
       |> put_status(:created)
@@ -46,7 +62,10 @@ defmodule OmscoreWeb.CampaignController do
   def update(conn, %{"id" => id, "campaign" => campaign_params}) do
     campaign = Registration.get_campaign!(id)
 
-    with {:ok, %Core.Permission{filters: filters}} <- Core.search_permission_list(conn.assigns.permissions, "update", "campaign"),
+    # Use the saved autojoin_body_id because otherwise board members could capture campaigns and assign their own body
+    permissions = update_local_permissions(conn.assigns.member, conn.assigns.permissions, campaign.autojoin_body_id)
+
+    with {:ok, %Core.Permission{filters: filters}} <- Core.search_permission_list(permissions, "update", "campaign"),
         campaign_params = Core.apply_attribute_filters(campaign_params, filters),
         {:ok, %Campaign{} = campaign} <- Registration.update_campaign(campaign, campaign_params) do
       render(conn, "show.json", campaign: campaign)
