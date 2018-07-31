@@ -146,6 +146,43 @@ defmodule OmscoreWeb.CampaignControllerTest do
       assert json_response(conn, 403)
     end
 
+    test "works with local permissions", %{conn: conn} do
+      campaign = campaign_fixture()
+      %{token: token, member: member} = create_member_with_permissions([])
+      body = body_fixture()
+      circle = bound_circle_fixture(body)
+      {:ok, _} = Omscore.Members.create_body_membership(body, member)
+      {:ok, _} = Omscore.Members.create_circle_membership(circle, member)
+
+      permission = permission_fixture(%{scope: "local", action: "view", object: "campaign"})
+      {:ok, _} = Omscore.Core.put_circle_permissions(circle, [permission])
+
+      {:ok, campaign} = Omscore.Registration.update_campaign(campaign, %{autojoin_body_id: body.id})
+
+      conn = put_req_header(conn, "x-auth-token", token)
+      conn = get conn, campaign_path(conn, :show_full, campaign.id)
+      assert json_response(conn, 200)
+    end
+
+    test "works with local permissions only of the right body", %{conn: conn} do
+      campaign = campaign_fixture()
+      %{token: token, member: member} = create_member_with_permissions([])
+      body2 = body_fixture()
+      body = body_fixture()
+      circle = bound_circle_fixture(body)
+      {:ok, _} = Omscore.Members.create_body_membership(body, member)
+      {:ok, _} = Omscore.Members.create_circle_membership(circle, member)
+
+      permission = permission_fixture(%{scope: "local", action: "view", object: "campaign"})
+      {:ok, _} = Omscore.Core.put_circle_permissions(circle, [permission])
+
+      {:ok, campaign} = Omscore.Registration.update_campaign(campaign, %{autojoin_body_id: body2.id})
+
+      conn = put_req_header(conn, "x-auth-token", token)
+      conn = get conn, campaign_path(conn, :show_full, campaign)
+      assert json_response(conn, 403)
+    end
+
     test "works with filtered permissions", %{conn: conn} do
       campaign = campaign_fixture()
       %{token: access_token} = create_member_with_permissions([%{action: "view", object: "campaign", filters: [%{field: "submissions"}]}])
