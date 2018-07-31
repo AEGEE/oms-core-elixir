@@ -338,6 +338,41 @@ defmodule OmscoreWeb.CampaignControllerTest do
       conn = delete conn, campaign_path(conn, :delete, campaign)
       assert response(conn, 403)
     end
+
+    test "allows locally permitted users to delete bound campaigns", %{conn: conn, campaign: campaign} do
+      %{token: token, member: member} = create_member_with_permissions([])
+      body = body_fixture()
+      circle = bound_circle_fixture(body)
+      {:ok, _} = Omscore.Members.create_body_membership(body, member)
+      {:ok, _} = Omscore.Members.create_circle_membership(circle, member)
+
+      permission = permission_fixture(%{scope: "local", action: "delete", object: "campaign"})
+      {:ok, _} = Omscore.Core.put_circle_permissions(circle, [permission])
+
+      {:ok, campaign} = Omscore.Registration.update_campaign(campaign, %{autojoin_body_id: body.id})
+
+      conn = put_req_header(conn, "x-auth-token", token)
+      conn = delete conn, campaign_path(conn, :delete, campaign)
+      assert response(conn, 204)
+    end
+
+    test "allows locally permissed users to delete only their own bound campaigns", %{conn: conn, campaign: campaign} do
+      %{token: token, member: member} = create_member_with_permissions([])
+      body2 = body_fixture()
+      body = body_fixture()
+      circle = bound_circle_fixture(body)
+      {:ok, _} = Omscore.Members.create_body_membership(body, member)
+      {:ok, _} = Omscore.Members.create_circle_membership(circle, member)
+
+      permission = permission_fixture(%{scope: "local", action: "update", object: "campaign"})
+      {:ok, _} = Omscore.Core.put_circle_permissions(circle, [permission])
+
+      {:ok, campaign} = Omscore.Registration.update_campaign(campaign, %{autojoin_body_id: body2.id})
+
+      conn = put_req_header(conn, "x-auth-token", token)
+      conn = delete conn, campaign_path(conn, :delete, campaign)
+      assert json_response(conn, 403)
+    end
   end
 
   describe "submit signup" do

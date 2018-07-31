@@ -74,7 +74,10 @@ defmodule OmscoreWeb.CampaignController do
 
   def delete(conn, %{"id" => id}) do
     campaign = Registration.get_campaign!(id)
-    with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "delete", "campaign"),
+
+    permissions = update_local_permissions(conn.assigns.member, conn.assigns.permissions, campaign.autojoin_body_id)
+
+    with {:ok, _} <- Core.search_permission_list(permissions, "delete", "campaign"),
          {:ok, %Campaign{}} <- Registration.delete_campaign(campaign) do
       send_resp(conn, :no_content, "")
     end
