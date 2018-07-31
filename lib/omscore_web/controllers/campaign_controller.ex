@@ -68,7 +68,15 @@ defmodule OmscoreWeb.CampaignController do
     # Use the saved autojoin_body_id because otherwise board members could capture campaigns and assign their own body
     permissions = update_local_permissions(conn.assigns.member, conn.assigns.permissions, campaign.autojoin_body_id)
 
-    with {:ok, %Core.Permission{filters: filters}} <- Core.search_permission_list(permissions, "update", "campaign"),
+    # Prevent someone with only local permissions to update the autojoin_body_id
+    permission = Core.search_permission_list(permissions, "update", "campaign")
+    campaign_params = if Kernel.match?({:ok, %Core.Permission{scope: "local"}}, permission) do
+      Map.delete(campaign_params, "autojoin_body_id")
+    else
+      campaign_params
+    end
+
+    with {:ok, %Core.Permission{filters: filters}} <- permission,
         campaign_params = Core.apply_attribute_filters(campaign_params, filters),
         {:ok, %Campaign{} = campaign} <- Registration.update_campaign(campaign, campaign_params) do
       render(conn, "show.json", campaign: campaign)

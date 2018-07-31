@@ -327,6 +327,23 @@ defmodule OmscoreWeb.CampaignControllerTest do
       assert json_response(conn, 403)
     end
 
+    test "does not allow someone with local permissions to change the autojoiin_body", %{conn: conn, campaign: campaign} do
+      %{token: token, member: member} = create_member_with_permissions([])
+      body = body_fixture()
+      circle = bound_circle_fixture(body)
+      {:ok, _} = Omscore.Members.create_body_membership(body, member)
+      {:ok, _} = Omscore.Members.create_circle_membership(circle, member)
+
+      permission = permission_fixture(%{scope: "local", action: "update", object: "campaign"})
+      {:ok, _} = Omscore.Core.put_circle_permissions(circle, [permission])
+
+      {:ok, campaign} = Omscore.Registration.update_campaign(campaign, %{autojoin_body_id: body.id})
+
+      conn = put_req_header(conn, "x-auth-token", token)
+      conn = put conn, campaign_path(conn, :update, campaign), campaign: Map.put(@update_attrs, :autojoin_body_id, -1)
+      assert json_response(conn, 200)["data"]["autojoin_body_id"] == body.id
+    end
+
     test "works with filter permissions", %{conn: conn, campaign: campaign} do
       %{token: access_token} = create_member_with_permissions([%{action: "update", object: "campaign", filters: [%{field: "name"}]}, %{action: "view", object: "campaign"}])
       conn = put_req_header(conn, "x-auth-token", access_token)
