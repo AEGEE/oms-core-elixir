@@ -258,7 +258,7 @@ if Repo.all(Permission) == [] && !dump do
 
   Repo.insert!(%Permission{
     scope: "global",
-    action: "delete_member", 
+    action: "delete_member",
     object: "body",
     description: "Delete the membership status of any member in any body. Use the local permission for this if possible"
   })
@@ -285,7 +285,7 @@ if Repo.all(Permission) == [] && !dump do
     object: "join_request",
     description: "View join request to the body you got this permission from"
   })
-  
+
   Repo.insert!(%Permission{
     scope: "global",
     action: "view",
@@ -349,7 +349,7 @@ if Repo.all(Permission) == [] && !dump do
     object: "member",
     description: "Update any member in the body you got this permission from. Notice that member information is global and several bodies might have the permission to access the same member. Also don't assign it when not necessary, the member can update his own profile anyways."
   })
-  
+
   # User permissions
   Repo.insert!(%Permission{
     scope: "global",
@@ -408,6 +408,75 @@ if Repo.all(Permission) == [] && !dump do
     description: "Delete a recruitment campaign"
   })
 
+  Repo.insert!(%Permission{
+    scope: "global",
+    action: "manage_event",
+    object: "agora",
+    description: "Create, edit and delete Agora statutory events."
+  })
+
+  Repo.insert!(%Permission{
+    scope: "global",
+    action: "manage_event",
+    object: "epm",
+    description: "Create, edit and delete EPM statutory events."
+  })
+
+  Repo.insert!(%Permission{
+    scope: "global",
+    action: "see_applications",
+    object: "agora",
+    description: "See all applications for Agora statutory events."
+  })
+
+  Repo.insert!(%Permission{
+    scope: "global",
+    action: "see_applications",
+    object: "epm",
+    description: "See all applications for EPM statutory events."
+  })
+
+  Repo.insert!(%Permission{
+    scope: "global",
+    action: "accept_applications",
+    object: "agora",
+    description: "Accept or reject applications for Agora statutory events. Would be useful for Chair Team."
+  })
+
+  Repo.insert!(%Permission{
+    scope: "global",
+    action: "accept_applications",
+    object: "epm",
+    description: "Accept or reject applications for EPM statutory events. Would be useful for CD."
+  })
+
+  Repo.insert!(%Permission{
+    scope: "global",
+    action: "manage_applications",
+    object: "agora",
+    description: "Set paid, cancelled or attended status for Agora statutory events. Would be useful for incoming organizers."
+  })
+
+  Repo.insert!(%Permission{
+    scope: "global",
+    action: "manage_applications",
+    object: "epm",
+    description: "Set paid, cancelled or attended status for EPM statutory events. Would be useful for incoming organizers."
+  })
+
+  Repo.insert!(%Permission{
+    scope: "local",
+    action: "approve_members",
+    object: "agora",
+    description: "Approve participants and set participant types and statuses for Agora statutory events. Would be useful for board members."
+  })
+
+  Repo.insert!(%Permission{
+    scope: "local",
+    action: "approve_members",
+    object: "epm",
+    description: "Approve participants and set participant types and statuses for EPM statutory events. Would be useful for board members."
+  })
 end
 
 
