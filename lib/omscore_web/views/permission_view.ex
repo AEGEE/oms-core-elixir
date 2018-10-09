@@ -37,4 +37,10 @@ defmodule OmscoreWeb.PermissionView do
   def render("filter.json", %{permission: filter}) do
     %{field: filter.field}
   end
+
+  def render("permission_relations.json", %{hierarchies: hierarchies}) do
+    %{success: true, 
+      data: Enum.map(hierarchies, fn(hierarchy) -> Helper.render_assoc_many(hierarchy, OmscoreWeb.CircleView, "circle.json") end)
+    }
+  end
 end

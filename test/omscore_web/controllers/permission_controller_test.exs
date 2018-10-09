@@ -254,6 +254,47 @@ defmodule OmscoreWeb.PermissionControllerTest do
     end
   end
 
+  describe "show my permission relations" do
+    test "returns no result when permission is not assignes", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([])
+      conn = put_req_header(conn, "x-auth-token", token)
+      conn = post conn, permission_path(conn, :show_permission_relation), %{action: "some action", object: "some object"}
+      assert res = json_response(conn, 200)["data"]
+      assert res == []
+    end
+
+    test "returns a circle when permission was assigned", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "some action", object: "some object"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+      conn = post conn, permission_path(conn, :show_permission_relation), %{action: "some action", object: "some object"}
+      assert res = json_response(conn, 200)["data"]
+      assert res != []
+
+      assert %{"id" => id} = hd(hd(res))
+      circle = Omscore.Core.get_circle!(id)
+      assert Enum.any?(circle.permissions, fn(x) -> x.action == "some action" && x.object == "some object" end)
+    end
+
+    test "returns a circle hierarchy when permission was assigned remotely", %{conn: conn} do
+      %{token: token, member: member} = create_member_with_permissions([])
+      circle1 = circle_fixture()
+      permission = permission_fixture(%{action: "some action", object: "some object"})
+      circle2 = circle_fixture()
+
+      assert {:ok, _} = Omscore.Core.put_circle_permissions(circle1, [permission])
+      assert {:ok, _} = Omscore.Core.put_parent_circle(circle2, circle1)
+      assert {:ok, _} = Omscore.Members.create_circle_membership(circle2, member)
+
+      conn = put_req_header(conn, "x-auth-token", token)
+      conn = post conn, permission_path(conn, :show_permission_relation), %{action: "some action", object: "some object"}
+      assert res = json_response(conn, 200)["data"]
+      assert res != []
+
+      assert circle1.id == hd(hd(res))["id"]
+      assert circle2.id == hd(tl(hd(res)))["id"]
+    end
+  end
+
   defp create_permission(_) do
     permission = fixture(:permission)
     {:ok, permission: permission}
