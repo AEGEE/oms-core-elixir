@@ -679,7 +679,7 @@ INSERT INTO circles (id, name, description, joinable, body_id, parent_circle_id,
 INSERT INTO circles (id, name, description, joinable, body_id, parent_circle_id, inserted_at, updated_at) VALUES (382, 'Board AEGEE-Vigo', 'Board circle of AEGEE-Vigo', false, 172, 2, '2018-05-15 10:44:38.168714', '2018-05-15 10:44:38.170622');
 INSERT INTO circles (id, name, description, joinable, body_id, parent_circle_id, inserted_at, updated_at) VALUES (383, 'Members AEGEE-Udine', 'Members circle for members of AEGEE-Udine', true, 191, 6, '2018-05-15 10:44:38.171254', '2018-05-15 10:44:38.172541');
 INSERT INTO circles (id, name, description, joinable, body_id, parent_circle_id, inserted_at, updated_at) VALUES (384, 'Board AEGEE-Udine', 'Board circle of AEGEE-Udine', false, 191, 2, '2018-05-15 10:44:38.175066', '2018-05-15 10:44:38.176181');
-
+INSERT INTO circles (id, name, description, joinable, body_id, parent_circle_id, inserted_at, updated_at) VALUES (385, 'Chair Team members', 'A circle that contains all Chair Team members, including IT Responsible and Secretary.', false, 9, NULL, '2018-10-09 21:29:53.783715', '2018-10-09 21:29:53.783784');
 
 ALTER TABLE circles ENABLE TRIGGER ALL;
 
@@ -836,6 +836,17 @@ INSERT INTO circle_permissions (id, circle_id, permission_id, inserted_at, updat
 INSERT INTO circle_permissions (id, circle_id, permission_id, inserted_at, updated_at) VALUES (46, 6, 12, '2018-05-14 13:08:03.954385', '2018-05-14 13:08:03.95439');
 INSERT INTO circle_permissions (id, circle_id, permission_id, inserted_at, updated_at) VALUES (48, 2, 18, '2018-05-14 13:27:21.190688', '2018-05-14 13:27:21.190694');
 INSERT INTO circle_permissions (id, circle_id, permission_id, inserted_at, updated_at) VALUES (49, 2, 16, '2018-05-14 13:33:33.37333', '2018-05-14 13:33:33.373335');
+
+INSERT INTO circle_permissions (id, circle_id, permission_id, inserted_at, updated_at) VALUES (50, 16, 56, '2018-10-09 21:31:07.028732', '2018-10-09 21:31:07.028737');
+INSERT INTO circle_permissions (id, circle_id, permission_id, inserted_at, updated_at) VALUES (51, 16, 58, '2018-10-09 21:31:25.090041', '2018-10-09 21:31:25.090064');
+INSERT INTO circle_permissions (id, circle_id, permission_id, inserted_at, updated_at) VALUES (52, 16, 60, '2018-10-09 21:31:40.515616', '2018-10-09 21:31:40.515622');
+INSERT INTO circle_permissions (id, circle_id, permission_id, inserted_at, updated_at) VALUES (53, 16, 62, '2018-10-09 21:31:58.957959', '2018-10-09 21:31:58.957963');
+INSERT INTO circle_permissions (id, circle_id, permission_id, inserted_at, updated_at) VALUES (54, 385, 61, '2018-10-09 21:32:45.670799', '2018-10-09 21:32:45.670805');
+INSERT INTO circle_permissions (id, circle_id, permission_id, inserted_at, updated_at) VALUES (55, 385, 55, '2018-10-09 21:33:03.890459', '2018-10-09 21:33:03.890471');
+INSERT INTO circle_permissions (id, circle_id, permission_id, inserted_at, updated_at) VALUES (56, 385, 57, '2018-10-09 21:33:22.792394', '2018-10-09 21:33:22.792415');
+INSERT INTO circle_permissions (id, circle_id, permission_id, inserted_at, updated_at) VALUES (57, 385, 59, '2018-10-09 21:33:39.622276', '2018-10-09 21:33:39.622282');
+INSERT INTO circle_permissions (id, circle_id, permission_id, inserted_at, updated_at) VALUES (58, 2, 63, '2018-10-09 21:36:10.310179', '2018-10-09 21:36:10.310202');
+INSERT INTO circle_permissions (id, circle_id, permission_id, inserted_at, updated_at) VALUES (59, 2, 64, '2018-10-09 21:36:17.861225', '2018-10-09 21:36:17.861235');
 
 
 ALTER TABLE circle_permissions ENABLE TRIGGER ALL;
