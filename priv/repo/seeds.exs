@@ -468,14 +468,14 @@ if Repo.all(Permission) == [] && !dump do
     scope: "local",
     action: "approve_members",
     object: "agora",
-    description: "Approve participants and set participant types and statuses for Agora statutory events. Would be useful for board members."
+    description: "Approve participants and set participant types and statuses for specific boards for Agora statutory events. Would be useful for board members."
   })
 
   Repo.insert!(%Permission{
     scope: "local",
     action: "approve_members",
     object: "epm",
-    description: "Approve participants and set participant types and statuses for EPM statutory events. Would be useful for board members."
+    description: "Approve participants and set participant types and statuses for specific boards for EPM statutory events. Would be useful for board members."
   })
 end
 
