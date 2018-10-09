@@ -23,10 +23,14 @@ services:
             JWT_ISSUER: OMS
             JWT_SECRET_KEY_FILE: /run/secrets/jwt_key
             SENDGRID_KEY_FILE: /run/secrets/sendgrid_key
+            MAIL_PASSWORD: /run/secrets/mail_password
+            MAIL_USER: /run/secrets/mail_user
             DB_HOST: postgres-oms-core-elixir
         secrets:
             - jwt_key
             - sendgrid_key
+            - mail_password
+            - mail_user
 
 
     postgres-oms-core-elixir:

@@ -22,7 +22,7 @@ defmodule Omscore.Mixfile do
   def application do
     [
       mod: {Omscore.Application, []},
-      extra_applications: [:logger, :runtime_tools, :bamboo]
+      extra_applications: [:logger, :runtime_tools, :bamboo, :bamboo_smtp]
     ]
   end
 
@@ -45,7 +45,8 @@ defmodule Omscore.Mixfile do
       {:comeonin, "~> 4.0"},
       {:bcrypt_elixir, "~> 0.12"},
       {:httpoison, "~> 1.0"},
-      {:bamboo, "~> 0.8"},
+      {:bamboo, "~> 1.0"},
+      {:bamboo_smtp, "~> 1.5.0"},
       {:excoveralls, "~> 0.8", only: :test}
     ]
   end
