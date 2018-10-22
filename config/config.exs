@@ -19,7 +19,7 @@ end
 config :omscore,
   ecto_repos: [Omscore.Repo],
   env: Mix.env,
-  url_prefix: System.get_env("BASE_URL") || "oms.aegee.org",
+  url_prefix: System.get_env("BASE_URL") || "my.aegee.eu",
   ttl_refresh: 60 * 60 * 24 * 7 * 2,  # 2 weeks
   ttl_access: 60 * 60,                # 1 hour
   ttl_password_reset: 60 * 15,        # 15 Minutes
