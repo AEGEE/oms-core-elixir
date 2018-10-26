@@ -14,4 +14,4 @@ before_script:
 
 
 script:
-    - sudo docker-compose -f docker-compose-secrets.yml -f docker-compose.yml exec oms-core-elixir MIX_ENV=test mix coveralls
+    - sudo docker-compose -f docker-compose-secrets.yml -f docker-compose.yml exec -e MIX_ENV=test oms-core-elixir mix coveralls
