@@ -26,6 +26,7 @@ services:
             MAIL_PASSWORD: /run/secrets/mail_password
             MAIL_USER: /run/secrets/mail_user
             DB_HOST: postgres-oms-core-elixir
+            MIX_ENV: prod
         secrets:
             - jwt_key
             - sendgrid_key
