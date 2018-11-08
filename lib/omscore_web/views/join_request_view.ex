@@ -28,6 +28,8 @@ defmodule OmscoreWeb.JoinRequestView do
       member_id: join_request.member_id,
       body_id: join_request.body_id,
       member: Helper.render_assoc_one(join_request.member, OmscoreWeb.MemberView, "member.json"),
-      body: Helper.render_assoc_one(join_request.body, OmscoreWeb.BodyView, "body.json")}
+      body: Helper.render_assoc_one(join_request.body, OmscoreWeb.BodyView, "body.json"),
+      inserted_at: join_request.inserted_at,
+      updated_at: join_request.updated_at}
   end
 end
