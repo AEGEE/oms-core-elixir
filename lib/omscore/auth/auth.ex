@@ -188,6 +188,9 @@ defmodule Omscore.Auth do
   def trigger_password_reset(email) do
     user = get_user_by_email!(email)
 
+    query = from u in PasswordReset, where: u.user_id == ^user.id
+    Repo.delete_all(query)
+
     with {:ok, password_reset, url} <- create_password_reset_object(user),
          {:ok} <- send_password_reset_mail(user, url),
     do: {:ok, password_reset}
