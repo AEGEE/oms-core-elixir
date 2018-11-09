@@ -207,6 +207,18 @@ defmodule Omscore.AuthTest do
       assert Enum.any?(res, fn(x) -> x.user_id == user.id end)
     end
 
+    test "trigger_password_reset allows only one active password reset per user" do
+      user = user_fixture()
+      
+      assert {:ok, _} = Auth.trigger_password_reset(user.email)
+      res = Repo.all(Auth.PasswordReset)
+      assert Enum.count(res, fn(x) -> x.user_id == user.id end) == 1
+
+      assert {:ok, _} = Auth.trigger_password_reset(user.email)
+      res = Repo.all(Auth.PasswordReset)
+      assert Enum.count(res, fn(x) -> x.user_id == user.id end) == 1
+    end
+
     test "create_password_reset_object/1 returns a password_reset and a url which is not directly stored in db" do
       user = user_fixture()
       assert {:ok, _, url} = Auth.create_password_reset_object(user)
