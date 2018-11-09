@@ -204,7 +204,7 @@ defmodule Omscore.CoreTest do
   describe "bodies" do
     alias Omscore.Core.Body
 
-    @valid_attrs %{address: "some address", description: "some description", email: "some email", legacy_key: "some legacy_key", name: "some name", phone: "some phone"}
+    @valid_attrs %{address: "some address", description: "some description", email: "some email", legacy_key: "some legacy_key", name: "some name", phone: "some phone", type: "other"}
     @update_attrs %{address: "some updated address", description: "some updated description", email: "some updated email", legacy_key: "some updated legacy_key", name: "some updated name", phone: "some updated phone"}
     @invalid_attrs %{address: nil, description: nil, email: nil, legacy_key: nil, name: nil, phone: nil}
 
@@ -231,6 +231,11 @@ defmodule Omscore.CoreTest do
       assert body.legacy_key == "some legacy_key"
       assert body.name == "some name"
       assert body.phone == "some phone"
+      assert body.type == "other"
+    end
+
+    test "create_body/1 validates body_types" do
+      assert {:error, _} = Core.create_body(@valid_attrs |> Map.put(:type, "some_very weird type which doesn't exist"))    
     end
 
     test "create_body/1 ignores shadow_circle_id" do
