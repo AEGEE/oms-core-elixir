@@ -207,7 +207,7 @@ defmodule Omscore.Auth do
   end
 
   defp send_password_reset_mail(user, token) do
-    url = Application.get_env(:omscore, :url_prefix) <> "/password_reset?token=" <> token
+    url = Application.get_env(:omscore, :url_prefix) <> "/password_confirm?token=" <> token
     Omscore.Interfaces.Mail.send_mail(user.email, "Reset your password", 
       "To reset your password, visit " <> url <> " or copy&paste this token into the input on the website: " <> token)
   end
