@@ -2,6 +2,8 @@ defmodule Omscore.Core.Body do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @body_types ["antenna", "contact antenna", "contact", "interest group", "working group", "commission", "committee", "other"]
+
 
   schema "bodies" do
     field :address, :string
@@ -26,7 +28,8 @@ defmodule Omscore.Core.Body do
   def changeset(body, attrs) do
     body
     |> cast(attrs, [:name, :email, :phone, :address, :description, :legacy_key, :shadow_circle_id, :type])
-    |> validate_required([:name, :legacy_key, :address, :email])
+    |> validate_required([:name, :legacy_key, :address, :email, :type])
+    |> validate_inclusion(:type, @body_types, message: "must be one of " <> Kernel.inspect(@body_types))
     |> validate_shadow_circle()
   end
 
