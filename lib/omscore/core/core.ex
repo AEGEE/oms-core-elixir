@@ -192,7 +192,7 @@ defmodule Omscore.Core do
   end
 
   # Gets a single body, circles preloaded
-  def get_body!(id), do: Repo.get!(Body, id) |> Repo.preload([:circles])
+  def get_body!(id), do: Repo.get!(Body, id) |> Repo.preload([:circles, :campaigns])
 
   def get_body_members(body) do
     body 
