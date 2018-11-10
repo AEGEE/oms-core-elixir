@@ -12,7 +12,7 @@ defmodule Omscore.Members do
 
   # Returns all members
   def list_members(params \\ %{}) do
-    from(u in Member, order_by: [:last_name, :first_name])
+    from(u in Member, order_by: [:last_name, :first_name], preload: :bodies)
     |> Helper.paginate(params)
     |> Helper.search(params, [:first_name, :last_name], " ")
     |> OmscoreWeb.Helper.filter(params, Member.__schema__(:fields))

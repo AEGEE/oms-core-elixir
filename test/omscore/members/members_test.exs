@@ -13,8 +13,15 @@ defmodule Omscore.MembersTest do
 
 
     test "list_members/0 returns all members" do
-      member = member_fixture()
+      member = member_fixture() |> Map.put(:bodies, [])
       assert Members.list_members() == [member]
+    end
+
+    test "list_members/0 returns bodies per member" do
+      member = member_fixture()
+      body = body_fixture()
+      Members.create_body_membership(body, member)
+      assert Members.list_members() |> hd |> Map.get(:bodies) != []
     end
 
     test "get_member!/1 returns the member with given id" do
