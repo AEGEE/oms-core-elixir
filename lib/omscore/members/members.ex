@@ -103,6 +103,14 @@ defmodule Omscore.Members do
 
   alias Omscore.Members.JoinRequest
 
+  defp filter_approved_joinrequests(query, params) do
+    case Map.get(params, "filter[approved]") do
+      "true" -> from(q in query, where: q.approved == true)
+      "false" -> from(q in query, where: q.approved == false)
+      _ -> query
+    end
+  end
+
   # Get all join requests for a body
   def list_join_requests(%Omscore.Core.Body{} = body, params \\ %{}) do
     members_query = from(u in Member)
@@ -113,6 +121,7 @@ defmodule Omscore.Members do
     |> Ecto.Query.join(:inner, [jr], u in subquery(members_query), jr.member_id == u.id)
     |> Ecto.Query.preload(:member)
     |> Helper.paginate(params)
+    |> filter_approved_joinrequests(params)
 
     Repo.all(jr_query)
   end
