@@ -17,6 +17,7 @@ defmodule Omscore.Core.Body do
     has_many :join_requests, Omscore.Members.JoinRequest
     has_many :body_memberships, Omscore.Members.BodyMembership
     belongs_to :shadow_circle, Omscore.Core.Circle
+    has_many :campaigns, Omscore.Registration.Campaign, foreign_key: :autojoin_body_id
 
     timestamps()
   end

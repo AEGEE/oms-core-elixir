@@ -122,6 +122,17 @@ defmodule OmscoreWeb.BodyControllerTest do
       assert res = json_response(conn, 200)["data"]
       assert !Map.has_key?(res, "name")
     end
+
+    test "shows campaigns of a body", %{conn: conn, body: body} do
+      %{token: token} = create_member_with_permissions([%{action: "view", object: "body"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      campaign = campaign_fixture(%{autojoin_body_id: body.id})
+
+      conn = get conn, body_body_path(conn, :show, body.id)
+      assert res = json_response(conn, 200)["data"]
+      assert Enum.any?(res["campaigns"], fn(x) -> x["id"] == campaign.id end)
+    end
   end
 
   describe "create body" do
