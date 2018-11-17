@@ -450,6 +450,15 @@ defmodule OmscoreWeb.CampaignControllerTest do
       assert Enum.any?(campaign.submissions, fn(x) -> x.user_id == user.id end)
     end
 
+    test "a valid submission returns the id of the submission so the user can refer to it later", %{conn: conn, campaign: campaign} do
+      conn = post conn, campaign_path(conn, :submit, campaign.url), submission: @valid_submission
+      assert %{"id" => id} = json_response(conn, 201)["data"]
+
+      campaign = campaign |> Omscore.Repo.preload([:submissions])
+      assert campaign.submissions != []
+      assert Enum.any?(campaign.submissions, fn(x) -> x.id == id end)
+    end
+
     test "a invalid submission returns an error", %{conn: conn, campaign: campaign} do
       conn = post conn, campaign_path(conn, :submit, campaign.url), submission: @invalid_submission
       assert json_response(conn, 422)["errors"] != %{}

@@ -53,7 +53,6 @@ defmodule Omscore.ExpireTokens do
     query = from u in Omscore.Registration.MailConfirmation,
       where: u.inserted_at < ^expiry
 
-    # Deleting the user object will cascade through to submission, mail_confirmation, member if already created and a lot more
     confirmations = query
     |> Omscore.Repo.all()
     |> Enum.map(fn(x) -> Omscore.Repo.preload(x, [submission: [:user]]) end)
@@ -61,10 +60,12 @@ defmodule Omscore.ExpireTokens do
     confirmations
     |> Enum.map(fn(x) -> Omscore.Repo.delete(x) end)
 
+    # Deleting the user object will cascade through to submission, mail_confirmation, member if already created and a lot more
+    # Only delete the user where no confirmations are left and the mail wasn't confirmed manually
     confirmations
     |> Enum.map(fn(x) -> x.submission end) # Now we deal with submissions only
     |> Enum.map(fn(x) -> Omscore.Repo.preload(x, [:mail_confirmations]) end)
-    |> Enum.filter(fn(x) -> x.mail_confirmations == [] end)
+    |> Enum.filter(fn(x) -> x.mail_confirmations == [] && x.mail_confirmed == false end)
     |> Enum.map(fn(x) -> Omscore.Repo.delete(x.user) end)
   end
 

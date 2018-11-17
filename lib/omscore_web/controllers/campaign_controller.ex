@@ -116,7 +116,7 @@ defmodule OmscoreWeb.CampaignController do
          {:ok, _data} <- Registration.send_confirmation_mail(user, submission) do
       conn
       |> put_status(:created)
-      |> render("success.json", msg: "Submission recorded successfully")
+      |> render("submit.json", campaign: submission)
     else
       {:error, {:unprocessable_entity, %{"errors" => errors}}} -> {:unprocessable_entity, %{errors: errors}}
       {:error, {status, errors}} -> {status, errors}
