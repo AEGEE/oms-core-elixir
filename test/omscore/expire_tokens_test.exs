@@ -49,4 +49,18 @@ defmodule Omscore.ExpireTokensTest do
 
     assert_raise Ecto.NoResultsError, fn -> Repo.get!(Omscore.Auth.User, user.id) end
   end
+
+  test "leaves a submission, etc intact in case there are still mail confirmations pending" do
+    %{submission: submission} = Omscore.ecto_date_in_past(Application.get_env(:omscore, :ttl_refresh) * 2)
+    |> token_fixture()
+
+    %Omscore.Registration.MailConfirmation{}
+    |> Omscore.Registration.MailConfirmation.changeset(%{submission_id: submission.id, url: "bla2"})
+    |> Ecto.Changeset.force_change(:inserted_at, Omscore.ecto_date_in_past(-2000))
+    |> Omscore.Repo.insert!()
+
+    Omscore.ExpireTokens.handle_info(:work, {})
+
+    assert Repo.get!(Omscore.Registration.Submission, submission.id)
+  end
 end

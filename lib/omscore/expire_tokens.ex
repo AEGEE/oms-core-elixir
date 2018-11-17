@@ -54,10 +54,18 @@ defmodule Omscore.ExpireTokens do
       where: u.inserted_at < ^expiry
 
     # Deleting the user object will cascade through to submission, mail_confirmation, member if already created and a lot more
-    query 
+    confirmations = query
     |> Omscore.Repo.all()
     |> Enum.map(fn(x) -> Omscore.Repo.preload(x, [submission: [:user]]) end)
-    |> Enum.map(fn(x) -> Omscore.Repo.delete(x.submission.user) end)
+
+    confirmations
+    |> Enum.map(fn(x) -> Omscore.Repo.delete(x) end)
+
+    confirmations
+    |> Enum.map(fn(x) -> x.submission end) # Now we deal with submissions only
+    |> Enum.map(fn(x) -> Omscore.Repo.preload(x, [:mail_confirmations]) end)
+    |> Enum.filter(fn(x) -> x.mail_confirmations == [] end)
+    |> Enum.map(fn(x) -> Omscore.Repo.delete(x.user) end)
   end
 
   def expire_password_resets() do
