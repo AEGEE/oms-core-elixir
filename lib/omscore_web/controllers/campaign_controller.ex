@@ -131,4 +131,32 @@ defmodule OmscoreWeb.CampaignController do
       render(conn, "success.json", msg: "Mail confirmed!")
     end
   end
+
+  # Make sure no more than 3 confirmations per user are sent
+  defp check_mail_confirmation_count(mail_confirmations) when length(mail_confirmations) > 3, do: {:error, {:too_many_requests, "You can only resend your mail 3 times"}}
+  defp check_mail_confirmation_count(_), do: {:ok}
+
+  # Check if campaign url is actually from that submission
+  defp check_matching_campaign(submission, campaign_url) do
+    if submission.campaign.url == campaign_url do
+      {:ok}
+    else
+      {:error, :not_found}
+    end
+  end
+
+  # Resend the confirmation mail to the user
+  def resend_confirmation_mail(conn, %{"submission_id" => submission_id, "campaign_url" => campaign_url}) do
+
+    submission = Omscore.Repo.get!(Registration.Submission, submission.id)
+    |> Omscore.Repo.preload([:user, :mail_confirmations, :campaign])
+
+    with {:ok} <- check_matching_campaign(submission, campaign_url), # check if attacker guessed the right campaign for the submission
+         {:ok} <- check_mail_confirmation_count(submission.mail_confirmations),
+         {:ok, _data} <- Registration.send_confirmation_mail(submission.user, submission) do
+      conn
+      |> put_status(:created)
+      |> render("success.json", msg: "Mail resent successfully")
+    end
+  end
 end
