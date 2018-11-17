@@ -63,4 +63,18 @@ defmodule Omscore.ExpireTokensTest do
 
     assert Repo.get!(Omscore.Registration.Submission, submission.id)
   end
+
+  test "leaves a submission intact in case the users mail was confirmed manually" do
+    %{submission: submission} = Omscore.ecto_date_in_past(Application.get_env(:omscore, :ttl_refresh) * 2)
+    |> token_fixture()
+
+    submission
+    |> Omscore.Registration.Submission.changeset(%{mail_confirmed: true})
+    |> Omscore.Repo.update!()
+
+    Omscore.ExpireTokens.handle_info(:work, {})
+
+    assert Repo.get!(Omscore.Registration.Submission, submission.id)
+
+  end
 end

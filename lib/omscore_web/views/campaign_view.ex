@@ -12,6 +12,10 @@ defmodule OmscoreWeb.CampaignView do
     %{success: true, data: render_one(campaign, CampaignView, "campaign_public.json")}
   end
 
+  def render("submit.json", %{campaign: submission}) do
+    %{success: true, data: %{id: submission.id}}
+  end
+
   def render("campaign_public.json", %{campaign: campaign}) do
     %{name: campaign.name,
       url: campaign.url,
