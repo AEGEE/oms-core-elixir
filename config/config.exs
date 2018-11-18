@@ -24,7 +24,8 @@ config :omscore,
   ttl_access: 60 * 60,                # 1 hour
   ttl_password_reset: 60 * 15,        # 15 Minutes
   ttl_mail_confirmation: 60 * 60 * 2, # 2 hours
-  expiry_worker_freq: 5 * 60 * 1000   # 5 Minutes
+  expiry_worker_freq: 5 * 60 * 1000,  # 5 Minutes
+  mail_confirmation_resends: 50       # How often a user can request resend of his confirmation mail within the expiration interval
 
 # Configures the endpoint
 config :omscore, OmscoreWeb.Endpoint,

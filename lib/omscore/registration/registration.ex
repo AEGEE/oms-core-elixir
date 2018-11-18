@@ -129,6 +129,7 @@ defmodule Omscore.Registration do
   end
 
   def get_submission!(submission_id), do: Repo.get!(Submission, submission_id)
+  def get_submission_by_token!(token), do: Repo.get_by!(Submission, token: token)
 
   def create_submission(campaign, user, submission_attrs) do
     %Submission{

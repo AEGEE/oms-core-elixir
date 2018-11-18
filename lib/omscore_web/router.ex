@@ -40,7 +40,7 @@ defmodule OmscoreWeb.Router do
     get "/campaigns", CampaignController, :index
     get "/campaigns/:campaign_url", CampaignController, :show
     post "/campaigns/:campaign_url", CampaignController, :submit
-    post "/campaigns/:campaign_url/resend_mail/:submission_id", CampaignController, :resend_mail
+    post "/campaigns/:campaign_url/resend_mail/:submission_token", CampaignController, :resend_confirmation_mail
     post "/confirm_mail/:confirmation_url", CampaignController, :confirm_mail
   end
 

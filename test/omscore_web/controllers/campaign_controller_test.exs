@@ -450,13 +450,13 @@ defmodule OmscoreWeb.CampaignControllerTest do
       assert Enum.any?(campaign.submissions, fn(x) -> x.user_id == user.id end)
     end
 
-    test "a valid submission returns the id of the submission so the user can refer to it later", %{conn: conn, campaign: campaign} do
+    test "a valid submission returns the token of the submission so the user can refer to it later", %{conn: conn, campaign: campaign} do
       conn = post conn, campaign_path(conn, :submit, campaign.url), submission: @valid_submission
-      assert %{"id" => id} = json_response(conn, 201)["data"]
+      assert %{"token" => token} = json_response(conn, 201)["data"]
 
       campaign = campaign |> Omscore.Repo.preload([:submissions])
       assert campaign.submissions != []
-      assert Enum.any?(campaign.submissions, fn(x) -> x.id == id end)
+      assert Enum.any?(campaign.submissions, fn(x) -> x.token == token end)
     end
 
     test "a invalid submission returns an error", %{conn: conn, campaign: campaign} do
@@ -595,6 +595,67 @@ defmodule OmscoreWeb.CampaignControllerTest do
 
       mail_confirmation = Repo.get(Omscore.Registration.MailConfirmation, mail_confirmation.id)
       assert mail_confirmation == nil
+    end
+
+    test "the submission contains a link to resend the password", %{conn: conn, campaign: campaign} do
+      conn = post conn, campaign_path(conn, :submit, campaign.url), submission: @valid_submission
+      assert res = json_response(conn, 201)
+      assert token = res["data"]["token"]
+
+      conn = recycle(conn)
+
+      conn = post conn, campaign_path(conn, :resend_confirmation_mail, campaign.url, token)
+      assert json_response(conn, 201)
+    end
+
+    test "doesn't allow for mail sending anymore when the submission was already approved", %{conn: conn, campaign: campaign} do
+      :ets.delete_all_objects(:saved_mail)
+
+      conn = post conn, campaign_path(conn, :submit, campaign.url), submission: @valid_submission
+      assert %{"token" => token} = json_response(conn, 201)["data"]
+      
+      url = :ets.lookup(:saved_mail, @valid_submission.email)
+      |> assert
+      |> Enum.at(0)
+      |> parse_url_from_mail()
+
+      conn = recycle(conn)
+
+      conn = post conn, campaign_path(conn, :confirm_mail, url)
+      assert json_response(conn, 200)
+
+      conn = recycle(conn)
+
+      conn = post conn, campaign_path(conn, :resend_confirmation_mail, campaign.url, token)
+      assert json_response(conn, 422)      
+    end
+
+    test "limits the number of resends", %{conn: conn, campaign: campaign} do
+      conn = post conn, campaign_path(conn, :submit, campaign.url), submission: @valid_submission
+      assert res = json_response(conn, 201)
+      assert token = res["data"]["token"]
+
+      resends = Application.get_env(:omscore, :mail_confirmation_resends) + 1
+
+      results = 0..resends
+      |> Enum.map(fn(_) -> 
+        recycle(conn)
+        |> post(campaign_path(conn, :resend_confirmation_mail, campaign.url, token))
+      end)
+
+      assert Enum.count(results, fn(conn) -> conn.status == 201 end) == resends - 1
+    end
+
+    test "requires the correct campaign to be set", %{conn: conn, campaign: campaign} do
+      conn = post conn, campaign_path(conn, :submit, campaign.url), submission: @valid_submission
+      assert res = json_response(conn, 201)
+      assert token = res["data"]["token"]
+
+      conn = recycle(conn)
+
+      conn = post conn, campaign_path(conn, :resend_confirmation_mail, "nonexisting_campaign_url", token)
+      assert json_response(conn, 404)
+
     end
   end
 
