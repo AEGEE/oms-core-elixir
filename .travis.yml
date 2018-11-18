@@ -5,6 +5,9 @@ sudo: required
 services:
   - docker
 
+notifications:
+  slack: myaegee:jhn0jBOynuYf93wsSfJI1XQk
+
 before_script:
     - cd docker
     - sudo docker-compose -f docker-compose-secrets.yml -f docker-compose.yml build
