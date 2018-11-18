@@ -95,6 +95,16 @@ defmodule Omscore.RegistrationTest do
       assert submission |> map_inclusion(@valid_attrs)
     end
 
+    test "create automatically assigns a token" do
+      campaign = campaign_fixture()
+      user = user_fixture()
+
+      assert {:ok, submission} = Registration.create_submission(campaign, user, @valid_attrs)
+      assert submission = Registration.get_submission!(submission.id)
+      assert submission.token != nil
+      assert submission.token != ""
+    end
+
     test "create with invalid attrs throws an error" do
       campaign = campaign_fixture()
       user = user_fixture()

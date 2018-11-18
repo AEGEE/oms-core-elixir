@@ -133,8 +133,8 @@ defmodule OmscoreWeb.CampaignController do
   end
 
   # Make sure no more than 3 confirmations per user are sent
-  defp check_mail_confirmation_count(mail_confirmations) when length(mail_confirmations) > 3, do: {:error, {:too_many_requests, "You can only resend your mail 3 times"}}
-  defp check_mail_confirmation_count(_), do: {:ok}
+  defp check_mail_confirmation_count(mail_confirmations, max_tries) when length(mail_confirmations) > max_tries, do: {:error, :too_many_requests, "You can only resend your mail " <> Kernel.inspect(max_tries) <> " times"}
+  defp check_mail_confirmation_count(_, _), do: {:ok}
 
   # Check if campaign url is actually from that submission
   defp check_matching_campaign(submission, campaign_url) do
@@ -145,14 +145,18 @@ defmodule OmscoreWeb.CampaignController do
     end
   end
 
-  # Resend the confirmation mail to the user
-  def resend_confirmation_mail(conn, %{"submission_id" => submission_id, "campaign_url" => campaign_url}) do
+  defp check_submission_confirmed(false), do: {:ok}
+  defp check_submission_confirmed(true), do: {:error, :unprocessable_entity, "You cannot resend a confirmation mail after successful confirmation"}
 
-    submission = Omscore.Repo.get!(Registration.Submission, submission.id)
+  # Resend the confirmation mail to the user
+  def resend_confirmation_mail(conn, %{"submission_token" => submission_token, "campaign_url" => campaign_url}) do
+
+    submission = Omscore.Registration.get_submission_by_token!(submission_token)
     |> Omscore.Repo.preload([:user, :mail_confirmations, :campaign])
 
-    with {:ok} <- check_matching_campaign(submission, campaign_url), # check if attacker guessed the right campaign for the submission
-         {:ok} <- check_mail_confirmation_count(submission.mail_confirmations),
+    with {:ok} <- check_matching_campaign(submission, campaign_url), # check if attacker guessed the right campaign for the submission  :)
+         {:ok} <- check_mail_confirmation_count(submission.mail_confirmations, Application.get_env(:omscore, :mail_confirmation_resends)),
+         {:ok} <- check_submission_confirmed(submission.mail_confirmed),
          {:ok, _data} <- Registration.send_confirmation_mail(submission.user, submission) do
       conn
       |> put_status(:created)

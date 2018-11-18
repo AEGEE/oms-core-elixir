@@ -13,7 +13,7 @@ defmodule OmscoreWeb.CampaignView do
   end
 
   def render("submit.json", %{campaign: submission}) do
-    %{success: true, data: %{id: submission.id}}
+    %{success: true, data: %{token: submission.token}}
   end
 
   def render("campaign_public.json", %{campaign: campaign}) do
