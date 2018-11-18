@@ -2,7 +2,7 @@ defmodule Omscore.Core.Body do
   use Ecto.Schema
   import Ecto.Changeset
 
-  @body_types ["antenna", "contact antenna", "contact", "interest group", "working group", "commission", "committee", "other"]
+  @body_types ["antenna", "contact antenna", "contact", "interest group", "working group", "commission", "committee", "project", "partner", "other"]
 
 
   schema "bodies" do
