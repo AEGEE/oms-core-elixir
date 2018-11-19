@@ -14,6 +14,13 @@ defmodule OmscoreWeb.BodyController do
     end
   end
 
+  def index_campaigns(conn, params) do
+    with {:ok, %Core.Permission{filters: filters}} <- Core.search_permission_list(conn.assigns.permissions, "view", "campaign") do
+      campaigns = Omscore.Registration.list_bound_campaigns(conn.assigns.body.id, params)
+      render(conn, "index_campaigns.json", campaigns: campaigns, filters: filters)
+    end
+  end
+
   def create(conn, %{"body" => body_params}) do
     with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "create", "body"),
          {:ok, %Body{} = body} <- Core.create_body(body_params) do

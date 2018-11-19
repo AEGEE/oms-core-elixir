@@ -36,6 +36,14 @@ defmodule Omscore.Registration do
     |> Repo.all
   end
 
+  def list_bound_campaigns(body_id, params \\ %{}) do
+    from(u in Campaign, order_by: [:name], where: u.autojoin_body_id == ^body_id)
+    |> Helper.paginate(params)
+    |> Helper.search(params, [:name, :description_short, :url], " ")
+    |> OmscoreWeb.Helper.filter(params, Campaign.__schema__(:fields))
+    |> Repo.all
+  end
+
   @doc """
   Gets a single campaign.
 
