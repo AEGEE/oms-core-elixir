@@ -15,6 +15,16 @@ defmodule Omscore.RegistrationTest do
       assert Registration.list_campaigns() |> Enum.any?(fn(x) -> x == campaign end)
     end
 
+    test "list_bound_campaigns returns all bound campaigns" do
+      campaign1 = campaign_fixture()
+      body = body_fixture()
+      campaign2 = campaign_fixture(%{autojoin_body_id: body.id, url: "some_other_url"})
+
+      res = Registration.list_bound_campaigns(body.id)
+      assert Enum.any?(res, fn(x) -> x == campaign2 end)
+      assert !Enum.any?(res, fn(x) -> x == campaign1 end)
+    end
+
     test "get_campaign!/1 returns the campaign with given id" do
       campaign = campaign_fixture()
       assert Registration.get_campaign!(campaign.id) == campaign

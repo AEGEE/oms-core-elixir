@@ -36,7 +36,7 @@ defmodule OmscoreWeb.BodyControllerTest do
       %{token: token} = create_member_with_permissions([%{action: "view", object: "body"}])
       conn = put_req_header(conn, "x-auth-token", token)
 
-      bodies = create_many_bodies(0..100)
+      bodies = create_many_bodies(0..10)
 
       conn = get conn, body_path(conn, :index)
       assert res = json_response(conn, 200)["data"]
@@ -47,7 +47,7 @@ defmodule OmscoreWeb.BodyControllerTest do
       %{token: token} = create_member_with_permissions([%{action: "view", object: "body"}])
       conn = put_req_header(conn, "x-auth-token", token)
 
-      create_many_bodies(0..100)
+      create_many_bodies(0..20)
 
       conn = get conn, body_path(conn, :index), limit: 10, offset: 0
       assert res = json_response(conn, 200)["data"]
@@ -58,7 +58,7 @@ defmodule OmscoreWeb.BodyControllerTest do
       %{token: token} = create_member_with_permissions([%{action: "view", object: "body"}])
       conn = put_req_header(conn, "x-auth-token", token)
 
-      create_many_bodies(0..100)
+      create_many_bodies(0..10)
 
       conn = get conn, body_path(conn, :index), query: "some really exotic query that definitely doesn't match any member at all"
       assert json_response(conn, 200)["data"] == []
@@ -87,10 +87,35 @@ defmodule OmscoreWeb.BodyControllerTest do
       %{token: token} = create_member_with_permissions([%{action: "view", object: "body"}])
       conn = put_req_header(conn, "x-auth-token", token)
 
-      create_many_bodies(0..100)
+      create_many_bodies(0..10)
 
       conn = get conn, body_path(conn, :index), [{"filter[name]", "some really exotic query that definitely doesn't match any member at all"}]
       assert json_response(conn, 200)["data"] == []
+    end
+  end
+
+  describe "index_campaigns" do
+    setup [:create_body]
+
+    test "lists campaigns for a single body", %{conn: conn, body: body} do
+      campaign = campaign_fixture(%{autojoin_body_id: body.id})
+
+      %{token: token} = create_member_with_permissions([%{action: "view", object: "campaign"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      conn = get conn, body_body_path(conn, :index_campaigns, body.id)
+      assert res = json_response(conn, 200)["data"]
+      assert hd(res)["id"] == campaign.id
+    end
+
+    test "rejects to unauthorized user", %{conn: conn, body: body} do
+      campaign = campaign_fixture(%{autojoin_body_id: body.id})
+
+      %{token: token} = create_member_with_permissions([])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      conn = get conn, body_body_path(conn, :index_campaigns, body.id)
+      assert res = json_response(conn, 403)
     end
   end
 
@@ -121,17 +146,6 @@ defmodule OmscoreWeb.BodyControllerTest do
       conn = get conn, body_body_path(conn, :show, body.id)
       assert res = json_response(conn, 200)["data"]
       assert !Map.has_key?(res, "name")
-    end
-
-    test "shows campaigns of a body", %{conn: conn, body: body} do
-      %{token: token} = create_member_with_permissions([%{action: "view", object: "body"}])
-      conn = put_req_header(conn, "x-auth-token", token)
-
-      campaign = campaign_fixture(%{autojoin_body_id: body.id})
-
-      conn = get conn, body_body_path(conn, :show, body.id)
-      assert res = json_response(conn, 200)["data"]
-      assert Enum.any?(res["campaigns"], fn(x) -> x["id"] == campaign.id end)
     end
   end
 
