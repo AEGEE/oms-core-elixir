@@ -80,6 +80,11 @@ defmodule OmscoreWeb.Router do
     get "/backend_campaigns/:campaign_id", CampaignController, :show_full
     put "/backend_campaigns/:id", CampaignController, :update
     delete "/backend_campaigns/:id", CampaignController, :delete
+
+    get "/payments", PaymentController, :index
+    get "/payments/:payment_id", PaymentController, :show
+    put "/payments/:payment_id", PaymentController, :update
+    delete "/payments/:payment_id", PaymentController, :delete
   end
 
   # Operating on the member, permissions based on the bodies he is part in will be granted
@@ -133,5 +138,9 @@ defmodule OmscoreWeb.Router do
     get "/join_requests", JoinRequestController, :index
     get "/join_requests/:id", JoinRequestController, :show
     post "/join_requests/:id", JoinRequestController, :process
+
+    get "/payments", PaymentController, :index_bound
+    post "/payments", PaymentController, :create
+    get "/payments/:payment_id", PaymentController, :show
   end
 end
