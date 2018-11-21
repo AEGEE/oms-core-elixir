@@ -202,6 +202,26 @@ defmodule OmscoreWeb.Fixtures do
     %{reset: reset, confirmation: confirmation, refresh: refresh, submission: submission, user: user}
   end
 
+  @valid_payment_attrs %{amount: "120.5", comment: "some comment", currency: "euro", expires: ~N[2010-04-17 14:00:00.000000], invoice_address: "some invoice_address", invoice_name: "some invoice_name"}
+  def payment_fixture(%Omscore.Core.Body{} = body, %Omscore.Members.Member{} = member, attrs) do
+    
+    attrs = attrs
+    |> Enum.into(@valid_payment_attrs)  
+
+    {:ok, payment} = Omscore.Finances.create_payment(body, member, attrs)
+    payment
+  end
+  def payment_fixture(%Omscore.Core.Body{} = body, %Omscore.Members.Member{} = member), do: payment_fixture(body, member, %{})
+  def payment_fixture(%Omscore.Core.Body{} = body, attrs) do
+    member = member_fixture()
+    {:ok, _} = Omscore.Members.create_body_membership(body, member)
+
+    payment_fixture(body, member, attrs)
+  end
+  def payment_fixture(%Omscore.Core.Body{} = body), do: payment_fixture(body, %{})
+  def payment_fixture(attrs), do: payment_fixture(body_fixture(), attrs)
+  def payment_fixture(), do: payment_fixture(%{})
+
   def map_inclusion(map_to_check, should_be_in_there) when is_map(should_be_in_there) do
     should_be_in_there
     |> Map.keys
