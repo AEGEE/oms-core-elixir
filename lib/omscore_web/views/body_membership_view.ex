@@ -26,9 +26,6 @@ defmodule OmscoreWeb.BodyMembershipView do
   def render("body_membership.json", %{body_membership: body_membership}) do
     %{id: body_membership.id,
       comment: body_membership.comment,
-      fee: body_membership.fee,
-      fee_currency: body_membership.fee_currency,
-      expiration: body_membership.expiration,
       has_expired: body_membership.has_expired,
       inserted_at: body_membership.inserted_at,
       member_id: body_membership.member_id,

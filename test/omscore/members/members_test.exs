@@ -429,61 +429,6 @@ defmodule Omscore.MembersTest do
       assert {:ok, _} = Members.delete_body_membership(bm)
       assert nil == Members.get_body_membership(body, member)
     end
-
-    test "body membership has an expiration date and a fee" do
-      member = member_fixture()
-      body = body_fixture()
-      assert {:ok, bm} = Members.create_body_membership(body, member)
-
-      assert {:ok, bm} = Members.update_body_membership(bm, %{fee: 12.0, fee_currency: "euro", expiration: Omscore.ecto_date_in_past(-10)})
-      assert bm = Members.get_body_membership!(bm.id)
-      assert Decimal.equal?(bm.fee, 12)
-      assert bm.fee_currency == "euro"
-      assert bm.expiration
-      assert bm.has_expired == false
-    end
-
-    test "does not allow setting an expiration in the past" do
-      member = member_fixture()
-      body = body_fixture()
-      assert {:ok, bm} = Members.create_body_membership(body, member)
-      assert {:error, _bm} = Members.update_body_membership(bm, %{fee: 12.0, fee_currency: "euro", expiration: Omscore.ecto_date_in_past(10)})
-    end
-
-    test "automatically sets the has_expired flag to false when membership expired" do
-      member = member_fixture()
-      body = body_fixture()
-      assert {:ok, bm} = Members.create_body_membership(body, member)
-      
-      bm = bm
-      |> BodyMembership.changeset(%{})
-      |> Ecto.Changeset.change(expiration: Omscore.ecto_date_in_past(10), has_expired: false)
-      |> Repo.update!
-
-      Omscore.ExpireTokens.expire_memberships()
-
-      bm = Repo.get!(BodyMembership, bm.id)
-      assert bm.has_expired == true
-    end
-
-    test "sends a mail when membership expired" do
-      member = member_fixture() |> Repo.preload([:user])
-      body = body_fixture()
-      assert {:ok, bm} = Members.create_body_membership(body, member)
-      :ets.delete_all_objects(:saved_mail)
-
-      bm = bm
-      |> BodyMembership.changeset(%{})
-      |> Ecto.Changeset.change(expiration: Omscore.ecto_date_in_past(10), has_expired: false)
-      |> Repo.update!
-
-      Omscore.ExpireTokens.expire_memberships()
-
-      bm = Repo.get!(BodyMembership, bm.id)
-      assert bm.has_expired == true
-
-      assert :ets.lookup(:saved_mail, member.user.email) != []
-    end
   end
 
   describe "circle_memberships" do
