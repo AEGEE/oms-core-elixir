@@ -77,4 +77,139 @@ defmodule Omscore.ExpireTokensTest do
     assert Repo.get!(Omscore.Registration.Submission, submission.id)
 
   end
+
+
+  test "automatically sets the has_expired flag to false when a new payment was created" do
+    member = member_fixture() |> Repo.preload([:user])
+    body = body_fixture()
+    :ets.delete_all_objects(:saved_mail)
+
+    assert {:ok, bm} = Omscore.Members.create_body_membership(body, member)
+    
+    payment_fixture(body, member)
+
+    bm = bm
+    |> Omscore.Members.BodyMembership.changeset(%{})
+    |> Ecto.Changeset.change(has_expired: true)
+    |> Repo.update!
+
+    Omscore.ExpireTokens.expire_memberships()
+
+    bm = Repo.get!(Omscore.Members.BodyMembership, bm.id)
+    assert bm.has_expired == false
+    assert :ets.lookup(:saved_mail, member.user.email) == []
+  end
+
+  test "automatically sets the has_expired flag to false when a payment's expiration was updated" do
+    member = member_fixture() |> Repo.preload([:user])
+    body = body_fixture()
+    :ets.delete_all_objects(:saved_mail)
+    assert {:ok, bm} = Omscore.Members.create_body_membership(body, member)
+    
+    payment = payment_fixture(body, member)
+    |> Omscore.Finances.Payment.changeset(%{})
+    |> Ecto.Changeset.change(expires: Omscore.ecto_date_in_past(10))
+    |> Repo.update!
+
+    bm = bm
+    |> Omscore.Members.BodyMembership.changeset(%{})
+    |> Ecto.Changeset.change(has_expired: true)
+    |> Repo.update!
+
+    Omscore.Finances.update_payment(payment, %{expires: Omscore.ecto_date_in_past(-10)})
+
+    Omscore.ExpireTokens.expire_memberships()
+
+    bm = Repo.get!(Omscore.Members.BodyMembership, bm.id)
+    assert bm.has_expired == false
+    assert :ets.lookup(:saved_mail, member.user.email) == []
+  end 
+
+  test "automatically sets the has_expired flag to true when membership expired" do
+    member = member_fixture() |> Repo.preload([:user])
+    body = body_fixture()
+    :ets.delete_all_objects(:saved_mail)
+    assert {:ok, bm} = Omscore.Members.create_body_membership(body, member)
+    
+    bm = bm
+    |> Omscore.Members.BodyMembership.changeset(%{})
+    |> Ecto.Changeset.change(has_expired: false)
+    |> Repo.update!
+
+    payment_fixture(body, member)
+    |> Omscore.Finances.Payment.changeset(%{})
+    |> Ecto.Changeset.change(expires: Omscore.ecto_date_in_past(10))
+    |> Repo.update!
+
+    Omscore.ExpireTokens.expire_memberships()
+
+    bm = Repo.get!(Omscore.Members.BodyMembership, bm.id)
+    assert bm.has_expired == true
+
+    assert :ets.lookup(:saved_mail, member.user.email) != []
+  end
+
+  test "also automatically sets has_expired flag to true when no payments are present" do
+    member = member_fixture() |> Repo.preload([:user])
+    body = body_fixture()
+    :ets.delete_all_objects(:saved_mail)
+    assert {:ok, bm} = Omscore.Members.create_body_membership(body, member)
+
+    bm = bm
+    |> Omscore.Members.BodyMembership.changeset(%{})
+    |> Ecto.Changeset.change(has_expired: false)
+    |> Repo.update!
+
+    Omscore.ExpireTokens.expire_memberships()
+
+    bm = Repo.get!(Omscore.Members.BodyMembership, bm.id)
+    assert bm.has_expired == true
+
+    assert :ets.lookup(:saved_mail, member.user.email) != []
+  end
+
+  test "does not expire memberships where only some payments expired" do
+    member = member_fixture() |> Repo.preload([:user])
+    body = body_fixture()
+    :ets.delete_all_objects(:saved_mail)
+    assert {:ok, bm} = Omscore.Members.create_body_membership(body, member)
+    
+    bm = bm
+    |> Omscore.Members.BodyMembership.changeset(%{})
+    |> Ecto.Changeset.change(has_expired: false)
+    |> Repo.update!
+
+    payment_fixture(body, member)
+    |> Omscore.Finances.Payment.changeset(%{})
+    |> Ecto.Changeset.change(expires: Omscore.ecto_date_in_past(10))
+    |> Repo.update!
+
+    payment_fixture(body, member)
+
+    Omscore.ExpireTokens.expire_memberships()
+
+    bm = Repo.get!(Omscore.Members.BodyMembership, bm.id)
+    assert bm.has_expired == false
+    assert :ets.lookup(:saved_mail, member.user.email) == []
+  end
+
+  test "does not expire nor send a mail when nothing happened" do
+    member = member_fixture() |> Repo.preload([:user])
+    body = body_fixture()
+    :ets.delete_all_objects(:saved_mail)
+    assert {:ok, bm} = Omscore.Members.create_body_membership(body, member)
+    
+    bm = bm
+    |> Omscore.Members.BodyMembership.changeset(%{})
+    |> Ecto.Changeset.change(has_expired: false)
+    |> Repo.update!
+
+    payment_fixture(body, member)
+    
+    Omscore.ExpireTokens.expire_memberships()
+
+    bm = Repo.get!(Omscore.Members.BodyMembership, bm.id)
+    assert bm.has_expired == false
+    assert :ets.lookup(:saved_mail, member.user.email) == []
+  end
 end
