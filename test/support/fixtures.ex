@@ -202,13 +202,13 @@ defmodule OmscoreWeb.Fixtures do
     %{reset: reset, confirmation: confirmation, refresh: refresh, submission: submission, user: user}
   end
 
-  @valid_payment_attrs %{amount: "120.5", comment: "some comment", currency: "euro", expires: ~N[2010-04-17 14:00:00.000000], invoice_address: "some invoice_address", invoice_name: "some invoice_name"}
+  @valid_payment_attrs %{amount: "120.5", comment: "some comment", currency: "euro", expires: ~N[3010-04-17 14:00:00.000000], invoice_address: "some invoice_address", invoice_name: "some invoice_name"}
   def payment_fixture(%Omscore.Core.Body{} = body, %Omscore.Members.Member{} = member, attrs) do
     
     attrs = attrs
     |> Enum.into(@valid_payment_attrs)  
 
-    {:ok, payment} = Omscore.Finances.create_payment(body, member, attrs)
+    {:ok, payment} = Omscore.Finances.create_payment(body, member, attrs) 
     payment
   end
   def payment_fixture(%Omscore.Core.Body{} = body, %Omscore.Members.Member{} = member), do: payment_fixture(body, member, %{})

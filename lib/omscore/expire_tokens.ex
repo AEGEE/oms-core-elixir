@@ -24,12 +24,30 @@ defmodule Omscore.ExpireTokens do
 
   def expire_memberships() do
     now = Omscore.ecto_date_in_past(0)
-    query = from u in Omscore.Members.BodyMembership,
-      where: not is_nil(u.expiration) and u.expiration < ^now and u.has_expired != true
 
+    # This query holds all bms which do have a valid payment
+    # Also this part doesn't need to be inside a transaction
+    unexpire_query = from bm in Omscore.Members.BodyMembership,
+      inner_join: p in Omscore.Finances.Payment, on: bm.member_id == p.member_id and bm.body_id == p.body_id,
+      where: p.expires > ^now and bm.has_expired == true
+
+    # These memberships should be set to unexpired
+    Omscore.Repo.update_all(unexpire_query, set: [has_expired: false])
+  
     {:ok, items} = Omscore.Repo.transaction(fn ->
-      items = Omscore.Repo.all(query)  |> Omscore.Repo.preload([member: [:user], body: []])
-      Omscore.Repo.update_all(query, set: [has_expired: true])
+      # This takes all body memberships and groups them with their payments, counting the valid payments
+      # All which have 0 valid payments but are not set to expired yet are in this
+      expire_query = from bm in Omscore.Members.BodyMembership, 
+        left_lateral_join: p in fragment("SELECT COUNT(p.id) AS valid_payments FROM payments AS p WHERE p.body_id = ? AND p.member_id = ? AND p.expires > ?", bm.body_id, bm.member_id, ^now),
+        where: p.valid_payments == 0 and bm.has_expired == false,
+        preload: [member: [:user], body: []]
+
+      # We need to first query them because we can't feed this complex query into an update statement
+      items = Omscore.Repo.all(expire_query)
+
+      ids = Enum.map(items, fn(x) -> x.id end)
+
+      Omscore.Repo.update_all(from(bm in Omscore.Members.BodyMembership, where: bm.id in ^ids), set: [has_expired: true])
       items
     end)
 

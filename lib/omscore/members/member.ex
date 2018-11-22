@@ -20,6 +20,7 @@ defmodule Omscore.Members.Member do
     many_to_many :circles, Omscore.Core.Circle, join_through: Omscore.Members.CircleMembership, on_replace: :delete, on_delete: :delete_all
     has_many :circle_memberships, Omscore.Members.CircleMembership
     has_many :body_memberships, Omscore.Members.BodyMembership
+    has_many :payments, Omscore.Finances.Payment
 
     timestamps()
   end
