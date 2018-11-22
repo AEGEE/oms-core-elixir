@@ -3,8 +3,8 @@ defmodule OmscoreWeb.PaymentControllerTest do
 
   alias Omscore.Finances.Payment
 
-  @create_attrs %{amount: "120.5", comment: "some comment", currency: "some currency", expires: ~N[2010-04-17 14:00:00.000000], invoice_address: "some invoice_address", invoice_name: "some invoice_name"}
-  @update_attrs %{amount: "456.7", comment: "some updated comment", currency: "some updated currency", expires: ~N[2011-05-18 15:01:01.000000], invoice_address: "some updated invoice_address", invoice_name: "some updated invoice_name"}
+  @create_attrs %{amount: "120.5", comment: "some comment", currency: "some currency", expires: ~N[3010-04-17 14:00:00.000000], invoice_address: "some invoice_address", invoice_name: "some invoice_name"}
+  @update_attrs %{amount: "456.7", comment: "some updated comment", currency: "some updated currency", expires: ~N[3011-05-18 15:01:01.000000], invoice_address: "some updated invoice_address", invoice_name: "some updated invoice_name"}
   @invalid_attrs %{amount: nil, comment: nil, currency: nil, expires: nil, invoice_address: nil, invoice_name: nil}
 
   def fixture(:payment) do
