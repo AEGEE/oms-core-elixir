@@ -40,7 +40,7 @@ config :omscore, Omscore.Guardian,
   secret_key: String.trim(Helper.read_secret_from_file(System.get_env("JWT_SECRET_KEY_FILE"), "rrSTfyfvFlFj1JCl8QW/ritOLKzIncRPC5ic0l0ENVUoiSIPBCDrdU6Su5vZHngY"))
 
 config :omscore, Omscore.Interfaces.Mail,
-  from: "oms@aegee.org",
+  from: "oms-mailer@aegee.org",
   mail_service: :sendgrid
 
 config :omscore, Omscore.Mailer,
