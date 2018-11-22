@@ -62,12 +62,16 @@ defmodule Omscore.Finances do
 
   """
   def create_payment(%Omscore.Core.Body{} = body, %Omscore.Members.Member{} = member, attrs \\ %{}) do
-    %Payment{
+    changeset = %Payment{
       body_id: body.id,
       member_id: member.id
     }
     |> Payment.changeset(attrs)
-    |> Repo.insert()
+
+    with {:ok, payment} <- Repo.insert(changeset) do
+      Omscore.ExpireTokens.expire_memberships()
+      {:ok, payment}
+    end
   end
 
   @doc """
