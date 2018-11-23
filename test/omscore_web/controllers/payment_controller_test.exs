@@ -63,6 +63,7 @@ defmodule OmscoreWeb.PaymentControllerTest do
       conn = get conn, payment_path(conn, :show, payment.id)
       assert res = json_response(conn, 200)["data"]
       assert res["id"] == payment.id
+      
     end
 
     test "shows bound payment", %{conn: conn} do
