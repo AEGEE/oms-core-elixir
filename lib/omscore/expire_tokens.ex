@@ -45,6 +45,7 @@ defmodule Omscore.ExpireTokens do
       # We need to first query them because we can't feed this complex query into an update statement
       items = Omscore.Repo.all(expire_query)
       |> Enum.filter(fn(x) -> x.body.pays_fees end)
+      #|> Enum.filter(fn(x) -> x.body.type in ["antenna", "contact antenna", "contact"] end)
 
       ids = Enum.map(items, fn(x) -> x.id end)
 
