@@ -16,7 +16,7 @@ defmodule Omscore.Auth do
 
   def get_user!(id), do: Repo.get!(User, id)
 
-  def get_user_by_email!(email), do: Repo.get_by!(User, email: email)
+  def get_user_by_email!(email), do: Repo.get_by!(User, email: String.downcase(email))
   def get_user_by_member_id!(member_id) when is_binary(member_id) do
     {member_id, ""} = Integer.parse(member_id)
     get_user_by_member_id!(member_id)
@@ -156,7 +156,8 @@ defmodule Omscore.Auth do
 
   # Fetch a user from DB
   def authenticate_user(username, plain_text_password) do
-    query = from u in User, where: u.name == ^username or u.email == ^username
+    username_lowercase = String.downcase(username)
+    query = from u in User, where: u.name == ^username or u.email == ^username_lowercase
 
     with user <- Repo.one(query),
       {:ok, _user} <- check_password(user, plain_text_password),
