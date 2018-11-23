@@ -215,7 +215,7 @@ defmodule Omscore.ExpireTokensTest do
 
   test "does not touch body memberships where the body doesn't have to pay fees" do
     member = member_fixture() |> Repo.preload([:user])
-    body = body_fixture(%{pays_fees: false})
+    body = body_fixture(%{pays_fees: false, type: "partner"})
     :ets.delete_all_objects(:saved_mail)
     assert {:ok, bm} = Omscore.Members.create_body_membership(body, member)
 
