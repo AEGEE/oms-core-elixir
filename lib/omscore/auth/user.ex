@@ -19,6 +19,7 @@ defmodule Omscore.Auth.User do
     user
     |> cast(attrs, [:name, :email, :password, :active])
     |> validate_required([:name, :email, :password])
+    |> downcase_email()
     |> validate_format(:email, ~r/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/) # copy&pasted without understanding it, thanks stackoverflow
     |> validate_length(:password, min: 8)
     |> unique_constraint(:name)
@@ -30,4 +31,7 @@ defmodule Omscore.Auth.User do
     change(changeset, password: Comeonin.Bcrypt.hashpwsalt(password))
   end
   defp put_pass_hash(changeset), do: changeset
+
+  defp downcase_email(%Ecto.Changeset{changes: %{email: email} = changes} = changeset), do: Map.put(changeset, :changes, Map.put(changes, :email, String.downcase(email)))
+  defp downcase_email(changeset), do: changeset
 end

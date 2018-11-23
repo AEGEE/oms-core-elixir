@@ -26,11 +26,23 @@ defmodule Omscore.AuthTest do
       assert Auth.get_user_by_member_id!("123")
     end
 
+    test "get_user_by_email!/1 returns the user with a given email" do
+      user_fixture(%{email: "some_weird@email.com"})
+      assert Auth.get_user_by_email!("some_weird@email.com")
+      assert Auth.get_user_by_email!("SOME_WEIRD@email.com")
+    end
+
     test "create_user/1 with valid data creates a user" do
       assert {:ok, %User{} = user} = Auth.create_user(@valid_attrs)
       assert user.email == "some@email.com"
       assert user.name == "some name"
       assert Omscore.Auth.authenticate_user(user.name, "some password")
+    end
+
+    test "create_user/1 stores mails lowercase" do
+      assert {:ok, %User{} = user} = Auth.create_user(@valid_attrs |> Map.put(:email, "SOME@EmAiL.com"))
+      assert user = Auth.get_user!(user.id)
+      assert user.email == "some@email.com"
     end
 
     test "create_user/1 with invalid data returns error changeset" do
@@ -132,6 +144,11 @@ defmodule Omscore.AuthTest do
       user_fixture()
       assert {:ok, _user, _access, _refresh} = Omscore.Auth.login_user("some name", "some password")
       assert {:ok, _user, _access, _refresh} = Omscore.Auth.login_user("some@email.com", "some password")
+    end
+
+    test "login also works with case-mismatch on email" do
+      user_fixture()
+      assert {:ok, _user, _access, _refresh} = Omscore.Auth.login_user("SOME@EMAIL.com", "some password")
     end
 
     test "refute bad credentials" do
