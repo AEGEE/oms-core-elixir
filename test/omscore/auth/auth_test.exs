@@ -62,6 +62,11 @@ defmodule Omscore.AuthTest do
       assert {:error, %Ecto.Changeset{}} = Auth.create_user(@update_attrs |> Map.put(:email, @valid_attrs.email))
     end
 
+    test "create_user/1 with duplicate email in different cases returns error" do
+      assert {:ok, %User{}} = Auth.create_user(@valid_attrs)
+      assert {:error, %Ecto.Changeset{}} = Auth.create_user(@update_attrs |> Map.put(:email, String.upcase(@valid_attrs.email)))
+    end
+
     test "create_user/1 with duplicate username returns error" do
       assert {:ok, %User{}} = Auth.create_user(@valid_attrs)
       assert {:error, %Ecto.Changeset{}} = Auth.create_user(@update_attrs |> Map.put(:name, @valid_attrs.name))
