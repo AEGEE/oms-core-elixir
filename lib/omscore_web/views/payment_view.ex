@@ -1,6 +1,8 @@
 defmodule OmscoreWeb.PaymentView do
   use OmscoreWeb, :view
   alias OmscoreWeb.PaymentView
+  alias OmscoreWeb.Helper
+
 
   def render("index.json", %{payments: payments, filters: filters}) do
     data = payments
@@ -27,7 +29,11 @@ defmodule OmscoreWeb.PaymentView do
       invoice_name: payment.invoice_name,
       invoice_address: payment.invoice_address,
       comment: payment.comment,
-      inserted_at: payment.inserted_at
+      inserted_at: payment.inserted_at,
+      body_id: payment.body_id,
+      member_id: payment.member_id,
+      body: Helper.render_assoc_one(payment.body, OmscoreWeb.BodyView, "body.json"),
+      member: Helper.render_assoc_one(payment.member, OmscoreWeb.MemberView, "member.json")
     }
   end
 end
