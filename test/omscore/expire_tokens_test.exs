@@ -212,4 +212,23 @@ defmodule Omscore.ExpireTokensTest do
     assert bm.has_expired == false
     assert :ets.lookup(:saved_mail, member.user.email) == []
   end
+
+  test "does not touch body memberships where the body doesn't have to pay fees" do
+    member = member_fixture() |> Repo.preload([:user])
+    body = body_fixture(%{pays_fees: false})
+    :ets.delete_all_objects(:saved_mail)
+    assert {:ok, bm} = Omscore.Members.create_body_membership(body, member)
+
+    bm = bm
+    |> Omscore.Members.BodyMembership.changeset(%{})
+    |> Ecto.Changeset.change(has_expired: false)
+    |> Repo.update!
+
+    Omscore.ExpireTokens.expire_memberships()
+
+    bm = Repo.get!(Omscore.Members.BodyMembership, bm.id)
+    assert bm.has_expired == false
+
+    assert :ets.lookup(:saved_mail, member.user.email) == []
+  end
 end
