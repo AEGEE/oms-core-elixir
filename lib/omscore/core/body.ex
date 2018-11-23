@@ -13,6 +13,7 @@ defmodule Omscore.Core.Body do
     field :name, :string
     field :phone, :string
     field :type, :string
+    field :pays_fees, :boolean
 
     has_many :circles, Omscore.Core.Circle
     many_to_many :members, Omscore.Members.Member, join_through: Omscore.Members.BodyMembership
@@ -28,7 +29,7 @@ defmodule Omscore.Core.Body do
   @doc false
   def changeset(body, attrs) do
     body
-    |> cast(attrs, [:name, :email, :phone, :address, :description, :legacy_key, :shadow_circle_id, :type])
+    |> cast(attrs, [:name, :email, :phone, :address, :description, :legacy_key, :shadow_circle_id, :type, :pays_fees])
     |> validate_required([:name, :legacy_key, :address, :email, :type])
     |> validate_inclusion(:type, @body_types, message: "must be one of " <> Kernel.inspect(@body_types))
     |> validate_shadow_circle()
