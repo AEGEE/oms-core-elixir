@@ -8,6 +8,7 @@ services:
             - postgres-oms-core-elixir
         expose:
             - 4000
+        restart: always
         labels:
             - "traefik.frontend.rule=HostRegexp:{domain:[a-z0-9.]+};PathPrefix:/services/oms-core-elixir/api;PathPrefixStrip:/services/oms-core-elixir/api"
             - "traefik.frontend.priority=101"
@@ -31,6 +32,7 @@ services:
             - postgres-oms-core-elixir:/var/lib/postgresql/data
         expose:
             - "5432"
+        restart: always
         environment:
             POSTGRES_USER: postgres
             POSTGRES_PASSWORD: postgres
@@ -39,6 +41,7 @@ services:
         image: nginx:1.15.6-alpine
         volumes:
             - ./$PATH_OMS_CORE_ELIXIR/../frontend/:/usr/share/nginx/html:ro
+        restart: always
         labels:
             - "traefik.frontend.rule=HostRegexp:{domain:[a-z0-9.]+};PathPrefix:/services/oms-core-elixir;PathPrefixStrip:/services/oms-core-elixir"
             - "traefik.frontend.priority=100"
