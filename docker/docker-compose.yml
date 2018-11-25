@@ -6,8 +6,8 @@ services:
             context: ./$PATH_OMS_CORE_ELIXIR/../
         depends_on:
             - postgres-oms-core-elixir
-        ports:
-            - 4000:4000
+        expose:
+            - 4000
         labels:
             - "traefik.frontend.rule=HostRegexp:{domain:[a-z0-9.]+};PathPrefix:/services/oms-core-elixir/api;PathPrefixStrip:/services/oms-core-elixir/api"
             - "traefik.frontend.priority=101"
@@ -26,7 +26,7 @@ services:
 
 
     postgres-oms-core-elixir:
-        image: postgres:latest
+        image: postgres:10.6
         volumes:
             - postgres-oms-core-elixir:/var/lib/postgresql/data
         expose:
@@ -36,7 +36,7 @@ services:
             POSTGRES_PASSWORD: postgres
 
     oms-core-elixir-nginx:
-        image: nginx:alpine
+        image: nginx:1.15.6-alpine
         volumes:
             - ./$PATH_OMS_CORE_ELIXIR/../frontend/:/usr/share/nginx/html:ro
         labels:
