@@ -1,31 +1,34 @@
 defmodule Omscore.Interfaces.Mail do
-  import Bamboo.Email
 
-  def send_mail(to, subject, content, content_type \\ "text/plain") do
-    mail_service = Application.get_env(:omscore, Omscore.Interfaces.Mail)[:mail_service]
-    apply(Omscore.Interfaces.Mail, mail_service, [to, subject, content, content_type])
-  end
+  use Tesla
 
-  def sendgrid(to, subject, content, _content_type) do
-    new_email(
+  plug Tesla.Middleware.Logger
+  plug Tesla.Middleware.BaseUrl, Application.get_env(:omscore, Omscore.Interfaces.Mail)[:oms_mailer_dns]
+  plug Tesla.Middleware.Headers
+  plug Tesla.Middleware.JSON, engine: Poison
+  plug Tesla.Middleware.Retry, delay: 500, max_retries: 5
+  #plug Tesla.Middleware.Timeout, timeout: 5000
+
+
+
+  # Define the different variants of send mail calls so we make sure we don't use any unknown templates or forget parameters
+  def send_mail(to, "confirm_email", %{token: token}), do: dispatch_mail(to, "Confirm your email to join OMS", "confirm_email", %{token: token})
+  def send_mail(to, "password_reset", %{token: token}), do: dispatch_mail(to, "Password reset in OMS", "password_reset", %{token: token})
+  def send_mail(to, "membership_expired", %{body_name: body_name}), do: dispatch_mail(to, "Your membership in " <> body_name <> " has expired", "membership_expired", %{body_name: body_name})
+  def send_mail(to, "welcome", %{body_name: body_name}), do: dispatch_mail(to, "Your new account in OMS", "welcome", %{body_name: body_name, email: to})
+
+  defp dispatch_mail(to, subject, template, content) do
+    body = %{
+      template: template,
       to: to,
-      from: Application.get_env(:omscore, Omscore.Interfaces.Mail)[:from],
       subject: subject,
-      html_body: content
-    )
-    |> Omscore.Mailer.deliver_later
-    
-    {:ok}
-  end
+      parameters: content
+    }
 
-  def consoleout(to, subject, content, content_type) do
-    #IO.inspect("to:  " <> to)
-    #IO.inspect("sub: " <> subject)
-    #IO.inspect("content: " <> content)
-    #IO.inspect("content_type: " <> content_type)
-
-    # Save in ets so test can query it
-    :ets.insert(:saved_mail, {to, subject, content, content_type})
-    {:ok}
+    case post("/", body) do
+      {:ok, %{status: 200} = res} -> {:ok, res}
+      {:ok, _} -> {:error, :internal_server_error, "Could not deliver email"}
+      _error -> {:error, :internal_server_error, "Could not contact mail delivery service"}
+    end
   end
 end

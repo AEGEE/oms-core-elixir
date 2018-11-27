@@ -48,11 +48,7 @@ defmodule OmscoreWeb.MemberController do
       end
 
       # Then send him a mail that everything went well
-      Omscore.Interfaces.Mail.send_mail(user.email, 
-        "Your new account in OMS", 
-        "You have received a new account to OMS as a member of " <> body.name <> "."
-        <> " If you want to log in, please use the reset password function to create yourself a password using your email address " <> user.email <> "."
-        <> " You can do so by visiting " <> Application.get_env(:omscore, :url_prefix) <> "/password_reset")
+      Omscore.Interfaces.Mail.send_mail(user.email, "welcome", %{body_name: body.name, email: user.email})
 
       member
     end)

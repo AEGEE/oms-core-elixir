@@ -150,14 +150,12 @@ defmodule Omscore.Registration do
 
   def send_confirmation_mail(user, submission) do
     with {:ok, confirmation, url} <- create_confirmation_object(submission),
-      {:ok} <- dispatch_confirmation_mail(user, url),
+        {:ok, _} <- dispatch_confirmation_mail(user, url),
     do: {:ok, confirmation}
   end
 
   defp dispatch_confirmation_mail(user, token) do
-    url = Application.get_env(:omscore, :url_prefix) <> "/confirm_signup?token=" <> token
-    Omscore.Interfaces.Mail.send_mail(user.email, "Confirm your email address", 
-      "To confirm your email, visit " <> url <> " or copy&paste the token into the form on the website: " <> token)
+    Omscore.Interfaces.Mail.send_mail(user.email, "confirm_email", %{token: token})
   end
 
   def create_confirmation_object(submission) do

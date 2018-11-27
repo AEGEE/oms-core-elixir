@@ -35,7 +35,7 @@ defmodule Omscore.ExpireTokens do
 
     items
     |> Enum.map(fn(x) -> 
-      Omscore.Interfaces.Mail.send_mail(x.member.user.email, "Membership expired", "Your membership in body " <> x.body.name <> " has expired")
+      Omscore.Interfaces.Mail.send_mail(x.member.user.email, "membership_expired", %{body_name: x.body.name})
     end)
   end
 

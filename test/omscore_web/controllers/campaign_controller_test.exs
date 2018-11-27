@@ -664,15 +664,5 @@ defmodule OmscoreWeb.CampaignControllerTest do
     {:ok, campaign: campaign}
   end
 
-  defp parse_url_from_mail({_, _, content, _}) do
-    # Parse the url token from a content which looks like this:
-    # To confirm your email, visit www.alastair.com/registration/signup?token=vXMkHWvQETck73sjQpccFDgQQuavIoDZ
-
-    Application.get_env(:omscore, :url_prefix) <> "/confirm_signup?token="
-    |> Regex.escape
-    |> Kernel.<>("([^\s]*)")
-    |> Regex.compile!
-    |> Regex.run(content)
-    |> Enum.at(1)
-  end
+  defp parse_url_from_mail({_, _, _, %{"token" => token}}), do: token
 end

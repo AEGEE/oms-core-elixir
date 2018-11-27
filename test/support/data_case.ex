@@ -33,6 +33,8 @@ defmodule Omscore.DataCase do
       Ecto.Adapters.SQL.Sandbox.mode(Omscore.Repo, {:shared, self()})
     end
 
+    OmscoreWeb.MockServer.mail_mock()
+
     :ok
   end
 
