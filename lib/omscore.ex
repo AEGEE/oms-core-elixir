@@ -23,5 +23,14 @@ defmodule Omscore do
   def test_nil(anything) when anything != nil, do: {:ok, anything}
   def test_nil(_anything), do: {:error, nil}
 
+  def downcase_field(%Ecto.Changeset{} = changeset, field) do
+    if Map.has_key?(changeset.changes, field) do
+      value = String.downcase(Map.get(changeset.changes, field))
+      Map.put(changeset, :changes, Map.put(changeset.changes, field, value))
+    else
+      changeset
+    end
+  end
+
 
 end

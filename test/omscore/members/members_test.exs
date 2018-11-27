@@ -87,6 +87,20 @@ defmodule Omscore.MembersTest do
       assert member == Members.get_member!(member.id)
     end
 
+    test "update_member/2 with invalid name returns error changeset" do
+      member = member_fixture()
+      assert {:ok, _} = Members.update_member(member, %{first_name: "Häßlich Дилян"})
+      assert {:error, _} = Members.update_member(member, %{first_name: "!!!!!!"})
+      assert {:error, _} = Members.update_member(member, %{first_name: "A"})
+    end
+
+    test "seo_url is stored lowercase" do
+      member = member_fixture()
+      assert {:ok, _} = Members.update_member(member, %{seo_url: "UPPERCASEURL"})
+      assert member = Members.get_member!(member.id)
+      assert member.seo_url == "uppercaseurl"
+    end
+
     test "delete_member/1 deletes the member" do
       member = member_fixture()
       assert {:ok, %Member{}} = Members.delete_member(member)
