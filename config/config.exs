@@ -40,26 +40,11 @@ config :omscore, Omscore.Guardian,
   secret_key: String.trim(Helper.read_secret_from_file(System.get_env("JWT_SECRET_KEY_FILE"), "rrSTfyfvFlFj1JCl8QW/ritOLKzIncRPC5ic0l0ENVUoiSIPBCDrdU6Su5vZHngY"))
 
 config :omscore, Omscore.Interfaces.Mail,
-  from: "oms-mailer@aegee.org",
-  mail_service: :sendgrid
+  oms_mailer_dns: "http://oms-mailer:4000"
 
-config :omscore, Omscore.Mailer,
-  adapter: Bamboo.SMTPAdapter,
-  server: "mail.aegee.org",
-  hostname: "aegee.org",
-  port: 587,
-  username: Helper.read_secret_from_file(System.get_env("MAIL_USER"), "oms"), # or {:system, "SMTP_USERNAME"}
-  password: Helper.read_secret_from_file(System.get_env("MAIL_PASSWORD"), "oms"), # or {:system, "SMTP_PASSWORD"}
-  tls: :if_available, # can be `:always` or `:never`
-  allowed_tls_versions: [:tlsv1, :"tlsv1.1", :"tlsv1.2"], # or {":system", ALLOWED_TLS_VERSIONS"} w/ comma seprated values (e.g. "tlsv1.1,tlsv1.2")
-  ssl: false, # can be `true`
-  retries: 3,
-  no_mx_lookups: false, # can be `true`
-  auth: :always # can be `always`. If your smtp relay requires authentication set it to `always`.
+# Configures the http library
+config :tesla, adapter: Tesla.Adapter.Hackney
 
-#config :omscore, Omscore.Mailer,
-#  adapter: Bamboo.SendgridAdapter,
-#  api_key: String.trim(Helper.read_secret_from_file(System.get_env("SENDGRID_KEY_FILE"), "censored"))
 
 # Configures Elixir's Logger
 config :logger, :console,

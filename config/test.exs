@@ -6,14 +6,15 @@ config :omscore, OmscoreWeb.Endpoint,
   http: [port: 4001],
   server: false
 
-config :omscore, Omscore.Interfaces.Mail,
-   mail_service: :consoleout
-
 # Print only warnings and errors during test
 config :logger, level: :warn
 
 # For testing we don't need secure tokens, so speed up tests by reducing rounds
 config :bcrypt_elixir, :log_rounds, 4
+
+# Use a mock adapter for testing
+config :tesla, adapter: Tesla.Mock
+
 
 # Configure your database
 config :omscore, Omscore.Repo,

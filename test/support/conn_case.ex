@@ -35,6 +35,7 @@ defmodule OmscoreWeb.ConnCase do
     unless tags[:async] do
       Ecto.Adapters.SQL.Sandbox.mode(Omscore.Repo, {:shared, self()})
     end
+    OmscoreWeb.MockServer.mail_mock()
     {:ok, conn: Phoenix.ConnTest.build_conn()}
   end
 

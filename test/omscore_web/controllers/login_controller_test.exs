@@ -402,15 +402,6 @@ defmodule OmscoreWeb.LoginControllerTest do
   end
 
 
-  defp parse_url_from_mail({_, _, content, _}) do
-    # Parse the url token from a content which looks like this:
-    # To reset your password, visit my.aegee.eu/registration/password_confirm?token=vXMkHWvQETck73sjQpccFDgQQuavIoDZ
-
-    Application.get_env(:omscore, :url_prefix) <> "/password_confirm?token="
-    |> Regex.escape
-    |> Kernel.<>("([^\s]*)")
-    |> Regex.compile!
-    |> Regex.run(content)
-    |> Enum.at(1)
-  end
+  defp parse_url_from_mail({_, _, _, %{"token" => token}}), do: token
+  
 end
