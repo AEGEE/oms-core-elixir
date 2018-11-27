@@ -41,16 +41,6 @@ defmodule Omscore.Members do
     |> Repo.insert()
   end
 
-  def validate_create_member(attrs) do
-    changeset = Member.changeset(%Member{}, attrs)
-    |> Ecto.Changeset.unsafe_validate_unique([:user_id], Repo)
-
-    case changeset.valid? do
-      true -> {:ok, %{valid: true}}
-      false -> {:error, changeset}
-    end
-  end
-
   # Updates a member
   def update_member(%Member{} = member, attrs) do
     attrs = attrs

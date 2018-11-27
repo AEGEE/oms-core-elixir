@@ -6,6 +6,10 @@ defmodule OmscoreWeb.MockServer do
   def handle(%{url: "http://oms-mailer:4000/"} = env) do
     body = Poison.decode! env.body
     :ets.insert(:saved_mail, {body["to"], body["subject"], body["template"], body["parameters"]})
-    %Tesla.Env{status: 200, body: Poison.encode!(%{success: true})}
+    if !Regex.match?(~r/^.*@.*$/, body["to"]) do
+      %Tesla.Env{status: 422, body: Poison.encode!(%{success: false, errors: "invalid email address"})}
+    else
+      %Tesla.Env{status: 200, body: Poison.encode!(%{success: true})}
+    end
   end
 end

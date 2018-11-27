@@ -2,12 +2,11 @@ defmodule Omscore.Interfaces.Mail do
 
   use Tesla
 
-  plug Tesla.Middleware.Logger
   plug Tesla.Middleware.BaseUrl, Application.get_env(:omscore, Omscore.Interfaces.Mail)[:oms_mailer_dns]
+  plug Tesla.Middleware.Logger
   plug Tesla.Middleware.Headers
   plug Tesla.Middleware.JSON, engine: Poison
   plug Tesla.Middleware.Retry, delay: 500, max_retries: 5
-  #plug Tesla.Middleware.Timeout, timeout: 5000
 
 
 
