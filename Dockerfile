@@ -12,6 +12,11 @@ COPY ./ /usr/src/myapp
 
 WORKDIR /usr/src/myapp
 
-EXPOSE 4000
+ENV MIX_ENV=prod
+ENV PORT=4000
+RUN ["mix", "deps.get"]
+RUN ["mix", "compile"]
+
+EXPOSE ${PORT}
 
 CMD ash /usr/src/scripts/bootstrap.sh && mix phx.server
