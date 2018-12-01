@@ -954,7 +954,7 @@ SELECT pg_catalog.setval('password_resets_id_seq', 1, true);
 -- Name: permissions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('permissions_id_seq', 56, true);
+SELECT pg_catalog.setval('permissions_id_seq', 64, true);
 
 
 --
