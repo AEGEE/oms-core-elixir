@@ -318,6 +318,26 @@ defmodule OmscoreWeb.BodyControllerTest do
       assert Enum.all?(res, fn(x) -> !Map.has_key?(x, "comment") end)
       assert Enum.all?(res, fn(x) -> !Map.has_key?(x["member"], "gender") end)
     end
+
+    test "when called with ?holds_permission query parameter, only returns members which received this permission inside the body", %{conn: conn, body: body} do
+      member1 = member_fixture()
+      member2 = member_fixture()
+      assert {:ok, _} = Omscore.Members.create_body_membership(body, member1)
+      assert {:ok, _} = Omscore.Members.create_body_membership(body, member2)
+      circle = bound_circle_fixture(body)
+      permission = permission_fixture(%{action: "approve", object: "epm_applications"})
+      assert {:ok, _} = Omscore.Core.put_circle_permissions(circle, [permission])
+      assert {:ok, _} = Omscore.Members.create_circle_membership(circle, member1)
+
+      %{token: token} = create_member_with_permissions([%{action: "view_members", object: "body"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      conn = get conn, body_body_path(conn, :show_members, body.id), holds_permission: %{action: "approve", object: "epm_applications"}
+      assert res = json_response(conn, 200)["data"]
+
+      assert Enum.any?(res, fn(x) -> x["member_id"] == member1.id end)
+      assert !Enum.any?(res, fn(x) -> x["member_id"] == member2.id end)
+    end
   end
 
   describe "update body membership" do

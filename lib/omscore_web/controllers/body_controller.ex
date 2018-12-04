@@ -57,6 +57,14 @@ defmodule OmscoreWeb.BodyController do
     end
   end
 
+  # When called with holds_permission parameter, only returns those members who got that permission locally. (Actually received it in the body)
+  def show_members(conn, %{"holds_permission" => %{"action" => action, "object" => object}}) do
+    with {:ok, %Core.Permission{filters: filters}} <- Core.search_permission_list(conn.assigns.permissions, "view_members", "body"),
+        body_memberships = Members.list_body_memberships_with_permission(conn.assigns.body, action, object) do
+      render(conn, OmscoreWeb.BodyMembershipView, "index.json", body_memberships: body_memberships, filters: filters)
+    end
+  end
+
   def show_members(conn, params) do
     body_memberships = Members.list_body_memberships(conn.assigns.body, params)
     with {:ok, %Core.Permission{filters: filters}} <- Core.search_permission_list(conn.assigns.permissions, "view_members", "body") do
