@@ -164,6 +164,13 @@ defmodule OmscoreWeb.CircleController do
     end
   end
 
+  # Different request when filtering for holds_permissions
+  def index_bound(conn, %{"holds_permission" => %{"action" => action, "object" => object}}) do
+    with {:ok, %Core.Permission{filters: filters}} <- Core.search_permission_list(conn.assigns.permissions, "view", "circle") do
+      circles = Core.list_bound_circles_with_permission(conn.assigns.body, action, object)
+      render(conn, "index.json", circles: circles, filters: filters)
+    end
+  end
 
   def index_bound(conn, params) do
     with {:ok, %Core.Permission{filters: filters}} <- Core.search_permission_list(conn.assigns.permissions, "view", "circle") do

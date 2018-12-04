@@ -196,6 +196,20 @@ defmodule Omscore.Members do
     Repo.all(bm_query)
   end
 
+  def list_body_memberships_with_permission(%Omscore.Core.Body{} = body, action, object), do: list_body_memberships_with_permission(body.id, action, object)
+  def list_body_memberships_with_permission(body_id, action, object) do
+    circles = Omscore.Core.list_bound_circles_with_permission(body_id, action, object)
+    circle_ids = Enum.map(circles, fn(x) -> x.id end)
+
+    cm_query = from(u in Omscore.Members.CircleMembership, where: u.circle_id in ^circle_ids)
+
+    from(bm in BodyMembership, where: bm.body_id == ^body_id)
+    |> Ecto.Query.join(:inner, [bm], u in subquery(cm_query), bm.member_id == u.member_id)
+    |> Ecto.Query.preload([member: [:user]])
+    |> Repo.all
+
+  end
+
   # Creates a membership with a body
   # Should not be used directly, only by tests and approve_join_request
   # If circle membership creation fails for some reason, also the body membership is not created

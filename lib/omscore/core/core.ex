@@ -259,6 +259,16 @@ defmodule Omscore.Core do
     |> Repo.all
   end
 
+  # Lists all bound circles which have a certain permission directly or indirectly attached.
+  # This function is rather unperformant with big numbers of circles...
+  def list_bound_circles_with_permission(%Body{} = body, action, object), do: list_bound_circles_with_permission(body.id, action, object)
+  def list_bound_circles_with_permission(body_id, action, object) do
+    from(u in Circle, where: u.body_id == ^body_id)
+    |> Repo.all
+    |> Enum.map(fn(circle) -> Map.put(circle, :all_permissions, get_permissions_recursive(circle)) end)
+    |> Enum.filter(fn(circle) -> Enum.any?(circle.all_permissions, fn(x) -> x.action == action and x.object == object end) end)
+  end
+
   # Get a single circle
   def get_circle!(id), do: Repo.get!(Circle, id) |> Repo.preload([:permissions, :child_circles, :parent_circle])
   def get_circle(id), do: Repo.get(Circle, id)

@@ -899,6 +899,23 @@ defmodule OmscoreWeb.CircleControllerTest do
       assert res = json_response(conn, 200)["data"]
       assert !Enum.any?(res, fn(x) -> Map.has_key?(x, "id") end)
     end
+
+    test "filters based on permissions if passed", %{conn: conn} do
+      body = body_fixture()
+      circle = bound_circle_fixture(body)
+      circle2 = bound_circle_fixture(body)
+      permission = permission_fixture(%{action: "approve", object: "epm_applications"})
+      Omscore.Core.put_circle_permissions(circle, [permission])
+
+
+      %{token: token} = create_member_with_permissions([%{action: "view", object: "circle"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      conn = get conn, body_circle_path(conn, :index_bound, body.id), holds_permission: %{action: "approve", object: "epm_applications"}
+      assert res = json_response(conn, 200)["data"]
+      assert Enum.any?(res, fn(x) -> x["id"] == circle.id end)
+      assert !Enum.any?(res, fn(x) -> x["id"] == circle2.id end)
+    end
   end
 
   describe "create bound circle" do

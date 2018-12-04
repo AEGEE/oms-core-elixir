@@ -347,6 +347,24 @@ defmodule Omscore.MembersTest do
       assert !Enum.any?(res, fn(x) -> x.member_id == member2.id end)
     end
 
+    test "list_body_memberships_with_permission/3 lists all members who have a certain permission in the body" do
+      member1 = member_fixture(%{first_name: "quiesel"})
+      member2 = member_fixture(%{first_name: "weasel"})
+      body = body_fixture()
+      circle = bound_circle_fixture(body)
+      permission = permission_fixture(%{action: "approve", object: "epm_application"})
+      assert {:ok, _} = Members.create_body_membership(body, member1)
+      assert {:ok, _} = Members.create_body_membership(body, member2)
+      assert {:ok, _} = Members.create_circle_membership(circle, member1)
+      assert {:ok, _} = Omscore.Core.put_circle_permissions(circle, [permission])
+      %{member: member3} = create_member_with_permissions(%{action: "approve", object: "epm_application"})
+
+      res = Members.list_body_memberships_with_permission(body, "approve", "epm_application")
+      assert Enum.any?(res, fn(x) -> x.member_id == member1.id end)
+      assert !Enum.any?(res, fn(x) -> x.member_id == member2.id end)
+      assert !Enum.any?(res, fn(x) -> x.member_id == member3.id end)
+    end
+
     test "update_body_membership/1 updates a body membership" do
       member = member_fixture()
       body = body_fixture()

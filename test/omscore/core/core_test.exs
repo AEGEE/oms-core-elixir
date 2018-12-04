@@ -326,6 +326,24 @@ defmodule Omscore.CoreTest do
       assert Enum.any?(res, fn(x) -> x.id == circle2.id end)
     end
 
+    test "list_bound_circles_with_permission/3 returns all bound circles which have a certain permission" do
+      circle1 = circle_fixture()
+      body = body_fixture()
+      circle2 = bound_circle_fixture(body)
+      circle3 = bound_circle_fixture(body)
+      circle4 = bound_circle_fixture(body)
+      Core.put_child_circles(circle1, [circle2])
+      permission = permission_fixture(%{action: "approve", object: "epm_applications"})
+      Core.put_circle_permissions(circle1, [permission])
+      Core.put_circle_permissions(circle4, [permission])
+
+      res = Core.list_bound_circles_with_permission(body, "approve", "epm_applications")
+      assert !Enum.any?(res, fn(x) -> x.id == circle1.id end)
+      assert Enum.any?(res, fn(x) -> x.id == circle2.id end)
+      assert !Enum.any?(res, fn(x) -> x.id == circle3.id end)
+      assert Enum.any?(res, fn(x) -> x.id == circle4.id end)
+    end
+
     test "get_circle!/1 returns the circle with given id" do
       circle = circle_fixture()
       assert circle = Core.get_circle!(circle.id)
