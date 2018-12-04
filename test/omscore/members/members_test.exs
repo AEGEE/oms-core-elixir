@@ -258,6 +258,30 @@ defmodule Omscore.MembersTest do
       assert {:error, _} = Members.create_join_request(body, member, @valid_attrs)
     end
 
+    test "create_join_request/3 sends a mail to everyone in the body holding the approve:join_request permission" do
+      body = body_fixture()
+      member1 = member_fixture() |> Repo.preload(:user)
+      member2 = member_fixture()
+      member3 = member_fixture() |> Repo.preload(:user)
+      member4 = member_fixture() |> Repo.preload(:user)
+      circle = bound_circle_fixture(body)
+      permission = permission_fixture(%{action: "approve", object: "join_request"})
+      assert {:ok, _} = Omscore.Core.put_circle_permissions(circle, [permission])
+      assert {:ok, _} = Omscore.Members.create_body_membership(body, member1)
+      assert {:ok, _} = Omscore.Members.create_circle_membership(circle, member1)
+      assert {:ok, _} = Omscore.Members.create_body_membership(body, member3)
+      assert {:ok, _} = Omscore.Members.create_circle_membership(circle, member3)
+      assert {:ok, _} = Omscore.Members.create_body_membership(body, member4)
+
+      :ets.delete_all_objects(:saved_mail)
+
+      assert {:ok, _} = Members.create_join_request(body, member2, @valid_attrs)
+
+      assert :ets.lookup(:saved_mail, member1.user.email) != []
+      assert :ets.lookup(:saved_mail, member3.user.email) != []
+      assert :ets.lookup(:saved_mail, member4.user.email) == []
+    end
+
     test "reject_join_request/1 deletes a join request" do
       {join_request, _body, _member} = join_request_fixture()
 
