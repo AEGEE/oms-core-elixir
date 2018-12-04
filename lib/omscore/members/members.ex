@@ -125,11 +125,21 @@ defmodule Omscore.Members do
 
   # Creates a join request
   def create_join_request(%Omscore.Core.Body{} = body, %Member{} = member, attrs \\ %{}) do
-    %JoinRequest{}
+    res = %JoinRequest{}
     |> JoinRequest.changeset(attrs)
     |> Ecto.Changeset.put_assoc(:body, body)
     |> Ecto.Changeset.put_assoc(:member, member)
     |> Repo.insert()
+
+    with {:ok, joinrequest} <- res do
+      approvers = list_body_memberships_with_permission(body, "approve", "join_request")
+      |> Enum.map(fn(x) -> x.member.user.email end)
+
+
+      Omscore.Interfaces.Mail.send_mail(approvers, "member_joined", %{body_name: body.name, member_firstname: member.first_name, member_lastname: member.last_name})
+
+      {:ok, joinrequest}
+    end
   end
 
   # Approving a join request means creating a body membership and setting the join request to approved
