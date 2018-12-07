@@ -208,13 +208,13 @@ defmodule Omscore.MembersTest do
     test "list_join_requests/2 filters for open join requests" do
       {join_request, body, _member} = join_request_fixture()
 
-      assert Members.list_join_requests(body, %{"filter[approved]" => "true"}) == []
-      assert Members.list_join_requests(body, %{"filter[approved]" => "false"}) != []
+      assert Members.list_join_requests(body, %{"filter" => %{"approved" => "true"}}) == []
+      assert Members.list_join_requests(body, %{"filter" => %{"approved" => "false"}}) != []
 
       assert {:ok, _body_membership} = Members.approve_join_request(join_request)
 
-      assert Members.list_join_requests(body, %{"filter[approved]" => "true"}) != []
-      assert Members.list_join_requests(body, %{"filter[approved]" => "false"}) == []
+      assert Members.list_join_requests(body, %{"filter" => %{"approved" => "true"}}) != []
+      assert Members.list_join_requests(body, %{"filter" => %{"approved" => "false"}}) == []
     end
 
 
