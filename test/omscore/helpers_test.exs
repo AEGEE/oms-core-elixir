@@ -148,7 +148,7 @@ defmodule Omscore.HelpersTest do
       member5 = member_fixture(%{first_name: "antihans"})
 
       res = from(u in Members.Member)
-      |> Helper.filter(%{"filter[first_name]" => "hans"}, Omscore.Members.Member.__schema__(:fields))
+      |> Helper.filter(%{"filter" => %{"first_name" => "hans"}}, Omscore.Members.Member.__schema__(:fields))
       |> Repo.all
 
       assert Enum.any?(res, fn(x) -> x.id == member1.id end)
@@ -166,7 +166,7 @@ defmodule Omscore.HelpersTest do
       member5 = member_fixture(%{first_name: "antihans"})
 
       res = from(u in Members.Member)
-      |> Helper.filter(%{"filter[first_name]" => "hans", "filter.__meta__" => "'; OR TRUE"}, Omscore.Members.Member.__schema__(:fields))
+      |> Helper.filter(%{"filter" => %{"first_name" => "hans", "filter.__meta__" => "'; OR TRUE"}}, Omscore.Members.Member.__schema__(:fields))
       |> Repo.all
 
       assert Enum.any?(res, fn(x) -> x.id == member1.id end)
