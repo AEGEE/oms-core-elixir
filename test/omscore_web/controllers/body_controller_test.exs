@@ -89,7 +89,7 @@ defmodule OmscoreWeb.BodyControllerTest do
 
       create_many_bodies(0..10)
 
-      conn = get conn, body_path(conn, :index), [{"filter[name]", "some really exotic query that definitely doesn't match any member at all"}]
+      conn = get conn, body_path(conn, :index), [{"filter", %{"name" => "some really exotic query that definitely doesn't match any member at all"}}]
       assert json_response(conn, 200)["data"] == []
     end
   end
