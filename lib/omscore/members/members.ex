@@ -93,13 +93,14 @@ defmodule Omscore.Members do
 
   alias Omscore.Members.JoinRequest
 
-  defp filter_approved_joinrequests(query, params) do
-    case Map.get(params, "filter[approved]") do
+  defp filter_approved_joinrequests(query, %{"filter" => filters}) do
+    case Map.get(filters, "approved") do
       "true" -> from(q in query, where: q.approved == true)
       "false" -> from(q in query, where: q.approved == false)
       _ -> query
     end
   end
+  defp filter_approved_joinrequests(query, _), do: query
 
   # Get all join requests for a body
   def list_join_requests(%Omscore.Core.Body{} = body, params \\ %{}) do
