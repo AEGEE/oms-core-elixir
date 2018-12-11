@@ -16,7 +16,10 @@ defmodule Omscore.Auth do
 
   def get_user!(id), do: Repo.get!(User, id)
 
-  def get_user_by_email!(email), do: Repo.get_by!(User, email: String.downcase(email))
+  def get_user_by_email!(email) do
+    Repo.one!(from(u in User, where: fragment("lower(?)", u.email) == ^String.downcase(email)))
+  end
+
   def get_user_by_member_id!(member_id) when is_binary(member_id) do
     {member_id, ""} = Integer.parse(member_id)
     get_user_by_member_id!(member_id)
