@@ -32,6 +32,17 @@ defmodule Omscore.AuthTest do
       assert Auth.get_user_by_email!("SOME_WEIRD@email.com")
     end
 
+    test "get_user_by_email!/1 works with upper-case stored emails" do
+      user = user_fixture(%{email: "SOME_WEIRD@email.com"})
+      user = user
+      |> Auth.User.changeset(%{})
+      |> Ecto.Changeset.force_change(:email, "SOME_WEIRD@email.com")
+      |> Repo.update!
+
+      assert Auth.get_user_by_email!("SOME_WEIRD@email.com")
+      assert Auth.get_user_by_email!("some_weird@email.com")
+    end
+
     test "create_user/1 with valid data creates a user" do
       assert {:ok, %User{} = user} = Auth.create_user(@valid_attrs)
       assert user.email == "some@email.com"
