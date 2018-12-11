@@ -160,7 +160,7 @@ defmodule Omscore.Auth do
   # Fetch a user from DB
   def authenticate_user(username, plain_text_password) do
     username_lowercase = String.downcase(username)
-    query = from u in User, where: u.name == ^username or u.email == ^username_lowercase
+    query = from u in User, where: u.name == ^username or fragment("lower(?)", u.email) == ^username_lowercase
 
     with user <- Repo.one(query),
       {:ok, _user} <- check_password(user, plain_text_password),
