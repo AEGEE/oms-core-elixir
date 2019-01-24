@@ -8,7 +8,7 @@ defmodule OmscoreWeb.BodyFetchPlug do
     body = Omscore.Core.get_body!(body_id)
 
     permissions = conn.assigns.permissions
-    |> Enum.into(Omscore.Members.get_local_permissions(conn.assigns.member, body))
+    |> Kernel.++(Omscore.Members.get_local_permissions(conn.assigns.member, body))
     |> Omscore.Core.reduce_permission_list()
 
     conn

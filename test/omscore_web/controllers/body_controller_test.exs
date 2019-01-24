@@ -109,7 +109,7 @@ defmodule OmscoreWeb.BodyControllerTest do
     end
 
     test "rejects to unauthorized user", %{conn: conn, body: body} do
-      campaign = campaign_fixture(%{autojoin_body_id: body.id})
+      campaign_fixture(%{autojoin_body_id: body.id})
 
       %{token: token} = create_member_with_permissions([])
       conn = put_req_header(conn, "x-auth-token", token)

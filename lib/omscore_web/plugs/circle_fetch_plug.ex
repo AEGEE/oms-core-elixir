@@ -9,7 +9,7 @@ defmodule OmscoreWeb.CircleFetchPlug do
 
     permissions = if circle.body_id != nil do
       conn.assigns.permissions
-      |> Enum.into(Omscore.Members.get_local_permissions(conn.assigns.member, circle.body))
+      |> Kernel.++(Omscore.Members.get_local_permissions(conn.assigns.member, circle.body))
       |> Omscore.Core.reduce_permission_list()
     else
       conn.assigns.permissions
