@@ -459,6 +459,11 @@ defmodule OmscoreWeb.CampaignControllerTest do
       assert Enum.any?(campaign.submissions, fn(x) -> x.token == token end)
     end
 
+    test "a submission without motivation is a valid submission", %{conn: conn, campaign: campaign} do
+      conn = post conn, campaign_path(conn, :submit, campaign.url), submission: Map.delete(@valid_submission, :motivation)
+      assert json_response(conn, 201)
+    end
+
     test "a invalid submission returns an error", %{conn: conn, campaign: campaign} do
       conn = post conn, campaign_path(conn, :submit, campaign.url), submission: @invalid_submission
       assert json_response(conn, 422)["errors"] != %{}
