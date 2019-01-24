@@ -28,7 +28,7 @@ defmodule OmscoreWeb.CampaignController do
 
     if Kernel.match?(%Omscore.Core.Body{}, body) do
       permissions
-      |> Enum.into(Omscore.Members.get_local_permissions(member, body))
+      |> Kernel.++(Omscore.Members.get_local_permissions(member, body))
       |> Omscore.Core.reduce_permission_list()
     else
       permissions

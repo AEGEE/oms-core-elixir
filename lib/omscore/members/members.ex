@@ -68,7 +68,7 @@ defmodule Omscore.Members do
     |> list_circle_memberships()                      # Get all circle memberships of the member
     |> Enum.map(fn(x) -> x.circle end)                # Strip the circle_membership part
     |> Omscore.Core.get_permissions_recursive()       # Gather all permissions on any of the circles
-    |> Enum.into(Omscore.Core.list_always_assigned_permissions())
+    |> Kernel.++(Omscore.Core.list_always_assigned_permissions())
     |> Enum.filter(fn(x) -> x.scope == "global" end)  # Filter out non-global permissions
     |> Omscore.Core.reduce_permission_list()          # Remove duplicates
   end
@@ -87,7 +87,7 @@ defmodule Omscore.Members do
     task = Task.async(fn -> get_global_permissions(member) end)
     
     get_local_permissions(member, body)
-    |> Enum.into(Task.await(task))
+    |> Kernel.++(Task.await(task))
     |> Omscore.Core.reduce_permission_list()
   end
 

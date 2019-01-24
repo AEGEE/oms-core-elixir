@@ -27,7 +27,7 @@ defmodule OmscoreWeb.MemberPermissionPlug do
                            %Permission{action: "update", object: "member", scope: "member"},
                            %Permission{action: "delete", object: "user", scope: "member"}]
   def process_myself(conn) do
-    permissions = Enum.into(conn.assigns.permissions, @additional_permissions)
+    permissions = conn.assigns.permissions ++ @additional_permissions
     conn 
     |> assign(:permissions, permissions)
     |> assign(:target_member, conn.assigns.member)

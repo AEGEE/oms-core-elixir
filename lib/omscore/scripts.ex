@@ -16,7 +16,7 @@ defmodule Omscore.Scripts do
 
   def autogenerate(general_board_circle_id, general_members_circle_id) do
     Repo.transaction fn ->
-      bodies = Repo.all(Body)
+      Repo.all(Body)
       |> Enum.filter(fn(x) -> String.starts_with?(x.name, "AEGEE-") end)
       |> Enum.map(fn(x) -> 
         create_shadow_circle(x, general_members_circle_id)
