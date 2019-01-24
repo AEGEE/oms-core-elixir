@@ -241,6 +241,15 @@ defmodule Omscore.MembersTest do
       assert join_request.motivation == "some motivation"
     end
 
+    test "can create a join request without motivation" do
+      body = body_fixture()
+      member = member_fixture()
+
+      assert {:ok, %JoinRequest{} = join_request} = Members.create_join_request(body, member, %{})
+      assert join_request.approved == false
+      assert join_request.motivation == nil
+    end
+
     test "create_join_request/3 prohibits duplicate join requests" do
       body = body_fixture()
       member = member_fixture()

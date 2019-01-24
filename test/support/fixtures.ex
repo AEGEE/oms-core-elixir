@@ -2,7 +2,7 @@ defmodule OmscoreWeb.Fixtures do
   @user_attrs %{id: 3, email: "some@email.com", superadmin: false, name: "some name", refresh: 1}
   def create_token(attrs) do
     user = Enum.into(attrs, @user_attrs)
-    {:ok, token, _claims} = Omscore.Guardian.encode_and_sign(user, %{name: user.name, email: user.email, superadmin: user.superadmin, refresh: user.refresh}, token_type: "access", ttl: {100, :seconds})
+    {:ok, token, _claims} = Omscore.Guardian.encode_and_sign(user, %{name: user.name, email: user.email, superadmin: user.superadmin, refresh: user.refresh}, token_type: "access", ttl: {100, :second})
     token  
   end
 

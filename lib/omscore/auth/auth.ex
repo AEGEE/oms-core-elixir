@@ -140,7 +140,7 @@ defmodule Omscore.Auth do
 
   # Create a longlived refresh token
   def create_refresh_token(%User{} = user, device) do
-    with {:ok, refresh_token, _claims} <- Omscore.Guardian.encode_and_sign(user, %{}, token_type: "refresh", ttl: {Application.get_env(:omscore, :ttl_refresh), :seconds}),
+    with {:ok, refresh_token, _claims} <- Omscore.Guardian.encode_and_sign(user, %{}, token_type: "refresh", ttl: {Application.get_env(:omscore, :ttl_refresh), :second}),
       {:ok, refresh_token_db} <- save_refresh_token(refresh_token, user, device),
     do: {:ok, refresh_token, refresh_token_db}
   end
@@ -154,7 +154,7 @@ defmodule Omscore.Auth do
 
   # Access tokens are shortlived and not saved in db, they are only cryptographically verified
   def create_access_token(%User{} = user, refresh_token_db) do
-    Omscore.Guardian.encode_and_sign(user, %{name: user.name, email: user.email, superadmin: user.superadmin, refresh: refresh_token_db.id}, token_type: "access", ttl: {Application.get_env(:omscore, :ttl_access), :seconds})
+    Omscore.Guardian.encode_and_sign(user, %{name: user.name, email: user.email, superadmin: user.superadmin, refresh: refresh_token_db.id}, token_type: "access", ttl: {Application.get_env(:omscore, :ttl_access), :second})
   end
 
   # Fetch a user from DB

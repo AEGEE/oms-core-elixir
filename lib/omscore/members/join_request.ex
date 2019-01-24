@@ -17,7 +17,7 @@ defmodule Omscore.Members.JoinRequest do
   def changeset(join_request, attrs) do
     join_request
     |> cast(attrs, [:motivation])
-    |> validate_required([:motivation, :approved])
+    |> validate_required([:approved])
     |> foreign_key_constraint(:body_id)
     |> foreign_key_constraint(:member_id)
     |> unique_constraint(:join_request_unique, name: :join_requests_member_id_body_id_index)
