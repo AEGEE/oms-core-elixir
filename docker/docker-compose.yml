@@ -35,7 +35,7 @@ services:
 
 
     postgres-oms-core-elixir:
-        image: postgres:latest
+        image: postgres:10.6
         volumes:
             - postgres-oms-core-elixir:/var/lib/postgresql/data
         expose:
