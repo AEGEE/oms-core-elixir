@@ -24,6 +24,7 @@ defmodule Omscore.Registration.Submission do
     submission
     |> cast(attrs, [:first_name,  :last_name, :motivation, :mail_confirmed])
     |> validate_required([:first_name, :last_name, :user_id, :campaign_id])
+    |> Omscore.Members.Member.validate_names()
     |> foreign_key_constraint(:user_id)
     |> foreign_key_constraint(:campaign_id)
     |> put_token
