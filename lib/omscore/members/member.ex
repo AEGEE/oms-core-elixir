@@ -34,15 +34,21 @@ defmodule Omscore.Members.Member do
     |> validate_exclusion(:seo_url, ["me"], message: "you cannot use me as seo_url")
     |> validate_length(:seo_url, min: 3)
     |> Omscore.downcase_field(:seo_url)
-    |> validate_length(:first_name, min: 2)
-    |> validate_format(:first_name, ~r/^[\p{L}\-\_\s]*$/u, message: "has invalid format. You can only use letters and dashes for names.")
-    |> validate_length(:last_name, min: 2)
-    |> validate_format(:last_name, ~r/^[\p{L}\-\_\s]*$/u, message: "has invalid format. You can only use letters and dashes for names.")
+    |> validate_names()
     |> validate_format(:phone, ~r/^(\+|00){0,2}(9[976]\d|8[987530]\d|6[987]\d|5[90]\d|42\d|3[875]\d|2[98654321]\d|9[8543210]|8[6421]|6[6543210]|5[87654321]|4[987654310]|3[9643210]|2[70]|7|1)\d{1,14}$/, message: "is not a valid phone number. Please enter a valid international phone number") # Thanks stackoverflow
     |> validate_primary_body()
     |> unique_constraint(:seo_url)
     |> foreign_key_constraint(:user_id)
     |> foreign_key_constraint(:primary_body_id)
+  end
+
+  # This is also needed in submission for validating the names, so we make a separate function from it
+  def validate_names(changeset) do
+    changeset
+    |> validate_length(:first_name, min: 2)
+    |> validate_format(:first_name, ~r/^[\p{L}\-\_\s]*$/u, message: "has invalid format. You can only use letters and dashes for names.")
+    |> validate_length(:last_name, min: 2)
+    |> validate_format(:last_name, ~r/^[\p{L}\-\_\s]*$/u, message: "has invalid format. You can only use letters and dashes for names.")
   end
 
   defp generate_seo_url(%Ecto.Changeset{valid?: true} = changeset) do

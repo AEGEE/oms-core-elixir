@@ -122,6 +122,13 @@ defmodule Omscore.RegistrationTest do
       assert {:error, _} = Registration.create_submission(campaign, user, @invalid_attrs)
     end
 
+    test "create with invalid member attrs throws an error" do
+      campaign = campaign_fixture()
+      user = user_fixture()
+
+      assert {:error, _} = Registration.create_submission(campaign, user, @valid_attrs |> Map.put(:last_name, "P."))
+    end
+
     test "create confirmation object creates a confirmation object" do
       submission = submission_fixture()
 
