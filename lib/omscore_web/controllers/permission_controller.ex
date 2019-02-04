@@ -30,6 +30,13 @@ defmodule OmscoreWeb.PermissionController do
     end
   end
 
+  def show_members(conn, %{"id" => id}) do
+    with {:ok, %Core.Permission{filters: filters}} <- Core.search_permission_list(conn.assigns.permissions, "view", "member") do
+      members = Core.get_members_with_permission(id)
+      render(conn, OmscoreWeb.MemberView, "index.json", members: members, filters: filters)
+    end
+  end
+
   def update(conn, %{"id" => id, "permission" => permission_params}) do
     with {:ok, %Core.Permission{filters: filters}} <- Core.search_permission_list(conn.assigns.permissions, "update", "permission"),
          permission_params = Core.apply_attribute_filters(permission_params, filters),

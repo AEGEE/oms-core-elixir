@@ -33,6 +33,15 @@ defmodule Omscore.CoreTest do
       assert Core.get_permission!(permission.id) == permission
     end
 
+    test "get_members_with_permission/1 returns all members holding a permission" do
+      %{member: member, permissions: [permission]} = create_member_with_permissions(@valid_attrs)
+      id = member.id
+      assert [%Omscore.Members.Member{id: ^id}] = Core.get_members_with_permission(permission.id)
+
+      permission2 = permission_fixture()
+      assert [] = Core.get_members_with_permission(permission2.id)
+    end
+
     test "get_permission/3 returns the permission by scope, action, object" do
       permission = permission_fixture()
       assert Core.get_permission(permission.scope, permission.action, permission.object) == permission
@@ -614,6 +623,45 @@ defmodule Omscore.CoreTest do
       assert Enum.any?(permission_list, fn(x) -> x.id == permission1.id end)
       assert Enum.any?(permission_list, fn(x) -> x.id == permission2.id end)
       assert Enum.any?(permission_list, fn(x) -> x.id == permission3.id end)
+    end
+
+    @tag only: true
+    test "get_child_circles/1 returns all child circles of a given circle" do
+      circle1 = circle_fixture()
+      circle2 = circle_fixture()
+      circle3 = circle_fixture()
+      circle4 = circle_fixture()
+      assert {:ok, _} = Core.put_child_circles(circle1, [circle2, circle3])
+      assert {:ok, _} = Core.put_child_circles(circle2, [circle4])
+
+      assert circle_list = Core.get_child_circles(circle1.id)
+      assert Enum.any?(circle_list, fn(x) -> x.id == circle1.id end)
+      assert Enum.any?(circle_list, fn(x) -> x.id == circle2.id end)
+      assert Enum.any?(circle_list, fn(x) -> x.id == circle3.id end)
+      assert Enum.any?(circle_list, fn(x) -> x.id == circle4.id end)
+      assert Enum.count(circle_list) == 4
+
+      assert circle_list = Core.get_child_circles(circle2.id)
+      assert !Enum.any?(circle_list, fn(x) -> x.id == circle1.id end)
+      assert Enum.any?(circle_list, fn(x) -> x.id == circle2.id end)
+      assert !Enum.any?(circle_list, fn(x) -> x.id == circle3.id end)
+      assert Enum.any?(circle_list, fn(x) -> x.id == circle4.id end)
+      assert Enum.count(circle_list) == 2
+      
+      assert circle_list = Core.get_child_circles([circle2, circle4])
+      assert !Enum.any?(circle_list, fn(x) -> x.id == circle1.id end)
+      assert Enum.any?(circle_list, fn(x) -> x.id == circle2.id end)
+      assert !Enum.any?(circle_list, fn(x) -> x.id == circle3.id end)
+      assert Enum.any?(circle_list, fn(x) -> x.id == circle4.id end)
+      assert Enum.count(circle_list) == 2
+
+
+      assert circle_list = Core.get_child_circles([circle1, circle3])
+      assert Enum.any?(circle_list, fn(x) -> x.id == circle1.id end)
+      assert Enum.any?(circle_list, fn(x) -> x.id == circle2.id end)
+      assert Enum.any?(circle_list, fn(x) -> x.id == circle3.id end)
+      assert Enum.any?(circle_list, fn(x) -> x.id == circle4.id end)
+      assert Enum.count(circle_list) == 4
     end
 
     test "circles_have_same_body?/1 checks if all circles are from the same body" do
