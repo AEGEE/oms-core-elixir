@@ -30,9 +30,9 @@ defmodule OmscoreWeb.PermissionController do
     end
   end
 
-  def show_members(conn, %{"id" => id}) do
+  def show_members(conn, %{"id" => id} = params) do
     with {:ok, %Core.Permission{filters: filters}} <- Core.search_permission_list(conn.assigns.permissions, "view", "member") do
-      members = Core.get_members_with_permission(id)
+      members = Core.get_members_with_permission(id, params)
       render(conn, OmscoreWeb.MemberView, "index.json", members: members, filters: filters)
     end
   end

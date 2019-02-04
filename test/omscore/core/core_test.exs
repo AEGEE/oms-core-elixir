@@ -36,10 +36,26 @@ defmodule Omscore.CoreTest do
     test "get_members_with_permission/1 returns all members holding a permission" do
       %{member: member, permissions: [permission]} = create_member_with_permissions(@valid_attrs)
       id = member.id
-      assert [%Omscore.Members.Member{id: ^id}] = Core.get_members_with_permission(permission.id)
+      assert [%Omscore.Members.Member{id: ^id}] = Core.get_members_with_permission(permission.id, %{})
 
       permission2 = permission_fixture()
-      assert [] = Core.get_members_with_permission(permission2.id)
+      assert [] = Core.get_members_with_permission(permission2.id, %{})
+    end
+
+    test "get_members_with_permission/1 filters" do
+      %{member: member, circle: circle, permissions: [permission]} = create_member_with_permissions(@valid_attrs)
+      member2 = member_fixture(%{first_name: "Peter"})
+      assert {:ok, _} = Omscore.Members.create_circle_membership(circle, member2)
+      assert res = Core.get_members_with_permission(permission.id, %{})
+
+      assert Enum.any?(res, fn(x) -> x.id == member.id end)
+      assert Enum.any?(res, fn(x) -> x.id == member2.id end)
+
+      assert res = Core.get_members_with_permission(permission.id, %{"query" => "peter"})
+
+      assert !Enum.any?(res, fn(x) -> x.id == member.id end)
+      assert Enum.any?(res, fn(x) -> x.id == member2.id end)
+
     end
 
     test "get_permission/3 returns the permission by scope, action, object" do

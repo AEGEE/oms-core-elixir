@@ -48,7 +48,7 @@ defmodule Omscore.Core do
   # Gets a single permission by scope, object and action
   def get_permission(scope, action, object), do: Repo.get_by(Permission, %{scope: scope, action: action, object: object})
 
-  def get_members_with_permission(id) do
+  def get_members_with_permission(id, params) do
     permission = Repo.get!(Permission, id)
 
     circle_ids = from(u in Omscore.Core.CirclePermission, where: u.permission_id == ^permission.id, preload: [:circle])
@@ -57,9 +57,14 @@ defmodule Omscore.Core do
     |> get_child_circles()
     |> Enum.map(fn(x) -> x.id end)
 
-    from(u in Omscore.Members.CircleMembership, where: u.circle_id in ^circle_ids, preload: [:member])
+
+
+    from(u in Omscore.Members.Member, order_by: [:last_name, :first_name], 
+      join: c in Omscore.Members.CircleMembership, where: c.member_id == u.id and c.circle_id in ^circle_ids)
+    |> OmscoreWeb.Helper.paginate(params)
+    |> OmscoreWeb.Helper.search(params, [:first_name, :last_name], " ")
+    |> OmscoreWeb.Helper.filter(params, Omscore.Members.Member.__schema__(:fields))
     |> Repo.all()
-    |> Enum.map(fn(x) -> x.member end)
   end
 
   # Creates a permission
