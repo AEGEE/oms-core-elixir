@@ -58,6 +58,7 @@ defmodule OmscoreWeb.Router do
   scope "/", OmscoreWeb do
     pipe_through [:api, :authorize]
     resources "/permissions", PermissionController, except: [:new, :edit]
+    get "/permissions/:id/members", PermissionController, :show_members
     get "/my_permissions", PermissionController, :index_permissions
     post "/my_permissions", PermissionController, :show_permission_relation
 

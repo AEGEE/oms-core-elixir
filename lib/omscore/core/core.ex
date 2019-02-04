@@ -48,6 +48,20 @@ defmodule Omscore.Core do
   # Gets a single permission by scope, object and action
   def get_permission(scope, action, object), do: Repo.get_by(Permission, %{scope: scope, action: action, object: object})
 
+  def get_members_with_permission(id) do
+    permission = Repo.get!(Permission, id)
+
+    circle_ids = from(u in Omscore.Core.CirclePermission, where: u.permission_id == ^permission.id, preload: [:circle])
+    |> Repo.all()
+    |> Enum.map(fn(x) -> x.circle end)
+    |> get_child_circles()
+    |> Enum.map(fn(x) -> x.id end)
+
+    from(u in Omscore.Members.CircleMembership, where: u.circle_id in ^circle_ids, preload: [:member])
+    |> Repo.all()
+    |> Enum.map(fn(x) -> x.member end)
+  end
+
   # Creates a permission
   def create_permission(attrs \\ %{}) do
     %Permission{}
@@ -436,4 +450,24 @@ defmodule Omscore.Core do
     x.body_id == body_id && circles_have_same_body?(rest, body_id)
   end
   defp circles_have_same_body?([], _), do: true
+
+  defp get_child_circles_lists([], processed), do: processed
+  defp get_child_circles_lists(unprocessed, processed) do
+    unprocessed_ids = Enum.map(unprocessed, fn(x) -> x.id end)
+    exclude_ids = Enum.map(processed, fn(x) -> x.id end) ++ unprocessed_ids
+
+    from(u in Circle, where: u.parent_circle_id in ^unprocessed_ids and u.id not in ^exclude_ids)
+    |> Repo.all()
+    |> get_child_circles_lists(processed ++ unprocessed)
+  end
+
+  # Works on a list of circles (already with the struct loaded)
+  def get_child_circles(circles) when is_list(circles) do
+    # Remove duplicates, then pipe to get_child_circles_list
+    circles
+    |> Enum.uniq_by(fn(x) -> x.id end)
+    |> get_child_circles_lists([])
+  end  
+  def get_child_circles(%Circle{} = circle), do: get_child_circles_lists([circle], [])
+  def get_child_circles(circle_id), do: get_child_circles(Repo.get!(Circle, circle_id))
 end

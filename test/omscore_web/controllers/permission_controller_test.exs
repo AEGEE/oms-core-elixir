@@ -113,6 +113,42 @@ defmodule OmscoreWeb.PermissionControllerTest do
     end
   end
 
+  describe "show members for permissions" do
+    test "shows all members for a permission", %{conn: conn} do
+      %{token: token} = create_member_with_permissions(%{action: "view", object: "member"})
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      %{member: member, permissions: [permission]} = create_member_with_permissions(%{action: "some action", object: "some object"})
+
+      conn = get conn, permission_path(conn, :show_members, permission.id)
+      assert [res] = json_response(conn, 200)["data"]
+      assert res["id"] == member.id
+      assert Map.has_key?(res, "first_name")
+    end
+
+    test "works with filtered permissions", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "view", object: "member", filters: [%{field: "first_name"}]}])
+      conn = put_req_header(conn, "x-auth-token", token)
+      
+      %{member: member, permissions: [permission]} = create_member_with_permissions(%{action: "some action", object: "some object"})
+
+      conn = get conn, permission_path(conn, :show_members, permission.id)
+      assert [res] = json_response(conn, 200)["data"]
+      assert res["id"] == member.id
+      assert !Map.has_key?(res, "first_name")
+    end
+
+    test "rejects to unauthorized user", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([])
+      conn = put_req_header(conn, "x-auth-token", token)
+      
+      %{permissions: [permission]} = create_member_with_permissions(%{action: "some action", object: "some object"})
+
+      conn = get conn, permission_path(conn, :show_members, permission.id)
+      assert json_response(conn, 403)
+    end
+  end
+
   describe "create permission" do
     test "renders permission when data is valid", %{conn: conn} do
       %{token: token} = create_member_with_permissions([%{action: "create", object: "permission"}, %{action: "view", object: "permission"}])
