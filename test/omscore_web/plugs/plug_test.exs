@@ -36,9 +36,10 @@ defmodule OmscoreWeb.PlugTest do
     assert conn == copy
   end
 
+  @tag only: true
   test "auth plug rejects an invalid access token", %{conn: conn} do
     # This token is expired
-    token = "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJPTVMiLCJlbWFpbCI6InNvbWVAZW1haWwuY29tIiwiZXhwIjoxNTIyNjU5MjUyLCJpYXQiOjE1MjI2NTkxNTIsImlzcyI6Ik9NUyIsImp0aSI6IjJiMWFmNTY4LTY4MWYtNGVlMC04ZWQyLWU2YzQxMzUwZmQ1OSIsIm5hbWUiOiJzb21lIG5hbWUiLCJuYmYiOjE1MjI2NTkxNTEsInN1YiI6IjMiLCJzdXBlcmFkbWluIjpmYWxzZSwidHlwIjoiYWNjZXNzIn0.jCxBvQqYOBsQiGm5WRnrcCx4PV0hlPsCYP9zC84K5R00en-3uUwfwe3YR6IA8Hpy5fkRlHNBsDfZQCOm8ORubQ"
+    token = "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJPTVMiLCJlbWFpbCI6Im5pY29Abmljby13ZXN0ZXJiZWNrLmRlIiwiZXhwIjoxNTUwMjQ4NDIyLCJpYXQiOjE1NTAyNDQ4MjIsImlzcyI6Ik9NUyIsImp0aSI6ImMxNjI1ZTM4LTZiMmEtNGY3NS1hYmIyLTk1MGNiYWVlYjI4YiIsIm5hbWUiOiJibGFja3NwaDNyZSIsIm5iZiI6MTU1MDI0NDgyMSwicmVmcmVzaCI6NjE5Miwic3ViIjoiMTQiLCJzdXBlcmFkbWluIjpmYWxzZSwidHlwIjoiYWNjZXNzIn0.pYJX36GTjlXXpWHmEcDdgIJaHFjhDQYTmxRjYBC-riMvOFQgEwQnGwD3o7K43fEl0pzXfoxKb-h864XF87txBw"
     conn = put_req_header(conn, "x-auth-token", token)
     conn = OmscoreWeb.AuthorizePlug.call(conn, nil)
     assert json_response(conn, 401)

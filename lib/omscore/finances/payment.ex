@@ -7,7 +7,8 @@ defmodule Omscore.Finances.Payment do
     field :amount, :decimal
     field :comment, :string
     field :currency, :string
-    field :expires, :naive_datetime
+    field :expires, :date
+    field :starts, :date
     field :invoice_address, :string
     field :invoice_name, :string
 
@@ -20,12 +21,25 @@ defmodule Omscore.Finances.Payment do
   @doc false
   def changeset(payment, attrs) do
     payment
-    |> cast(attrs, [:amount, :currency, :expires, :invoice_name, :invoice_address, :comment])
+    |> cast(attrs, [:amount, :currency, :starts, :expires, :invoice_name, :invoice_address, :comment])
     |> validate_required([:amount, :currency, :expires, :body_id])
+    |> put_default_start()
     |> validate_body_membership()
-    |> validate_expiration()
+    |> validate_start_before_expiration()
   end
 
+
+  # If no starting date was set, today is assumed
+  defp put_default_start(changeset) do
+    if Ecto.Changeset.get_field(changeset, :starts, nil) == nil do
+      changeset
+      |> Ecto.Changeset.put_change(:starts, Date.utc_today())
+    else
+      changeset
+    end
+  end
+
+  # You can only create payments for members of the body
   defp validate_body_membership(%Ecto.Changeset{valid?: true} = changeset) do
     member_id = get_field(changeset, :member_id)
     body_id = get_field(changeset, :body_id)
@@ -38,13 +52,15 @@ defmodule Omscore.Finances.Payment do
   end
   defp validate_body_membership(changeset), do: changeset
 
+  defp validate_start_before_expiration(changeset) do
+    starts = Ecto.Changeset.get_field(changeset, :starts)
+    expires = Ecto.Changeset.get_field(changeset, :expires)
 
-  defp validate_expiration(%Ecto.Changeset{changes: %{expires: expires}} = changeset) when expires != nil do
-    if NaiveDateTime.compare(expires, NaiveDateTime.utc_now()) == :lt do
-      add_error(changeset, :expires, "Payments can not expire in the past")
+    if starts == nil or expires == nil or Date.compare(starts, expires) == :lt do
+      changeset
     else
       changeset
+      |> add_error(:expires, "Payments can not expire before the start date")
     end
   end
-  defp validate_expiration(changeset), do: changeset
 end

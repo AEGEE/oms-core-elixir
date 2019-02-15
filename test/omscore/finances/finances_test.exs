@@ -6,8 +6,8 @@ defmodule Omscore.FinancesTest do
   describe "payments" do
     alias Omscore.Finances.Payment
 
-    @valid_attrs %{amount: "120.5", comment: "some comment", currency: "some currency", expires: ~N[3012-04-17 14:00:00.000000], invoice_address: "some invoice_address", invoice_name: "some invoice_name"}
-    @update_attrs %{amount: "456.7", comment: "some updated comment", currency: "some updated currency", expires: ~N[3011-05-18 15:01:01.000000], invoice_address: "some updated invoice_address", invoice_name: "some updated invoice_name"}
+    @valid_attrs %{amount: "120.5", comment: "some comment", currency: "some currency", starts: ~D[3012-04-16], expires: ~D[3012-04-17], invoice_address: "some invoice_address", invoice_name: "some invoice_name"}
+    @update_attrs %{amount: "456.7", comment: "some updated comment", currency: "some updated currency", starts: ~D[3010-01-01], expires: ~D[3011-05-18], invoice_address: "some updated invoice_address", invoice_name: "some updated invoice_name"}
     @invalid_attrs %{amount: nil, comment: nil, currency: nil, expires: nil, invoice_address: nil, invoice_name: nil}
 
     test "list_payments/0 returns all payments" do
@@ -37,7 +37,7 @@ defmodule Omscore.FinancesTest do
       assert payment.amount == Decimal.new("120.5")
       assert payment.comment == "some comment"
       assert payment.currency == "some currency"
-      assert payment.expires == ~N[3012-04-17 14:00:00.000000]
+      assert payment.expires ==  ~D[3012-04-17]
       assert payment.invoice_address == "some invoice_address"
       assert payment.invoice_name == "some invoice_name"
       assert payment.body_id == body.id
@@ -60,11 +60,13 @@ defmodule Omscore.FinancesTest do
       assert {:error, _} = Finances.create_payment(body, member, @valid_attrs)
     end
 
-    test "create_payment/3 forbids setting an expiration in the past" do
+    test "create_payment/3 allows setting an expiration in the past" do
       member = member_fixture()
       body = body_fixture()
+
+      {:ok, _} = Omscore.Members.create_body_membership(body, member)
   
-      assert {:error, _} = Finances.create_payment(body, member, @valid_attrs |> Map.put(:expiration, Omscore.ecto_date_in_past(10)))
+      assert {:ok, _} = Finances.create_payment(body, member, @valid_attrs |> Map.put(:expires, Omscore.ecto_date_in_past(10)) |> Map.put(:starts, Omscore.ecto_date_in_past(11)))
     end
 
     test "update_payment/2 with valid data updates the payment" do
@@ -74,7 +76,7 @@ defmodule Omscore.FinancesTest do
       assert payment.amount == Decimal.new("456.7")
       assert payment.comment == "some updated comment"
       assert payment.currency == "some updated currency"
-      assert payment.expires == ~N[3011-05-18 15:01:01.000000]
+      assert payment.expires ==  ~D[3011-05-18]
       assert payment.invoice_address == "some updated invoice_address"
       assert payment.invoice_name == "some updated invoice_name"
     end
@@ -117,6 +119,46 @@ defmodule Omscore.FinancesTest do
       |> Repo.update!
 
       payment_fixture(body, member)
+
+      bm = Repo.get!(Omscore.Members.BodyMembership, bm.id)
+      assert bm.has_expired == false
+      assert :ets.lookup(:saved_mail, member.user.email) == []
+    end
+
+    test "automatic expiry does not set the membership unexpired in case the payment is in the past" do
+      member = member_fixture() |> Repo.preload([:user])
+      body = body_fixture()
+      :ets.delete_all_objects(:saved_mail)
+
+      assert {:ok, bm} = Omscore.Members.create_body_membership(body, member)
+      
+
+      bm = bm
+      |> Omscore.Members.BodyMembership.changeset(%{})
+      |> Ecto.Changeset.change(has_expired: true)
+      |> Repo.update!
+
+      payment_fixture(body, member, %{starts: Omscore.ecto_date_in_past(12), expires: Omscore.ecto_date_in_past(10)})
+
+      bm = Repo.get!(Omscore.Members.BodyMembership, bm.id)
+      assert bm.has_expired == false
+      assert :ets.lookup(:saved_mail, member.user.email) == []
+    end    
+
+    test "automatic expiry does not set the membership unexpired in case the payment is in the future" do
+      member = member_fixture() |> Repo.preload([:user])
+      body = body_fixture()
+      :ets.delete_all_objects(:saved_mail)
+
+      assert {:ok, bm} = Omscore.Members.create_body_membership(body, member)
+      
+
+      bm = bm
+      |> Omscore.Members.BodyMembership.changeset(%{})
+      |> Ecto.Changeset.change(has_expired: true)
+      |> Repo.update!
+
+      payment_fixture(body, member, %{starts: Omscore.ecto_date_in_past(-10), expires: Omscore.ecto_date_in_past(-12)})
 
       bm = Repo.get!(Omscore.Members.BodyMembership, bm.id)
       assert bm.has_expired == false

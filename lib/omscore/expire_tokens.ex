@@ -29,7 +29,7 @@ defmodule Omscore.ExpireTokens do
     # Also this part doesn't need to be inside a transaction
     unexpire_query = from bm in Omscore.Members.BodyMembership,
       inner_join: p in Omscore.Finances.Payment, on: bm.member_id == p.member_id and bm.body_id == p.body_id,
-      where: p.expires > ^now and bm.has_expired == true
+      where: p.expires > ^now and p.starts < ^now and bm.has_expired == true
 
     # These memberships should be set to unexpired
     Omscore.Repo.update_all(unexpire_query, set: [has_expired: false])
@@ -38,7 +38,7 @@ defmodule Omscore.ExpireTokens do
       # This takes all body memberships and groups them with their payments, counting the valid payments
       # All which have 0 valid payments but are not set to expired yet are in this
       expire_query = from bm in Omscore.Members.BodyMembership, 
-        left_lateral_join: p in fragment("SELECT COUNT(p.id) AS valid_payments FROM payments AS p WHERE p.body_id = ? AND p.member_id = ? AND p.expires > ?", bm.body_id, bm.member_id, ^now),
+        left_lateral_join: p in fragment("SELECT COUNT(p.id) AS valid_payments FROM payments AS p WHERE p.body_id = ? AND p.member_id = ? AND p.expires > ? AND p.starts < ?", bm.body_id, bm.member_id, ^now, ^now),
         where: p.valid_payments == 0 and bm.has_expired == false,
         preload: [member: [:user], body: []]
 
@@ -60,7 +60,7 @@ defmodule Omscore.ExpireTokens do
   end
 
   def expire_refresh_tokens() do
-    expiry = Omscore.ecto_date_in_past(Application.get_env(:omscore, :ttl_refresh))
+    expiry = Omscore.ecto_datetime_in_past(Application.get_env(:omscore, :ttl_refresh))
     query = from u in Omscore.Auth.RefreshToken,
       where: u.inserted_at < ^expiry
 
@@ -69,7 +69,7 @@ defmodule Omscore.ExpireTokens do
 
   def expire_mail_confirmations() do
     # Pipeline of death to find a date in the past
-    expiry = Omscore.ecto_date_in_past(Application.get_env(:omscore, :ttl_mail_confirmation)) 
+    expiry = Omscore.ecto_datetime_in_past(Application.get_env(:omscore, :ttl_mail_confirmation)) 
     query = from u in Omscore.Registration.MailConfirmation,
       where: u.inserted_at < ^expiry
 
@@ -90,7 +90,7 @@ defmodule Omscore.ExpireTokens do
   end
 
   def expire_password_resets() do
-    expiry = Omscore.ecto_date_in_past(Application.get_env(:omscore, :ttl_password_reset))
+    expiry = Omscore.ecto_datetime_in_past(Application.get_env(:omscore, :ttl_password_reset))
     query = from u in Omscore.Auth.PasswordReset,
       where: u.inserted_at < ^expiry
 

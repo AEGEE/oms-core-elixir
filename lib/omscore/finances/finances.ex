@@ -70,9 +70,10 @@ defmodule Omscore.Finances do
 
     with {:ok, payment} <- Repo.insert(changeset) do
       # Unexpire the body membership in case it is expired
-      body_membership = Omscore.Members.get_body_membership(body, member)
+      Omscore.Members.get_body_membership(body, member)
       |> Ecto.Changeset.change(has_expired: false)
       |> Repo.update!()
+      
       {:ok, payment}
     end
   end
