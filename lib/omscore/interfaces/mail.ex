@@ -15,7 +15,7 @@ defmodule Omscore.Interfaces.Mail do
   def send_mail(to, "password_reset", %{token: token}), do: dispatch_mail(to, "Password reset in OMS", "password_reset", %{token: token})
   def send_mail(to, "membership_expired", %{body_name: body_name}), do: dispatch_mail(to, "Your membership in " <> body_name <> " has expired", "membership_expired", %{body_name: body_name})
   def send_mail(to, "welcome", %{body_name: body_name}), do: dispatch_mail(to, "Your new account in OMS", "welcome", %{body_name: body_name, email: to})
-  def send_mail(to, "member_joined", %{body_name: body_name, member_firstname: member_firstname, member_lastname: member_lastname}), do: dispatch_mail(to, "A new join request was filed", "member_joined", %{body_name: body_name, member_firstname: member_firstname, member_lastname: member_lastname})
+  def send_mail(to, "member_joined", %{body_name: body_name, body_id: body_id, member_firstname: member_firstname, member_lastname: member_lastname}), do: dispatch_mail(to, "A new join request was filed", "member_joined", %{body_name: body_name, body_id: body_id, member_firstname: member_firstname, member_lastname: member_lastname})
 
   defp dispatch_mail(to, subject, template, content) do
     body = %{

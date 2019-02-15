@@ -138,7 +138,7 @@ defmodule Omscore.Members do
       |> Enum.map(fn(x) -> x.member.user.email end)
 
 
-      Omscore.Interfaces.Mail.send_mail(approvers, "member_joined", %{body_name: body.name, member_firstname: member.first_name, member_lastname: member.last_name})
+      Omscore.Interfaces.Mail.send_mail(approvers, "member_joined", %{body_name: body.name, body_id: body.id, member_firstname: member.first_name, member_lastname: member.last_name})
 
       {:ok, joinrequest}
     end
