@@ -162,6 +162,16 @@ defmodule OmscoreWeb.PaymentControllerTest do
       assert json_response(conn, 422)["errors"] != %{}
     end
 
+    test "throws error when member is non-existent", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "create", object: "payment"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      body = body_fixture()
+
+      conn = post conn, body_payment_path(conn, :create, body.id), payment: @create_attrs |> Map.put(:member_id, -1)
+      assert json_response(conn, 404)["errors"] != %{}
+    end
+
     test "rejects to unauthorized user", %{conn: conn} do
       %{token: token} = create_member_with_permissions([])
       conn = put_req_header(conn, "x-auth-token", token)
