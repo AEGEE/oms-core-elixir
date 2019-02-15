@@ -20,6 +20,7 @@ defmodule Omscore.Members do
   end
 
   # Gets a single member by either his seo_url or his id
+  def get_member(id) when is_integer(id), do: Repo.get(Member, id)
   def get_member!(id) when is_integer(id), do: Repo.get!(Member, id)
   def get_member!(query) when is_binary(query) do
     case Integer.parse(query) do
