@@ -14,6 +14,10 @@ defmodule OmscoreWeb.ErrorView do
     %{success: false, errors: %{detail: Phoenix.Controller.status_message_from_template(template)}}
   end
 
+  def render("404.json", _assigns) do
+    %{success: false, message: "Route or Template not found! Check your url and parameters"}
+  end
+
   def render("error.json", %{msg: msg}) do
     %{success: false, message: msg}
   end

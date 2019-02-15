@@ -6,7 +6,7 @@ defmodule OmscoreWeb.ErrorViewTest do
 
   test "renders 404.json" do
     assert render(OmscoreWeb.ErrorView, "404.json", []) ==
-           %{success: false, errors: %{detail: "Not Found"}}
+           %{success: false, message: "Route or Template not found! Check your url and parameters"}
   end
 
   test "renders 500.json" do
