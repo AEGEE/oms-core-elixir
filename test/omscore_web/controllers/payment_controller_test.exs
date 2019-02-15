@@ -126,6 +126,19 @@ defmodule OmscoreWeb.PaymentControllerTest do
         "invoice_name" => "some invoice_name"})
     end
 
+    test "throws 400 on missing member id", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "create", object: "payment"}, %{action: "view", object: "payment"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      body = body_fixture()
+      member = member_fixture()
+      {:ok, _} = Omscore.Members.create_body_membership(body, member)
+
+      assert_error_sent 400, fn ->
+        post conn, body_payment_path(conn, :create, body.id), payment: %{"expires" => ~N[3010-04-17 14:00:00.000000], "currency" => "x", "amount" => 0, "body_id" => 30}
+      end
+    end
+
     test "renders errors when data is invalid", %{conn: conn} do
       %{token: token} = create_member_with_permissions([%{action: "create", object: "payment"}])
       conn = put_req_header(conn, "x-auth-token", token)

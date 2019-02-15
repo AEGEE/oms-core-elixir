@@ -39,10 +39,10 @@ defmodule OmscoreWeb.PaymentController do
     end
   end
 
-  def create(conn, %{"payment" => payment_params}) do
+  def create(conn, %{"payment" => %{"member_id" => member_id} = payment_params}) do
     with {:ok, %Core.Permission{filters: filters}} <- Core.search_permission_list(conn.assigns.permissions, "create", "payment"),
          payment_params <- Core.apply_attribute_filters(payment_params, filters),
-         member <- Omscore.Members.get_member!(payment_params["member_id"]),
+         member <- Omscore.Members.get_member!(member_id),
          {:ok, %Payment{} = payment} <- Finances.create_payment(conn.assigns.body, member, payment_params) do
       conn
       |> put_status(:created)
