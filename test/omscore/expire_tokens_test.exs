@@ -18,7 +18,7 @@ defmodule Omscore.ExpireTokensTest do
 
 
   test "expire tokens worker removes outdated tokens" do
-    Omscore.ecto_date_in_past(Application.get_env(:omscore, :ttl_refresh) * 2)
+    Omscore.ecto_datetime_in_past(Application.get_env(:omscore, :ttl_refresh) * 2)
     |> token_fixture()
 
     Omscore.ExpireTokens.handle_info(:work, {})    
@@ -29,7 +29,7 @@ defmodule Omscore.ExpireTokensTest do
   end
 
   test "expire tokens workers also removes users and submissions in case a mail confirmation expired" do
-    %{submission: submission, user: user} = Omscore.ecto_date_in_past(Application.get_env(:omscore, :ttl_refresh) * 2)
+    %{submission: submission, user: user} = Omscore.ecto_datetime_in_past(Application.get_env(:omscore, :ttl_refresh) * 2)
     |> token_fixture()
 
     Omscore.ExpireTokens.handle_info(:work, {})    
@@ -39,7 +39,7 @@ defmodule Omscore.ExpireTokensTest do
   end
 
   test "mail confirmation expiry worker tries to delete member objects from core" do
-    %{user: user} = Omscore.ecto_date_in_past(Application.get_env(:omscore, :ttl_refresh) * 2)
+    %{user: user} = Omscore.ecto_datetime_in_past(Application.get_env(:omscore, :ttl_refresh) * 2)
     |> token_fixture()
 
     assert {:ok, user} = Omscore.Auth.update_user_member_id(user, 1)
@@ -51,12 +51,12 @@ defmodule Omscore.ExpireTokensTest do
   end
 
   test "leaves a submission, etc intact in case there are still mail confirmations pending" do
-    %{submission: submission} = Omscore.ecto_date_in_past(Application.get_env(:omscore, :ttl_refresh) * 2)
+    %{submission: submission} = Omscore.ecto_datetime_in_past(Application.get_env(:omscore, :ttl_refresh) * 2)
     |> token_fixture()
 
     %Omscore.Registration.MailConfirmation{}
     |> Omscore.Registration.MailConfirmation.changeset(%{submission_id: submission.id, url: "bla2"})
-    |> Ecto.Changeset.force_change(:inserted_at, Omscore.ecto_date_in_past(-2000))
+    |> Ecto.Changeset.force_change(:inserted_at, Omscore.ecto_datetime_in_past(-2000))
     |> Omscore.Repo.insert!()
 
     Omscore.ExpireTokens.handle_info(:work, {})
@@ -65,7 +65,7 @@ defmodule Omscore.ExpireTokensTest do
   end
 
   test "leaves a submission intact in case the users mail was confirmed manually" do
-    %{submission: submission} = Omscore.ecto_date_in_past(Application.get_env(:omscore, :ttl_refresh) * 2)
+    %{submission: submission} = Omscore.ecto_datetime_in_past(Application.get_env(:omscore, :ttl_refresh) * 2)
     |> token_fixture()
 
     submission
@@ -109,6 +109,7 @@ defmodule Omscore.ExpireTokensTest do
     payment = payment_fixture(body, member)
     |> Omscore.Finances.Payment.changeset(%{})
     |> Ecto.Changeset.change(expires: Omscore.ecto_date_in_past(10))
+    |> Ecto.Changeset.change(starts: Omscore.ecto_date_in_past(12))
     |> Repo.update!
 
     bm = bm
@@ -139,6 +140,7 @@ defmodule Omscore.ExpireTokensTest do
     payment_fixture(body, member)
     |> Omscore.Finances.Payment.changeset(%{})
     |> Ecto.Changeset.change(expires: Omscore.ecto_date_in_past(10))
+    |> Ecto.Changeset.change(starts: Omscore.ecto_date_in_past(12))    
     |> Repo.update!
 
     Omscore.ExpireTokens.expire_memberships()
@@ -182,6 +184,7 @@ defmodule Omscore.ExpireTokensTest do
     payment_fixture(body, member)
     |> Omscore.Finances.Payment.changeset(%{})
     |> Ecto.Changeset.change(expires: Omscore.ecto_date_in_past(10))
+    |> Ecto.Changeset.change(starts: Omscore.ecto_date_in_past(12))
     |> Repo.update!
 
     payment_fixture(body, member)
@@ -230,5 +233,47 @@ defmodule Omscore.ExpireTokensTest do
     assert bm.has_expired == false
 
     assert :ets.lookup(:saved_mail, member.user.email) == []
+  end
+
+  test "does not unexpire when a payment is in the future" do
+    member = member_fixture() |> Repo.preload([:user])
+    body = body_fixture()
+    :ets.delete_all_objects(:saved_mail)
+
+    assert {:ok, bm} = Omscore.Members.create_body_membership(body, member)
+    
+    payment_fixture(body, member, %{starts: Omscore.ecto_date_in_past(-10), expires: Omscore.ecto_date_in_past(-11)})
+
+    bm = bm
+    |> Omscore.Members.BodyMembership.changeset(%{})
+    |> Ecto.Changeset.change(has_expired: true)
+    |> Repo.update!
+
+    Omscore.ExpireTokens.expire_memberships()
+
+    bm = Repo.get!(Omscore.Members.BodyMembership, bm.id)
+    assert bm.has_expired == true
+    assert :ets.lookup(:saved_mail, member.user.email) == []
+  end
+
+  test "does expire when payment is in the future" do
+    member = member_fixture() |> Repo.preload([:user])
+    body = body_fixture()
+    :ets.delete_all_objects(:saved_mail)
+
+    assert {:ok, bm} = Omscore.Members.create_body_membership(body, member)
+    
+    payment_fixture(body, member, %{starts: Omscore.ecto_date_in_past(-10), expires: Omscore.ecto_date_in_past(-11)})
+
+    bm = bm
+    |> Omscore.Members.BodyMembership.changeset(%{})
+    |> Ecto.Changeset.change(has_expired: false)
+    |> Repo.update!
+
+    Omscore.ExpireTokens.expire_memberships()
+
+    bm = Repo.get!(Omscore.Members.BodyMembership, bm.id)
+    assert bm.has_expired == true
+    assert :ets.lookup(:saved_mail, member.user.email) != []
   end
 end
