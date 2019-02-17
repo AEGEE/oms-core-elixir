@@ -26,6 +26,7 @@ defmodule OmscoreWeb.PaymentView do
       amount: payment.amount,
       currency: payment.currency,
       expires: payment.expires,
+      starts: payment.starts,
       invoice_name: payment.invoice_name,
       invoice_address: payment.invoice_address,
       comment: payment.comment,
