@@ -3,6 +3,7 @@ defmodule OmscoreWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
+    plug OmscoreWeb.RequestLoggerPlug
   end
 
   pipeline :authorize do
