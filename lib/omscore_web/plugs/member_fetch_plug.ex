@@ -12,6 +12,7 @@ defmodule OmscoreWeb.MemberFetchPlug do
   end
 
   # This loads the associated member object to an already fetched user in conn.assigns
+  def call(%Plug.Conn{assigns: %{supertoken: true}} = conn, _default), do: assign(conn, :member, %{})
   def call(conn, _default) do
     with {:ok, member} <- load_member(conn.assigns.user.id) do
       conn 

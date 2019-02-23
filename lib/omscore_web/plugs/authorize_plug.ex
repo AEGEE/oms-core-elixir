@@ -4,7 +4,15 @@ defmodule OmscoreWeb.AuthorizePlug do
   def init(default), do: default
 
   def check_access_token(token) do
-    Omscore.Guardian.resource_from_token(token, typ: "access")
+    supertoken = Application.get_env(:omscore, :supertoken)
+    # If token is supertoken, grant superadmin rights
+    if supertoken && token == supertoken do
+      {:ok,
+       %Omscore.Auth.User{id: -1, name: "superadmin", email: "superadmin@aegee.eu", superadmin: true},
+       %{supertoken: true}}
+    else
+      Omscore.Guardian.resource_from_token(token, typ: "access")
+    end
   end
 
   defp check_nil([]), do: {:error, "No X-Auth-Token provided"}
@@ -21,6 +29,7 @@ defmodule OmscoreWeb.AuthorizePlug do
       |> assign(:user, user)
       |> assign(:token, token)
       |> assign(:refresh_token_id, claims["refresh"])
+      |> assign(:supertoken, claims[:supertoken])
     else
       {:error, _} -> 
         conn

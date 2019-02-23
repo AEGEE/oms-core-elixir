@@ -50,6 +50,15 @@ defmodule OmscoreWeb.PlugTest do
     assert json_response(conn, 401)
   end
 
+  test "auth plug allows superadmin access", %{conn: conn} do
+    conn = put_req_header(conn, "x-auth-token", Application.get_env(:omscore, :supertoken))
+    conn = OmscoreWeb.AuthorizePlug.call(conn, nil)
+    assert conn.assigns.user
+    assert conn.assigns.user.id == -1
+    assert conn.assigns.user.superadmin == true
+    assert conn.assigns.refresh_token_id == nil
+  end
+
   test "member plug fetches member object", %{conn: conn} do
     token = create_token(@user_attrs)
     member = member_fixture(%{user_id: @user_attrs.id})
@@ -59,6 +68,15 @@ defmodule OmscoreWeb.PlugTest do
     |> OmscoreWeb.AuthorizePlug.call(nil)
     |> OmscoreWeb.MemberFetchPlug.call(nil)
     assert conn.assigns.member == member
+  end
+
+  test "member plug does nothing in case of supertoken", %{conn: conn} do
+    conn = put_req_header(conn, "x-auth-token", Application.get_env(:omscore, :supertoken))
+    conn = conn
+    |> OmscoreWeb.AuthorizePlug.call(nil)
+    |> OmscoreWeb.MemberFetchPlug.call(nil)
+
+    assert conn.assigns.member == %{}
   end
 
   test "member plug rejects a valid access token without a member object", %{conn: conn} do
@@ -101,6 +119,16 @@ defmodule OmscoreWeb.PlugTest do
     assert Enum.count(conn.assigns.permissions) == Enum.count(Omscore.Core.list_permissions())
   end
 
+  test "permission plug works with supertoken", %{conn: conn} do
+    conn = conn
+    |> put_req_header("x-auth-token", Application.get_env(:omscore, :supertoken))
+    |> OmscoreWeb.AuthorizePlug.call(nil)
+    |> OmscoreWeb.MemberFetchPlug.call(nil)
+    |> OmscoreWeb.PermissionFetchPlug.call(nil)
+
+    assert Enum.count(conn.assigns.permissions) == Enum.count(Omscore.Core.list_permissions())
+  end
+
   test "body_fetch_plug fetches the body and updates permissions to include local permissions", %{conn: conn} do
     %{token: token, member: member} = create_member_with_permissions(%{action: "some action", object: "some object"})
     permission = permission_fixture(%{scope: "local", action: "some other action"})
@@ -121,6 +149,21 @@ defmodule OmscoreWeb.PlugTest do
     assert conn.assigns.body
     assert conn.assigns.body.id == body.id
     assert conn.assigns.permissions |> Enum.any?(fn(x) -> x.id == permission.id end)
+  end
+
+  test "body_fetch_plug works with supertoken", %{conn: conn} do
+    body = body_fixture()
+
+    conn = conn
+    |> put_req_header("x-auth-token", Application.get_env(:omscore, :supertoken))
+    |> OmscoreWeb.AuthorizePlug.call(nil)
+    |> OmscoreWeb.MemberFetchPlug.call(nil)
+    |> OmscoreWeb.PermissionFetchPlug.call(nil)
+    |> Map.put(:path_params, %{"body_id" => body.id})
+    |> OmscoreWeb.BodyFetchPlug.call(nil)
+
+    assert conn.assigns.body
+    assert conn.assigns.body.id == body.id
   end
 
   test "circle_fetch_plug fetches the circle and in case of a bound circle updates permissions to include local permissions", %{conn: conn} do
@@ -145,6 +188,23 @@ defmodule OmscoreWeb.PlugTest do
     assert conn.assigns.circle.id == circle2.id
     assert conn.assigns.permissions |> Enum.any?(fn(x) -> x.id == permission.id end)
   end
+
+  test "circle_fetch_plug works with supertoken", %{conn: conn} do
+    body = body_fixture()
+    {:ok, circle} = Omscore.Core.create_circle(@circle_attrs, body)
+
+    conn = conn
+    |> put_req_header("x-auth-token", Application.get_env(:omscore, :supertoken))
+    |> OmscoreWeb.AuthorizePlug.call(nil)
+    |> OmscoreWeb.MemberFetchPlug.call(nil)
+    |> OmscoreWeb.PermissionFetchPlug.call(nil)
+    |> Map.put(:path_params, %{"circle_id" => circle.id})
+    |> OmscoreWeb.CircleFetchPlug.call(nil)
+
+    assert conn.assigns.circle
+    assert conn.assigns.circle.id == circle.id
+  end
+
 
   test "member permission plug fetches permissions the own member got through any of the bodies of the foreign members", %{conn: conn} do
     %{token: token, member: member1} = create_member_with_permissions([])
@@ -201,5 +261,20 @@ defmodule OmscoreWeb.PlugTest do
         |> Map.put(:path_params, %{"member_id" => -1})
         |> OmscoreWeb.MemberPermissionPlug.call([])
     end
+  end
+
+  test "works with supertoken", %{conn: conn} do
+    member = member_fixture()
+    
+    conn = conn
+    |> put_req_header("x-auth-token",  Application.get_env(:omscore, :supertoken))
+    |> OmscoreWeb.AuthorizePlug.call([])
+    |> OmscoreWeb.MemberFetchPlug.call([])
+    |> OmscoreWeb.PermissionFetchPlug.call([])
+    |> Map.put(:path_params, %{"member_id" => member.id})
+    |> OmscoreWeb.MemberPermissionPlug.call([])
+
+    assert conn.assigns.target_member
+    assert conn.assigns.target_member.id == member.id
   end
 end
