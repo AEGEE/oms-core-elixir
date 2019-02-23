@@ -11,7 +11,6 @@ defmodule OmscoreWeb.RequestLoggerPlug do
     start = System.monotonic_time()
 
     Conn.register_before_send(conn, fn conn ->
-
       # Logger.info(inspect(conn.assigns))
       Logger.info(inspect(Map.keys(conn.assigns)))
 

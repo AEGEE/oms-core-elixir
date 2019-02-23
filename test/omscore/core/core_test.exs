@@ -641,7 +641,6 @@ defmodule Omscore.CoreTest do
       assert Enum.any?(permission_list, fn(x) -> x.id == permission3.id end)
     end
 
-    @tag only: true
     test "get_child_circles/1 returns all child circles of a given circle" do
       circle1 = circle_fixture()
       circle2 = circle_fixture()

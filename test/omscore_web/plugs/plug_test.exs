@@ -265,7 +265,7 @@ defmodule OmscoreWeb.PlugTest do
 
   test "works with supertoken", %{conn: conn} do
     member = member_fixture()
-    
+
     conn = conn
     |> put_req_header("x-auth-token",  Application.get_env(:omscore, :supertoken))
     |> OmscoreWeb.AuthorizePlug.call([])
@@ -276,5 +276,23 @@ defmodule OmscoreWeb.PlugTest do
 
     assert conn.assigns.target_member
     assert conn.assigns.target_member.id == member.id
+  end
+
+  
+  test "logger plug works", %{conn: conn} do
+    
+    conn = conn
+    |> OmscoreWeb.RequestLoggerPlug.call(:info)
+    |> put_req_header("x-auth-token",  Application.get_env(:omscore, :supertoken))
+    |> OmscoreWeb.AuthorizePlug.call([])
+    |> OmscoreWeb.MemberFetchPlug.call([])
+    |> OmscoreWeb.PermissionFetchPlug.call([])
+    
+    loglevel = Application.get_env(:logger, :level)
+
+    require Logger
+    Logger.configure(level: :debug)
+    assert ExUnit.CaptureLog.capture_log(fn -> Plug.Conn.send_resp(conn, 201, "") end) =~ "GET / 201"
+    Logger.configure(level: loglevel)
   end
 end
