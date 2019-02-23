@@ -25,8 +25,8 @@ defmodule OmscoreWeb.RequestLoggerPlug do
             conn.request_path, ?\s,
             status, ?\s,
             Conn.get_resp_header(conn, "content-length"), " - ",
-            formatted_diff(diff), ", "
-            # print_user(conn)
+            formatted_diff(diff), ", ",
+            print_user(conn)
         ]
       end)
 
@@ -39,7 +39,7 @@ defmodule OmscoreWeb.RequestLoggerPlug do
 
   defp print_user(conn) do
     cond do
-      Map.has_key?(conn.assigns, :user) -> "member " <> conn.assigns.user.name <> " with id " <> conn.assigns.member.id
+      Map.has_key?(conn.assigns, :user) and Map.has_key?(conn.assigns, :member) -> "member " <> to_string(Map.get(conn.assigns.user, :name)) <> " with id " <> to_string(Map.get(conn.assigns.member, :id))
       true -> "unauthorized"
     end
   end
