@@ -136,6 +136,7 @@ defmodule Omscore.Members do
     with {:ok, joinrequest} <- res do
       approvers = list_body_memberships_with_permission(body, "approve", "join_request")
       |> Enum.map(fn(x) -> x.member.user.email end)
+      |> Enum.uniq()
 
 
       Omscore.Interfaces.Mail.send_mail(approvers, "member_joined", %{body_name: body.name, body_id: body.id, member_firstname: member.first_name, member_lastname: member.last_name})
