@@ -136,7 +136,6 @@ defmodule Omscore.Members do
     with {:ok, joinrequest} <- res do
       approvers = list_body_memberships_with_permission(body, "process", "join_request")
       |> Enum.map(fn(x) -> x.member.user.email end)
-      |> Enum.uniq()
 
       if approvers != [] do
         Omscore.Interfaces.Mail.send_mail(approvers, "member_joined", %{body_name: body.name, body_id: body.id, member_firstname: member.first_name, member_lastname: member.last_name})
@@ -211,6 +210,7 @@ defmodule Omscore.Members do
     |> Ecto.Query.join(:inner, [bm], u in subquery(cm_query), bm.member_id == u.member_id)
     |> Ecto.Query.preload([member: [:user]])
     |> Repo.all
+    |> Enum.uniq_by(fn(x) -> x.id end)
 
   end
 
