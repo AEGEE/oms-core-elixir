@@ -282,7 +282,7 @@ defmodule Omscore.MembersTest do
       assert :ets.lookup(:saved_mail, member4.user.email) == []
     end
 
-    test "create_join_request/3 sends only one mail to everyone in the body holding the approve:join_request permission" do
+    test "create_join_request/3 sends only one mail to everyone in the body holding the process:join_request permission" do
       body = body_fixture()
       member1 = member_fixture() |> Repo.preload(:user)
       member2 = member_fixture()
@@ -290,7 +290,7 @@ defmodule Omscore.MembersTest do
       member4 = member_fixture() |> Repo.preload(:user)
       circle1 = bound_circle_fixture(body)
       circle2 = bound_circle_fixture(body)
-      permission = permission_fixture(%{action: "approve", object: "join_request"})
+      permission = permission_fixture(%{action: "process", object: "join_request"})
       assert {:ok, _} = Omscore.Core.put_circle_permissions(circle1, [permission])
       assert {:ok, _} = Omscore.Core.put_circle_permissions(circle2, [permission])
       assert {:ok, _} = Omscore.Members.create_body_membership(body, member1)
