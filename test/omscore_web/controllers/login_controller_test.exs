@@ -307,6 +307,7 @@ defmodule OmscoreWeb.LoginControllerTest do
       assert user.active == true
     end
 
+
     test "rejects on missing permissions", %{conn: conn} do
       %{token: token} = create_member_with_permissions([])
       conn = put_req_header(conn, "x-auth-token", token)
@@ -318,6 +319,7 @@ defmodule OmscoreWeb.LoginControllerTest do
       conn = put conn, login_path(conn, :update_active, member.user_id), active: false
       assert json_response(conn, 403)
     end
+
 
     test "works also if the user has no member object", %{conn: conn} do
       %{token: token} = create_member_with_permissions([%{action: "update_active", object: "user"}])

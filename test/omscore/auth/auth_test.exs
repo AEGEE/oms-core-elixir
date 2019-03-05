@@ -9,7 +9,8 @@ defmodule Omscore.AuthTest do
     @valid_attrs %{email: "some@email.com", name: "some name", password: "some password", active: true, superadmin: false}
     @update_attrs %{email: "someupdated@email.com", name: "some updated name", password: "some updated password", active: true, superadmin: false}
     @invalid_attrs %{email: nil, name: nil, password: nil}
-    @invalid_token "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJBbGFzdGFpciIsImV4cCI6MTUyMjg0NzMyMCwiaWF0IjoxNTIwNDI4MTIwLCJpc3MiOiJBbGFzdGFpciIsImp0aSI6IjI4ZDM3YTIyLTExMzEtNGFjNy04YTlmLWQ2YzU0YTEyZjM1OCIsIm5hbWUiOiJzb21lIG5hbWUiLCJuYmYiOjE1MjA0MjgxMTksInN1YiI6IjcyIiwidHlwIjoiYWNjZXNzIn0.CN5aB844O2_LgYF7Z4lmBOsurjSSBtCmHd2MisahmZkYPSP2AinlcRcCCMpw-wPs_frBi4nwzB-_0CCuNvtHqg"
+    @invalid_token "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJPTVMiLCJlbWFpbCI6Im5pY29Abmljby13ZXN0ZXJiZWNrLmRlIiwiZXhwIjoxNTUwMjQ4NDIyLCJpYXQiOjE1NTAyNDQ4MjIsImlzcyI6Ik9NUyIsImp0aSI6ImMxNjI1ZTM4LTZiMmEtNGY3NS1hYmIyLTk1MGNiYWVlYjI4YiIsIm5hbWUiOiJibGFja3NwaDNyZSIsIm5iZiI6MTU1MDI0NDgyMSwicmVmcmVzaCI6NjE5Miwic3ViIjoiMTQiLCJzdXBlcmFkbWluIjpmYWxzZSwidHlwIjoiYWNjZXNzIn0.pYJX36GTjlXXpWHmEcDdgIJaHFjhDQYTmxRjYBC-riMvOFQgEwQnGwD3o7K43fEl0pzXfoxKb-h864XF87txBw"
+
 
     test "list_users/0 returns all users" do
       user = user_fixture()

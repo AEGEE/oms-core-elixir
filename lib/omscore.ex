@@ -15,7 +15,12 @@ defmodule Omscore do
     :crypto.hash(:sha256, data) |> Base.encode64
   end
 
-  def ecto_date_in_past(offset_seconds) do
+  def ecto_date_in_past(offset_days) do
+    Date.utc_today()
+    |> Date.add(-offset_days)
+  end
+
+  def ecto_datetime_in_past(offset_seconds) do
     NaiveDateTime.utc_now()
     |> NaiveDateTime.add(-offset_seconds)
   end
