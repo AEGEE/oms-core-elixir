@@ -210,6 +210,7 @@ defmodule Omscore.Members do
     |> Ecto.Query.join(:inner, [bm], u in subquery(cm_query), bm.member_id == u.member_id)
     |> Ecto.Query.preload([member: [:user]])
     |> Repo.all
+    |> Enum.uniq_by(fn(x) -> x.id end)
 
   end
 

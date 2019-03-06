@@ -282,6 +282,35 @@ defmodule Omscore.MembersTest do
       assert :ets.lookup(:saved_mail, member4.user.email) == []
     end
 
+    test "create_join_request/3 sends only one mail to everyone in the body holding the process:join_request permission" do
+      body = body_fixture()
+      member1 = member_fixture() |> Repo.preload(:user)
+      member2 = member_fixture()
+      member3 = member_fixture() |> Repo.preload(:user)
+      member4 = member_fixture() |> Repo.preload(:user)
+      circle1 = bound_circle_fixture(body)
+      circle2 = bound_circle_fixture(body)
+      permission = permission_fixture(%{action: "process", object: "join_request"})
+      assert {:ok, _} = Omscore.Core.put_circle_permissions(circle1, [permission])
+      assert {:ok, _} = Omscore.Core.put_circle_permissions(circle2, [permission])
+      assert {:ok, _} = Omscore.Members.create_body_membership(body, member1)
+      assert {:ok, _} = Omscore.Members.create_circle_membership(circle1, member1)
+      assert {:ok, _} = Omscore.Members.create_circle_membership(circle2, member1)
+      assert {:ok, _} = Omscore.Members.create_body_membership(body, member3)
+      assert {:ok, _} = Omscore.Members.create_circle_membership(circle1, member3)
+      assert {:ok, _} = Omscore.Members.create_body_membership(body, member4)
+
+      :ets.delete_all_objects(:saved_mail)
+
+      assert {:ok, _} = Members.create_join_request(body, member2, @valid_attrs)
+      
+      assert :ets.lookup(:saved_mail, member1.user.email) != []
+      assert Enum.count(:ets.lookup(:saved_mail, member1.user.email)) == 1
+      assert :ets.lookup(:saved_mail, member3.user.email) != []
+      assert Enum.count(:ets.lookup(:saved_mail, member3.user.email)) == 1
+      assert :ets.lookup(:saved_mail, member4.user.email) == []
+    end
+    
     test "create_join_request/3 does not send a mail in case nobody is holding the process:join_request permission" do
       body = body_fixture()
       member1 = member_fixture() |> Repo.preload(:user)
@@ -300,7 +329,6 @@ defmodule Omscore.MembersTest do
       :ets.delete_all_objects(:saved_mail)
 
       assert {:ok, _} = Members.create_join_request(body, member2, @valid_attrs)
-
       assert :ets.first(:saved_mail) == :"$end_of_table"
     end
 
