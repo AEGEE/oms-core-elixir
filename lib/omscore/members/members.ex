@@ -55,7 +55,8 @@ defmodule Omscore.Members do
            member_params <- Map.put(member_params, "user_id", user.id),
            {:ok, member} <- Omscore.Members.create_member(member_params),
            {:ok, %Omscore.Members.BodyMembership{}} <- Omscore.Members.create_body_membership(body, member),
-           {:ok, member} <- Omscore.Members.update_member(member, %{primary_body_id: body.id}) do
+           {:ok, member} <- Omscore.Members.update_member(member, %{primary_body_id: body.id}),
+           {:ok, _} <- Omscore.Auth.update_user_member_id(user, member.id) do
         # Then send him a mail that everything went well
         Omscore.Interfaces.Mail.send_mail(user.email, "welcome", %{body_name: body.name, email: user.email})
         {:ok, member}

@@ -9,7 +9,8 @@ defmodule Omscore.Auth.User do
     field :password, :string
     field :active, :boolean
     field :superadmin, :boolean
-    field :member_id, :integer
+
+    belongs_to :member, Omscore.Members.Member
 
     timestamps()
   end
