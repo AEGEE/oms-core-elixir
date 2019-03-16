@@ -14,49 +14,10 @@ defmodule OmscoreWeb.MemberController do
     end
   end
 
-  defp create_transaction(%Omscore.Core.Body{} = body, %{} = member_params, %{} = user_params) do
-    Omscore.Repo.transaction(fn ->
-      # First create the user
-      user_params = user_params
-      |> Map.put("password", Omscore.random_url())
-      |> Map.put("active", true)
-
-      user = case Omscore.Auth.create_user(user_params) do
-        {:ok, user} -> user
-        {:error, error} -> Omscore.Repo.rollback(error)
-      end
-
-      # Then create the member
-      member_params = member_params
-      |> Map.put("user_id", user.id)
-
-      member = case Omscore.Members.create_member(member_params) do
-        {:ok, member} -> member
-        {:error, error} -> Omscore.Repo.rollback(error)
-      end
-
-      # Then create a body membership
-      case Omscore.Members.create_body_membership(body, member) do
-        {:ok, %Omscore.Members.BodyMembership{}} -> :ok
-        {:error, error} -> Omscore.Repo.rollback(error)
-      end
-
-      # Set the body as the primary body for the member
-      member = case Omscore.Members.update_member(member, %{primary_body_id: body.id}) do
-        {:ok, member} -> member
-        {:error, error} -> Omscore.Repo.rollback(error)
-      end
-
-      # Then send him a mail that everything went well
-      Omscore.Interfaces.Mail.send_mail(user.email, "welcome", %{body_name: body.name, email: user.email})
-
-      member
-    end)
-  end
 
   def create(conn, %{"member" => member_params, "user" => user_params}) do
     with {:ok, _} <- Core.search_permission_list(conn.assigns.permissions, "create", "member"),
-         {:ok, %Member{} = member} <- create_transaction(conn.assigns.body, member_params, user_params) do
+         {:ok, %Member{} = member} <- Members.create_member_in_body(conn.assigns.body, member_params, user_params) do
       conn
       |> put_status(:created)
       |> put_resp_header("location", member_path(conn, :show, member))
