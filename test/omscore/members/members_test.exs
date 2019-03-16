@@ -70,6 +70,8 @@ defmodule Omscore.MembersTest do
       assert member |> map_inclusion(Map.delete(@valid_attrs, :user_id))
       assert Members.get_body_membership(body, member)
       assert member.primary_body_id == body.id
+      assert user.member_id == member.id
+      assert member.user_id == user.id
 
       assert :ets.lookup(:saved_mail, @valid_user_attrs.email) != []
     end
