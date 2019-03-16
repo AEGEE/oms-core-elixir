@@ -42,6 +42,34 @@ defmodule Omscore.Members do
     |> Repo.insert()
   end
 
+  # Creates a member in a body
+  def create_member_in_body(%Omscore.Core.Body{} = body, %{} = member_params, %{} = user_params) do
+    Omscore.Repo.transaction(fn ->
+
+      user_params = user_params
+      |> Map.put("password", Omscore.random_url())
+      |> Map.put("active", true)
+
+      # Create a user, create a member, create a body membership and set the primary body
+      res = with {:ok, user} <- Omscore.Auth.create_user(user_params),
+           member_params <- Map.put(member_params, "user_id", user.id),
+           {:ok, member} <- Omscore.Members.create_member(member_params),
+           {:ok, %Omscore.Members.BodyMembership{}} <- Omscore.Members.create_body_membership(body, member),
+           {:ok, member} <- Omscore.Members.update_member(member, %{primary_body_id: body.id}) do
+        # Then send him a mail that everything went well
+        Omscore.Interfaces.Mail.send_mail(user.email, "welcome", %{body_name: body.name, email: user.email})
+        {:ok, member}
+      end
+
+      # In the end, check if everything actually went well
+      # In case that not, rollback the transaction
+      case res do
+        {:ok, member} -> member
+        {:error, error} -> Omscore.Repo.rollback(error)
+      end
+    end)
+  end
+
   # Updates a member
   def update_member(%Member{} = member, attrs) do
     attrs = attrs

@@ -10,7 +10,7 @@ defmodule Omscore.MembersTest do
     @valid_attrs %{about_me: "some about_me", address: "some address", date_of_birth: ~D[2010-04-17], first_name: "some first_name", gender: "some gender", last_name: "some last_name", phone: "+1212345678", user_id: 1}
     @update_attrs %{about_me: "some updated about_me", address: "some updated address", date_of_birth: ~D[2011-05-18], first_name: "some updated first_name", gender: "some updated gender", last_name: "some updated last_name", phone: "+1212345679", seo_url: "some_updated_seo_url", user_id: 43}
     @invalid_attrs %{about_me: nil, address: nil, date_of_birth: nil, first_name: nil, gender: nil, last_name: nil, phone: nil, seo_url: nil, user_id: nil}
-
+    @valid_user_attrs %{email: "some@email.com", name: "some name", password: "some password", active: true, superadmin: false}
 
     test "list_members/0 returns all members" do
       member = member_fixture() |> Map.put(:bodies, [])
@@ -54,6 +54,90 @@ defmodule Omscore.MembersTest do
 
     test "create_member/1 with invalid data returns error changeset" do
       assert {:error, %Ecto.Changeset{}} = Members.create_member(@invalid_attrs)
+    end
+
+    test "create_member_in_body/3 creates a user, a member and a body membership and then sends a mail" do
+      body = body_fixture()
+      member_attrs = Map.new(@valid_attrs, fn {k, v} -> {Atom.to_string(k), v} end)
+      user_attrs = Map.new(@valid_user_attrs, fn {k, v} -> {Atom.to_string(k), v} end)
+
+      :ets.delete_all_objects(:saved_mail)
+      assert {:ok, %Member{} = member} = Members.create_member_in_body(body, member_attrs, user_attrs)
+
+      assert member = Repo.get!(Member, member.id)
+      assert user = Repo.get!(Omscore.Auth.User, member.user_id)
+      assert user |> map_inclusion(Map.delete(@valid_user_attrs, :password))
+      assert member |> map_inclusion(Map.delete(@valid_attrs, :user_id))
+      assert Members.get_body_membership(body, member)
+      assert member.primary_body_id == body.id
+
+      assert :ets.lookup(:saved_mail, @valid_user_attrs.email) != []
+    end
+
+    test "create_member_in_body/3 rolls back on problematic member data" do
+      body = body_fixture()
+      member_attrs = Map.new(@valid_attrs, fn {k, v} -> {Atom.to_string(k), v} end) |> Map.delete("first_name")
+      user_attrs = Map.new(@valid_user_attrs, fn {k, v} -> {Atom.to_string(k), v} end)
+      :ets.delete_all_objects(:saved_mail)
+      assert {:error, _} = Members.create_member_in_body(body, member_attrs, user_attrs)
+
+      assert Repo.get_by(Member, last_name: @valid_attrs.last_name) == nil
+      assert Repo.get_by(Omscore.Auth.User, email: @valid_user_attrs.email) == nil
+      assert Members.list_body_memberships(body) == []
+      assert :ets.lookup(:saved_mail, @valid_user_attrs.email) == []
+    end
+
+    test "create_member_in_body/3 rolls back on problematic user data" do
+      body = body_fixture()
+      member_attrs = Map.new(@valid_attrs, fn {k, v} -> {Atom.to_string(k), v} end)
+      user_attrs = Map.new(@valid_user_attrs, fn {k, v} -> {Atom.to_string(k), v} end) |> Map.delete("email")
+      :ets.delete_all_objects(:saved_mail)
+      assert {:error, _} = Members.create_member_in_body(body, member_attrs, user_attrs)
+
+      assert Repo.get_by(Member, last_name: @valid_attrs.last_name) == nil
+      assert Repo.get_by(Omscore.Auth.User, name: @valid_user_attrs.name) == nil
+      assert Members.list_body_memberships(body) == []
+      assert :ets.lookup(:saved_mail, @valid_user_attrs.email) == []
+    end
+
+    test "create_member_in_body/3 downcases email address" do
+      body = body_fixture()
+      member_attrs = Map.new(@valid_attrs, fn {k, v} -> {Atom.to_string(k), v} end)
+      user_attrs = Map.new(@valid_user_attrs, fn {k, v} -> {Atom.to_string(k), v} end) |> Map.put("email", "SOME@EMAIL.COM")
+      :ets.delete_all_objects(:saved_mail)
+      assert {:ok, %Member{} = member} = Members.create_member_in_body(body, member_attrs, user_attrs)
+
+      assert member = Repo.get!(Member, member.id)
+      assert user = Repo.get!(Omscore.Auth.User, member.user_id)
+      assert user |> map_inclusion(Map.delete(@valid_user_attrs, :password))
+      assert member |> map_inclusion(Map.delete(@valid_attrs, :user_id))
+      assert Repo.get_by(Omscore.Auth.User, email: @valid_user_attrs.email) != nil
+      assert Members.get_body_membership(body, member)
+      assert :ets.lookup(:saved_mail, @valid_user_attrs.email) != []
+      assert :ets.lookup(:saved_mail, "SOME@EMAIL.COM") == []
+    end
+
+    test "create_member_in_body/3 rolls back on duplicate email address" do
+      body = body_fixture()
+      member_attrs = Map.new(@valid_attrs, fn {k, v} -> {Atom.to_string(k), v} end)
+      user_attrs = Map.new(@valid_user_attrs, fn {k, v} -> {Atom.to_string(k), v} end)
+      user = user_fixture(@valid_user_attrs)
+      :ets.delete_all_objects(:saved_mail)
+      assert {:error, _} = Members.create_member_in_body(body, member_attrs, user_attrs)
+
+      assert Repo.get_by(Member, last_name: @valid_attrs.last_name) == nil
+      assert Repo.get_by(Omscore.Auth.User, email: @valid_user_attrs.email) == user
+      assert Members.list_body_memberships(body) == []
+      assert :ets.lookup(:saved_mail, @valid_user_attrs.email) == []
+    end
+
+    test "create_member_in_body/3 ignores which password was passed" do
+      body = body_fixture()
+      member_attrs = Map.new(@valid_attrs, fn {k, v} -> {Atom.to_string(k), v} end)
+      user_attrs = Map.new(@valid_user_attrs, fn {k, v} -> {Atom.to_string(k), v} end)
+      assert {:ok, %Member{} = member} = Members.create_member_in_body(body, member_attrs, user_attrs)
+
+      assert {:error, :unprocessable_entity, _} = Omscore.Auth.login_user(@valid_user_attrs.name, @valid_user_attrs.password)      
     end
 
     test "update_member/2 with valid data updates the member" do
