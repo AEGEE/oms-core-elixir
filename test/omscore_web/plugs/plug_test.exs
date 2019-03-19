@@ -278,7 +278,6 @@ defmodule OmscoreWeb.PlugTest do
     assert conn.assigns.target_member.id == member.id
   end
 
-  
   test "logger plug works", %{conn: conn} do
     
     conn = conn

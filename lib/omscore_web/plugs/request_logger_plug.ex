@@ -11,22 +11,23 @@ defmodule OmscoreWeb.RequestLoggerPlug do
     start = System.monotonic_time()
 
     Conn.register_before_send(conn, fn conn ->
-      # Logger.info(inspect(conn.assigns))
-      Logger.info(inspect(Map.keys(conn.assigns)))
-
       Logger.log(level, fn ->
         stop = System.monotonic_time()
         diff = System.convert_time_unit(stop - start, :native, :microsecond)
         status = Integer.to_string(conn.status)
+        resp_body = if conn.method in ["PUT", "POST"] and hd(conn.path_info) not in ["login", "renew"] do
+          [", resp: ", conn.resp_body]
+        else
+          []
+        end
 
         [
             conn.method, ?\s,
             conn.request_path, ?\s,
             status, ?\s,
-            Conn.get_resp_header(conn, "content-length"), " - ",
             formatted_diff(diff), ", ",
-            print_user(conn)
-        ]
+            print_user(conn), ?\s,
+        ] ++ resp_body
       end)
 
       conn
