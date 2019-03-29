@@ -229,6 +229,25 @@ defmodule OmscoreWeb.MemberControllerTest do
       assert res["user"] != nil
     end
 
+    test "scoping works for local and join_request scope permissions", %{conn: conn, member: member} do
+      %{token: token, member: member} = create_member_with_permissions([])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      body = body_fixture()
+      circle = bound_circle_fixture(body)
+      permission = permission_fixture(%{action: "view", object: "member", scope: "join_request"})
+      assert {:ok, _} = Omscore.Core.put_circle_permissions(circle, [permission])
+      assert {:ok, _} = Members.create_body_membership(body, member)
+      assert {:ok, _} = Members.create_circle_membership(circle, member)
+
+      new_member = member_fixture()
+      Members.create_join_request(body, new_member)
+
+      conn = get conn, member_path(conn, :show, new_member.id)
+      assert res = json_response(conn, 200)["data"] 
+      assert res["id"] == new_member.id   
+    end
+
     test "rejects request for unauthorized user", %{conn: conn, member: member} do
       %{token: token} = create_member_with_permissions([])
       conn = put_req_header(conn, "x-auth-token", token)

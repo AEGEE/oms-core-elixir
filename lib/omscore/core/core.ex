@@ -113,7 +113,14 @@ defmodule Omscore.Core do
   defp merge_permissions(a, b) do
     filters = intersect_filters(a.filters, b.filters)
 
-    res = if a.scope == "global" do
+    scopes = Omscore.Core.Permission.scopes
+    # We should be able to rely on scopes always being in the scopes array
+    # If not, <= comparison will choose the non-nil value
+    idx_a = Enum.find_index(scopes, fn(x) -> x == a.scope end)
+    idx_b = Enum.find_index(scopes, fn(x) -> x == b.scope end)
+
+    # The scope with the lowest index is the higher one
+    res = if idx_a <= idx_b do
       a
     else
       b

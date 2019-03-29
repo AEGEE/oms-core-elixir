@@ -106,10 +106,10 @@ defmodule Omscore.Members do
   # Get all local permissions that the user has through his membership in the body
   def get_local_permissions(%Member{} = member, %Omscore.Core.Body{} = body) do
     member
-    |> list_bound_circle_memberships(body)                  # Get all circle memberships of the member in that body
+    |> list_bound_circle_memberships(body)            # Get all circle memberships of the member in that body
     |> Enum.map(fn(x) -> x.circle end)                # Strip the circle_membership part
     |> Omscore.Core.get_permissions_recursive()       # Gather all permissions on any of the circles
-    |> Omscore.Core.reduce_permission_list()          # Remove duplicates and overwrite local permissions with global permission, thus no need to filter before
+    #|> Omscore.Core.reduce_permission_list()          # Remove duplicates and overwrite local permissions with global permission, thus no need to filter before
   end
 
   # A bit of a lazy implementation of a get all permissions from the body plus all global ones

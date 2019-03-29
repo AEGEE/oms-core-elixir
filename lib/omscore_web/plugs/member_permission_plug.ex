@@ -9,12 +9,20 @@ defmodule OmscoreWeb.MemberPermissionPlug do
   # There is quite some performance optimization potential here...
   def process_foreign(conn, member_id) do
     member = Omscore.Members.get_member!(member_id) 
-    |> Omscore.Repo.preload([:bodies])
+    |> Omscore.Repo.preload([:bodies, [join_requests: [:body]]])
+
+    join_request_permissions = member.join_requests
+    |> Enum.filter(fn(x) -> not x.approved end)
+    |> Enum.map(fn(x) -> x.body end)
+    |> Enum.map(fn(body) -> Omscore.Members.get_local_permissions(conn.assigns.member, body) end)
+    |> Enum.reduce([], fn(x, acc) -> x ++ acc end)
+    |> Enum.filter(fn(x) -> x.scope == "join_request" end)
 
     permissions = member.bodies
     |> Enum.map(fn(body) -> Omscore.Members.get_local_permissions(conn.assigns.member, body) end)
     |> Enum.reduce([], fn(x, acc) -> x ++ acc end)
     |> Enum.concat(conn.assigns.permissions)
+    |> Enum.concat(join_request_permissions)
     |> Omscore.Core.reduce_permission_list()
 
     conn 
