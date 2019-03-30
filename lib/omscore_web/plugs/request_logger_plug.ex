@@ -15,8 +15,8 @@ defmodule OmscoreWeb.RequestLoggerPlug do
         stop = System.monotonic_time()
         diff = System.convert_time_unit(stop - start, :native, :microsecond)
         status = Integer.to_string(conn.status)
-        resp_body = if conn.method in ["PUT", "POST"] and hd(conn.path_info) not in ["login", "renew"] do
-          [", resp: ", conn.resp_body]
+        params = if conn.method in ["PUT", "POST"] and hd(conn.path_info) not in ["login", "renew"] do
+          [", request params: ", Kernel.inspect(conn.params, pretty: true)]
         else
           []
         end
@@ -27,7 +27,7 @@ defmodule OmscoreWeb.RequestLoggerPlug do
             status, ?\s,
             formatted_diff(diff), ", ",
             print_user(conn), ?\s,
-        ] ++ resp_body
+        ] ++ params
       end)
 
       conn
