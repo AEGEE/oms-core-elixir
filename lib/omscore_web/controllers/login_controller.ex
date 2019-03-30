@@ -7,7 +7,8 @@ defmodule OmscoreWeb.LoginController do
 
 
   def login(conn, %{"username" => username, "password" => password}) do
-    with {:ok, _user, access, refresh} <- (Auth.login_user(username, password)) do
+    with {:ok} <- Auth.login_bruteforce_protection(conn.remote_ip, username, password),
+         {:ok, _user, access, refresh} <- (Auth.login_user(username, password)) do
       render(conn, "login.json", access: access, refresh: refresh)
     end
   end

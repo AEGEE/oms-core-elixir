@@ -2,7 +2,6 @@ defmodule OmscoreWeb.Router do
   use OmscoreWeb, :router
 
   pipeline :api do
-    plug OmscoreWeb.RequestLoggerPlug
     plug :accepts, ["json"]
   end
 

@@ -155,6 +155,21 @@ defmodule Omscore.AuthTest do
       assert %Ecto.Changeset{} = Auth.change_user(user)
     end
 
+    test "login_bruteforce_protection stops after too many requests" do
+      old_attempts = Application.get_env(:omscore, :max_login_attempts)
+      Application.put_env(:omscore, :max_login_attempts, 10)
+      :ets.delete_all_objects(:login_attempts)
+
+      num_passes = 0..15
+      |> Enum.map(fn(_) -> Auth.login_bruteforce_protection(Omscore.random_url(), "somename", "some password") end)
+      |> Enum.filter(fn(x) -> x == {:ok} end)
+      |> Enum.count
+
+      assert num_passes == 10
+
+      Application.put_env(:omscore, :max_login_attempts, old_attempts)
+    end
+
     test "login user successfully" do
       user_fixture()
       assert {:ok, _user, _access, _refresh} = Omscore.Auth.login_user("some name", "some password")

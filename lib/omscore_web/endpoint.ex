@@ -15,7 +15,10 @@ defmodule OmscoreWeb.Endpoint do
     plug Phoenix.CodeReloader
   end
 
-  #plug Plug.Logger
+  # This plug replaces the real IP from traefik forwarding
+  plug OmscoreWeb.ReplaceRealIpPlug
+  # Log in our custom format
+  plug OmscoreWeb.RequestLoggerPlug
 
   plug Plug.Parsers,
     parsers: [:urlencoded, :multipart, :json],

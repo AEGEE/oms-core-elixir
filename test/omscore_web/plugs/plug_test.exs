@@ -8,6 +8,32 @@ defmodule OmscoreWeb.PlugTest do
   @user_attrs %{id: 3, email: "some@email.com", superadmin: false, name: "some name"} 
   @circle_attrs %{description: "some description", joinable: true, name: "some name"}
 
+  test "replace_real_ip_plug replaces the remote_ip field with the correct ip", %{conn: conn} do
+    conn = conn
+    |> Map.put(:remote_ip, {127, 0, 0, 1})
+    |> OmscoreWeb.ReplaceRealIpPlug.call(nil)
+
+    assert conn.remote_ip == "127.0.0.1"
+
+    conn = conn
+    |> Map.put(:remote_ip, "localhost")
+    |> OmscoreWeb.ReplaceRealIpPlug.call(nil)
+
+    assert conn.remote_ip == "localhost"
+
+    conn = conn
+    |> put_req_header("x-real-ip", "172.20.0.1")
+    |> OmscoreWeb.ReplaceRealIpPlug.call(nil)
+
+    assert conn.remote_ip == "172.20.0.1"
+
+    conn = conn
+    |> recycle
+    |> put_req_header("x-forwarded-for", "localhost")
+    |> OmscoreWeb.ReplaceRealIpPlug.call(nil)
+
+    assert conn.remote_ip == "localhost"
+  end
 
   test "auth plug successfully decodes a valid access token", %{conn: conn} do
     token = create_token(@user_attrs)

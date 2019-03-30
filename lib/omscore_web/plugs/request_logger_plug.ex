@@ -27,6 +27,7 @@ defmodule OmscoreWeb.RequestLoggerPlug do
             status, ?\s,
             formatted_diff(diff), ", ",
             print_user(conn), ?\s,
+            Kernel.inspect(conn.req_headers)
         ] ++ params
       end)
 

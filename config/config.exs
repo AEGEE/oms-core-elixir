@@ -24,6 +24,7 @@ config :omscore,
   ttl_access: 60 * 60,                # 1 hour
   ttl_password_reset: 60 * 15,        # 15 Minutes
   ttl_mail_confirmation: 60 * 60 * 2, # 2 hours
+  max_login_attempts: 100,            # Max number of login attempts in 5 minutes
   expiry_worker_freq: 5 * 60 * 1000,  # 5 Minutes
   mail_confirmation_resends: 50,      # How often a user can request resend of his confirmation mail within the expiration interval
   supertoken: Helper.read_secret_from_file(System.get_env("SUPERTOKEN_FILE"), nil) # The supertoken grants full access to everything
