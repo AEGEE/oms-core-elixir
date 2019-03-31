@@ -36,7 +36,6 @@ defmodule OmscoreWeb.PlugTest do
     assert conn == copy
   end
 
-  @tag only: true
   test "auth plug rejects an invalid access token", %{conn: conn} do
     # This token is expired
     token = "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJPTVMiLCJlbWFpbCI6Im5pY29Abmljby13ZXN0ZXJiZWNrLmRlIiwiZXhwIjoxNTUwMjQ4NDIyLCJpYXQiOjE1NTAyNDQ4MjIsImlzcyI6Ik9NUyIsImp0aSI6ImMxNjI1ZTM4LTZiMmEtNGY3NS1hYmIyLTk1MGNiYWVlYjI4YiIsIm5hbWUiOiJibGFja3NwaDNyZSIsIm5iZiI6MTU1MDI0NDgyMSwicmVmcmVzaCI6NjE5Miwic3ViIjoiMTQiLCJzdXBlcmFkbWluIjpmYWxzZSwidHlwIjoiYWNjZXNzIn0.pYJX36GTjlXXpWHmEcDdgIJaHFjhDQYTmxRjYBC-riMvOFQgEwQnGwD3o7K43fEl0pzXfoxKb-h864XF87txBw"
@@ -170,6 +169,34 @@ defmodule OmscoreWeb.PlugTest do
     assert conn.assigns.target_member
     assert conn.assigns.target_member.id == member2.id
     assert Enum.any?(conn.assigns.permissions, fn(x) -> x.id == permission.id end)
+  end
+
+  @tag only: true
+  test "member permission plug fetches permissions obtained through join requests", %{conn: conn} do
+    %{token: token, member: member1} = create_member_with_permissions([])
+    permission = permission_fixture(%{scope: "join_request", action: "lol"})
+    permission2 = permission_fixture(%{scope: "local"})
+    body = body_fixture()
+    member2 = member_fixture()
+    circle = bound_circle_fixture(body)
+
+    assert {:ok, _} = Omscore.Members.create_body_membership(body, member1)
+    assert {:ok, _} = Omscore.Members.create_join_request(body, member2)
+    assert {:ok, _} = Omscore.Core.put_circle_permissions(circle, [permission, permission2])
+    assert {:ok, _} = Omscore.Members.create_circle_membership(circle, member1)
+
+    conn = conn
+    |> put_req_header("x-auth-token", token)
+    |> OmscoreWeb.AuthorizePlug.call([])
+    |> OmscoreWeb.MemberFetchPlug.call([])
+    |> OmscoreWeb.PermissionFetchPlug.call([])
+    |> Map.put(:path_params, %{"member_id" => member2.id})
+    |> OmscoreWeb.MemberPermissionPlug.call([])
+
+    assert conn.assigns.target_member
+    assert conn.assigns.target_member.id == member2.id
+    assert Enum.any?(conn.assigns.permissions, fn(x) -> x.id == permission.id end)
+    assert !Enum.any?(conn.assigns.permissions, fn(x) -> x.id == permission2.id end)
   end
 
   test "member permission plug adds some constant permissions if requesting myself", %{conn: conn} do

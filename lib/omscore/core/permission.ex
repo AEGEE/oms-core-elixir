@@ -2,6 +2,8 @@ defmodule Omscore.Core.Permission do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @scopes ["global", "local", "join_request"]
+  def scopes(), do: @scopes
 
   schema "permissions" do
     field :action, :string
@@ -22,7 +24,7 @@ defmodule Omscore.Core.Permission do
     |> cast(attrs, [:scope, :action, :object, :description, :always_assigned])
     |> cast_embed(:filters)
     |> validate_required([:scope, :action, :object])
-    |> validate_inclusion(:scope, ["global", "local"], message: "must be either global or local")
+    |> validate_inclusion(:scope, @scopes, message: "must be either global, local or join_request")
     |> validate_format(:scope, ~r/^[^:]*$/, message: "Cannot contain colons")
     |> validate_format(:action, ~r/^[^:]*$/, message: "Cannot contain colons")
     |> validate_format(:object, ~r/^[^:]*$/, message: "Cannot contain colons")
