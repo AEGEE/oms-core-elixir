@@ -1,4 +1,17 @@
 defmodule Omscore.Auth.User do
+  @moduledoc """
+  A user structure
+
+  A user can exist without a member, while a member can not exist without a user.
+  This was intended to create user accounts for programmatic access, while natural persons have both a user and a member. 
+
+  A user can be active or not, meaning he can login or not.
+  If a user has superadmin status, he automatically gets all permissions in the system without being in any circle.
+
+  A user is uniquely identified by either his id, his email or his name. All three fields must be unique.
+  The password is stored in hashed form, so an attacker who can read the db won't leak all passwords.
+  """
+
   use Ecto.Schema
   import Ecto.Changeset
 

@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.19.3">
+    <title>Omscore.Core — OMS Core Elixir v0.0.1</title>
+    <link rel="stylesheet" href="dist/html-399e30b9b028e3059575.css" />
+    <script src="dist/sidebar_items-635002dc95.js"></script>
+    <script async src="dist/html-399e30b9b028e3059575.js"></script>
+    
+  </head>
+  <body data-type="modules">
+    <script>try { if(localStorage.getItem('night-mode')) document.body.className += ' night-mode'; } catch (e) { }</script>
+    <div class="main">
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" aria-hidden="true"></span>
+  <span class="sr-only">Toggle Sidebar</span>
+</button>
+<button class="sidebar-button night-mode-toggle">
+  <span class="icon-theme" aria-hidden="true"></span>
+  <span class="sr-only">Toggle Theme</span>
+</button>
+<section class="sidebar">
+
+  <a href="https://oms-project.atlassian.net/wiki/spaces/GENERAL" class="sidebar-projectLink">
+    <div class="sidebar-projectDetails">
+      <h1 class="sidebar-projectName">
+OMS Core Elixir      </h1>
+      <h2 class="sidebar-projectVersion">
+        v0.0.1
+      </h2>
+    </div>
+  </a>
+
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button">
+      <span class="icon-search" aria-hidden="true"></span>
+    </button>
+    <input name="q" type="text" id="search-list" class="search-input" placeholder="Search" aria-label="Search" autocomplete="off" />
+  </form>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+
+      <h1>
+        <small class="visible-xs">OMS Core Elixir v0.0.1</small>
+Omscore.Core        
+          <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L1" title="View Source" class="view-source" rel="help">
+            <span class="icon-code" aria-hidden="true"></span>
+            <span class="sr-only">View Source</span>
+          </a>
+      </h1>
+
+
+        <section id="moduledoc">
+<p>The Core context.</p>
+        </section>
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#all_orphan_circles?/1">all_orphan_circles?(circles)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#apply_attribute_filters/2">apply_attribute_filters(data, filters)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#change_body/1">change_body(body)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#change_circle/1">change_circle(circle)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#change_permission/1">change_permission(permission)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#circles_have_same_body?/1">circles_have_same_body?(list)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#create_body/1">create_body(attrs \\ %{})</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#create_circle/1">create_circle(attrs \\ %{})</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#create_circle/2">create_circle(attrs, body)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#create_permission/1">create_permission(attrs \\ %{})</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#delete_body/1">delete_body(body)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#delete_circle/1">delete_circle(circle)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#delete_permission/1">delete_permission(permission)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#find_array/2">find_array(type, input_data)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#find_circles/1">find_circles(input_data)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#find_permissions/1">find_permissions(input_data)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_body!/1">get_body!(id)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_body_members/1">get_body_members(body)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_child_circles/1">get_child_circles(circles)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_circle/1">get_circle(id)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_circle!/1">get_circle!(id)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_members_with_permission/2">get_members_with_permission(id, params)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_permission/3">get_permission(scope, action, object)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_permission!/1">get_permission!(id)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_permissions_recursive/1">get_permissions_recursive(circle)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#is_parent_recursive?/2">is_parent_recursive?(circle, parent_circle)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#list_always_assigned_permissions/0">list_always_assigned_permissions()</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#list_bodies/1">list_bodies(params \\ %{})</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#list_bound_circles/2">list_bound_circles(body, params \\ %{})</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#list_bound_circles_/2">list_bound_circles_(body, params)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#list_bound_circles_with_permission/3">list_bound_circles_with_permission(body, action, object)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#list_circles/1">list_circles(params \\ %{})</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#list_free_circles/1">list_free_circles(params \\ %{})</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#list_permissions/1">list_permissions(params \\ %{})</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#put_child_circles/2">put_child_circles(circle, child_circles)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#put_circle_permissions/2">put_circle_permissions(circle, permissions)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#put_parent_circle/2">put_parent_circle(circle, parent_circle)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#reduce_permission_list/1">reduce_permission_list(permission_list)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#search_permission_list/3">search_permission_list(permission_list, action, object)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#search_permission_list/4">search_permission_list(permission_list, action, object, scope)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#update_body/2">update_body(body, attrs)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#update_circle/2">update_circle(circle, attrs)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#update_permission/2">update_permission(permission, attrs)</a>
+  </div>
+</div>
+  </div>
+        </section>
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions          </h1>
+          <div class="functions-list">
+<section class="detail" id="all_orphan_circles?/1">
+    <div class="detail-header">
+    <a href="#all_orphan_circles?/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">all_orphan_circles?(circles)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L355" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="apply_attribute_filters/2">
+    <div class="detail-header">
+    <a href="#apply_attribute_filters/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">apply_attribute_filters(data, filters)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L194" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="change_body/1">
+    <div class="detail-header">
+    <a href="#change_body/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">change_body(body)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L246" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="change_circle/1">
+    <div class="detail-header">
+    <a href="#change_circle/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">change_circle(circle)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L336" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="change_permission/1">
+    <div class="detail-header">
+    <a href="#change_permission/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">change_permission(permission)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L90" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="circles_have_same_body?/1">
+    <div class="detail-header">
+    <a href="#circles_have_same_body?/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">circles_have_same_body?(list)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L450" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="create_body/1">
+  
+    <span id="create_body/0"></span>
+  <div class="detail-header">
+    <a href="#create_body/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">create_body(attrs \\ %{})</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L223" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="create_circle/1">
+  
+    <span id="create_circle/0"></span>
+  <div class="detail-header">
+    <a href="#create_circle/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">create_circle(attrs \\ %{})</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L312" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="create_circle/2">
+    <div class="detail-header">
+    <a href="#create_circle/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">create_circle(attrs, body)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L302" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="create_permission/1">
+  
+    <span id="create_permission/0"></span>
+  <div class="detail-header">
+    <a href="#create_permission/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">create_permission(attrs \\ %{})</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L71" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="delete_body/1">
+    <div class="detail-header">
+    <a href="#delete_body/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">delete_body(body)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L241" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="delete_circle/1">
+    <div class="detail-header">
+    <a href="#delete_circle/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">delete_circle(circle)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L331" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="delete_permission/1">
+    <div class="detail-header">
+    <a href="#delete_permission/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">delete_permission(permission)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L85" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="find_array/2">
+    <div class="detail-header">
+    <a href="#find_array/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">find_array(type, input_data)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L13" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="find_circles/1">
+    <div class="detail-header">
+    <a href="#find_circles/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">find_circles(input_data)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L353" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="find_permissions/1">
+    <div class="detail-header">
+    <a href="#find_permissions/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">find_permissions(input_data)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L95" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="get_body!/1">
+    <div class="detail-header">
+    <a href="#get_body!/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_body!(id)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L214" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="get_body_members/1">
+    <div class="detail-header">
+    <a href="#get_body_members/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_body_members(body)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L216" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="get_child_circles/1">
+    <div class="detail-header">
+    <a href="#get_child_circles/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_child_circles(circles)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L470" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="get_circle/1">
+    <div class="detail-header">
+    <a href="#get_circle/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_circle(id)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L293" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="get_circle!/1">
+    <div class="detail-header">
+    <a href="#get_circle!/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_circle!(id)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L292" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="get_members_with_permission/2">
+    <div class="detail-header">
+    <a href="#get_members_with_permission/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_members_with_permission(id, params)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L51" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="get_permission/3">
+    <div class="detail-header">
+    <a href="#get_permission/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_permission(scope, action, object)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L49" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="get_permission!/1">
+    <div class="detail-header">
+    <a href="#get_permission!/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_permission!(id)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L47" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="get_permissions_recursive/1">
+    <div class="detail-header">
+    <a href="#get_permissions_recursive/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_permissions_recursive(circle)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L428" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="is_parent_recursive?/2">
+    <div class="detail-header">
+    <a href="#is_parent_recursive?/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">is_parent_recursive?(circle, parent_circle)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L416" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="list_always_assigned_permissions/0">
+    <div class="detail-header">
+    <a href="#list_always_assigned_permissions/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">list_always_assigned_permissions()</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L41" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="list_bodies/1">
+  
+    <span id="list_bodies/0"></span>
+  <div class="detail-header">
+    <a href="#list_bodies/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">list_bodies(params \\ %{})</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L205" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="list_bound_circles/2">
+  
+    <span id="list_bound_circles/1"></span>
+  <div class="detail-header">
+    <a href="#list_bound_circles/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">list_bound_circles(body, params \\ %{})</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L271" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="list_bound_circles_/2">
+    <div class="detail-header">
+    <a href="#list_bound_circles_/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">list_bound_circles_(body, params)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L272" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="list_bound_circles_with_permission/3">
+    <div class="detail-header">
+    <a href="#list_bound_circles_with_permission/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">list_bound_circles_with_permission(body, action, object)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L283" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="list_circles/1">
+  
+    <span id="list_circles/0"></span>
+  <div class="detail-header">
+    <a href="#list_circles/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">list_circles(params \\ %{})</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L253" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="list_free_circles/1">
+  
+    <span id="list_free_circles/0"></span>
+  <div class="detail-header">
+    <a href="#list_free_circles/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">list_free_circles(params \\ %{})</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L262" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="list_permissions/1">
+  
+    <span id="list_permissions/0"></span>
+  <div class="detail-header">
+    <a href="#list_permissions/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">list_permissions(params \\ %{})</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L32" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="put_child_circles/2">
+    <div class="detail-header">
+    <a href="#put_child_circles/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">put_child_circles(circle, child_circles)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L361" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="put_circle_permissions/2">
+    <div class="detail-header">
+    <a href="#put_circle_permissions/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">put_circle_permissions(circle, permissions)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L342" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="put_parent_circle/2">
+    <div class="detail-header">
+    <a href="#put_parent_circle/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">put_parent_circle(circle, parent_circle)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L401" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="reduce_permission_list/1">
+    <div class="detail-header">
+    <a href="#reduce_permission_list/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">reduce_permission_list(permission_list)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L99" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="search_permission_list/3">
+    <div class="detail-header">
+    <a href="#search_permission_list/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">search_permission_list(permission_list, action, object)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L145" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="search_permission_list/4">
+    <div class="detail-header">
+    <a href="#search_permission_list/4" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">search_permission_list(permission_list, action, object, scope)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L151" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="update_body/2">
+    <div class="detail-header">
+    <a href="#update_body/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">update_body(body, attrs)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L234" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="update_circle/2">
+    <div class="detail-header">
+    <a href="#update_circle/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">update_circle(circle, attrs)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L322" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="update_permission/2">
+    <div class="detail-header">
+    <a href="#update_permission/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">update_permission(permission, attrs)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L78" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+          </div>
+        </section>
+          <footer class="footer">
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.19.3),
+          </span>
+          <span class="line">
+            designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+            </span>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+  
+  </body>
+</html>
+

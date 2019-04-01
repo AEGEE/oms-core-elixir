@@ -12,7 +12,11 @@ defmodule Omscore.Mixfile do
       aliases: aliases(),
       deps: deps(),
       test_coverage: [tool: ExCoveralls],
-      preferred_cli_env: [coveralls: :test, "coveralls.detail": :test, "coveralls.post": :test, "coveralls.html": :test]
+      preferred_cli_env: [coveralls: :test, "coveralls.detail": :test, "coveralls.post": :test, "coveralls.html": :test],
+      # Docs
+      name: "OMS Core Elixir",
+      source_url: "https://github.com/AEGEE/oms-core-elixir",
+      homepage_url: "https://oms-project.atlassian.net/wiki/spaces/GENERAL"
     ]
   end
 
@@ -47,7 +51,8 @@ defmodule Omscore.Mixfile do
       {:tesla, "~> 1.2.0"},
       {:hackney, "~> 1.14.0"}, # for tesla http requests
       #{:jason, ">= 1.0.0"}, # for tesla json encoding
-      {:excoveralls, "~> 0.8", only: :test}
+      {:excoveralls, "~> 0.8", only: :test},
+      {:ex_doc, "~> 0.19", only: :dev, runtime: false}
     ]
   end
 

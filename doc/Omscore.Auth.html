@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.19.3">
+    <title>Omscore.Auth — OMS Core Elixir v0.0.1</title>
+    <link rel="stylesheet" href="dist/html-399e30b9b028e3059575.css" />
+    <script src="dist/sidebar_items-635002dc95.js"></script>
+    <script async src="dist/html-399e30b9b028e3059575.js"></script>
+    
+  </head>
+  <body data-type="modules">
+    <script>try { if(localStorage.getItem('night-mode')) document.body.className += ' night-mode'; } catch (e) { }</script>
+    <div class="main">
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" aria-hidden="true"></span>
+  <span class="sr-only">Toggle Sidebar</span>
+</button>
+<button class="sidebar-button night-mode-toggle">
+  <span class="icon-theme" aria-hidden="true"></span>
+  <span class="sr-only">Toggle Theme</span>
+</button>
+<section class="sidebar">
+
+  <a href="https://oms-project.atlassian.net/wiki/spaces/GENERAL" class="sidebar-projectLink">
+    <div class="sidebar-projectDetails">
+      <h1 class="sidebar-projectName">
+OMS Core Elixir      </h1>
+      <h2 class="sidebar-projectVersion">
+        v0.0.1
+      </h2>
+    </div>
+  </a>
+
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button">
+      <span class="icon-search" aria-hidden="true"></span>
+    </button>
+    <input name="q" type="text" id="search-list" class="search-input" placeholder="Search" aria-label="Search" autocomplete="off" />
+  </form>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+
+      <h1>
+        <small class="visible-xs">OMS Core Elixir v0.0.1</small>
+Omscore.Auth        
+          <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/auth/auth.ex#L1" title="View Source" class="view-source" rel="help">
+            <span class="icon-code" aria-hidden="true"></span>
+            <span class="sr-only">View Source</span>
+          </a>
+      </h1>
+
+
+        <section id="moduledoc">
+<p>The Auth context.
+This accumulates functionalities around logging in, the user datastructure and everything password related</p>
+        </section>
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#authenticate_user/2">authenticate_user(username, plain_text_password)</a>
+  </div>
+    <div class="summary-synopsis"><p>Check if a user exists in the database and if that user has the password and is activated</p>
+</div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#change_user/1">change_user(user)</a>
+  </div>
+    <div class="summary-synopsis"><p>Creates a user <a href="https://hexdocs.pm/ecto/2.2.9/Ecto.Changeset.html"><code class="inline">Ecto.Changeset</code></a> and returns it</p>
+</div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#check_access_token/1">check_access_token(access_token)</a>
+  </div>
+    <div class="summary-synopsis"><p>Check an access token for validity</p>
+</div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#check_refresh_token/1">check_refresh_token(refresh_token)</a>
+  </div>
+    <div class="summary-synopsis"><p>Check a refresh token for validity</p>
+</div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#check_user_existence/1">check_user_existence(username)</a>
+  </div>
+    <div class="summary-synopsis"><p>Checks if a given username exists in the database</p>
+</div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#create_access_token/2">create_access_token(user, refresh_token_db)</a>
+  </div>
+    <div class="summary-synopsis"><p>Creates an access token</p>
+</div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#create_password_reset_object/1">create_password_reset_object(user)</a>
+  </div>
+    <div class="summary-synopsis"><p>Creates a password reset object</p>
+</div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#create_refresh_token/2">create_refresh_token(user, device)</a>
+  </div>
+    <div class="summary-synopsis"><p>Creates a refresh token</p>
+</div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#create_user/1">create_user(attrs \\ %{})</a>
+  </div>
+    <div class="summary-synopsis"><p>Creates a new user by attributes</p>
+</div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#delete_user/1">delete_user(user)</a>
+  </div>
+    <div class="summary-synopsis"><p>Deletes a user</p>
+</div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#execute_password_reset/2">execute_password_reset(reset_url, password)</a>
+  </div>
+    <div class="summary-synopsis"><p>Executes a password reset</p>
+</div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_password_reset_by_url!/1">get_password_reset_by_url!(reset_url)</a>
+  </div>
+    <div class="summary-synopsis"><p>Finds a password reset object by its url</p>
+</div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_user!/1">get_user!(id)</a>
+  </div>
+    <div class="summary-synopsis"><p>Gets a user by its user ID</p>
+</div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_user_by_email!/1">get_user_by_email!(email)</a>
+  </div>
+    <div class="summary-synopsis"><p>Gets a user by its email address</p>
+</div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_user_by_member_id!/1">get_user_by_member_id!(member_id)</a>
+  </div>
+    <div class="summary-synopsis"><p>Gets a user by its associated <a href="Omscore.Members.Member.html"><code class="inline">Omscore.Members.Member</code></a></p>
+</div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#list_users/0">list_users()</a>
+  </div>
+    <div class="summary-synopsis"><p>Lists all <code class="inline">User</code>s in the system</p>
+</div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#login_user/3">login_user(username, password, device \\ &quot;Unknown device&quot;)</a>
+  </div>
+    <div class="summary-synopsis"><p>Check user credentials and on success, generate a refresh and an access token</p>
+</div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#logout_token/1">logout_token(refresh_token_id)</a>
+  </div>
+    <div class="summary-synopsis"><p>Invalidates a single refresh token</p>
+</div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#logout_user/1">logout_user(user)</a>
+  </div>
+    <div class="summary-synopsis"><p>Invalidates all refresh tokens of the user, completely logging him out</p>
+</div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#renew_token/1">renew_token(refresh_token)</a>
+  </div>
+    <div class="summary-synopsis"><p>Get a new access token for a valid refresh token</p>
+</div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#trigger_password_reset/1">trigger_password_reset(email)</a>
+  </div>
+    <div class="summary-synopsis"><p>Triggers a password reset for a user, based on an email provided</p>
+</div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#update_user/2">update_user(user, attrs)</a>
+  </div>
+    <div class="summary-synopsis"><p>Updates an existing user</p>
+</div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#update_user_active/2">update_user_active(user, active)</a>
+  </div>
+    <div class="summary-synopsis"><p>Updates whether a user is active or not</p>
+</div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#update_user_member_id/2">update_user_member_id(user, member_id)</a>
+  </div>
+    <div class="summary-synopsis"><p>Updates the associated member_id</p>
+</div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#update_user_superadmin/2">update_user_superadmin(user, superadmin)</a>
+  </div>
+    <div class="summary-synopsis"><p>Updates the superadmin status of an existing user</p>
+</div>
+</div>
+  </div>
+        </section>
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions          </h1>
+          <div class="functions-list">
+<section class="detail" id="authenticate_user/2">
+    <div class="detail-header">
+    <a href="#authenticate_user/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">authenticate_user(username, plain_text_password)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/auth/auth.ex#L288" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+<p>Check if a user exists in the database and if that user has the password and is activated.</p>
+<p>Returns <code class="inline">{:ok, user}</code></p>
+  </section>
+</section>
+<section class="detail" id="change_user/1">
+    <div class="detail-header">
+    <a href="#change_user/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">change_user(user)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/auth/auth.ex#L147" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+<p>Creates a user <a href="https://hexdocs.pm/ecto/2.2.9/Ecto.Changeset.html"><code class="inline">Ecto.Changeset</code></a> and returns it</p>
+  </section>
+</section>
+<section class="detail" id="check_access_token/1">
+    <div class="detail-header">
+    <a href="#check_access_token/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">check_access_token(access_token)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/auth/auth.ex#L247" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+<p>Check an access token for validity</p>
+<p>Just requires a check with the Guardian library by cryptographic means, no db access is performed.</p>
+<p>Returns <code class="inline">{:ok, user, claims}</code> or <code class="inline">{:error, any}</code></p>
+  </section>
+</section>
+<section class="detail" id="check_refresh_token/1">
+    <div class="detail-header">
+    <a href="#check_refresh_token/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">check_refresh_token(refresh_token)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/auth/auth.ex#L226" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+<p>Check a refresh token for validity</p>
+<p>First checks if the token is a valid token by cryptographic means and then checks if it is in the db (if not the user was logged out).</p>
+<p>Returns <code class="inline">{:ok, user, token_db}</code> or <code class="inline">{:error, any}</code></p>
+  </section>
+</section>
+<section class="detail" id="check_user_existence/1">
+    <div class="detail-header">
+    <a href="#check_user_existence/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">check_user_existence(username)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/auth/auth.ex#L156" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+<p>Checks if a given username exists in the database</p>
+<p>Returns <code class="inline">true</code> or <code class="inline">false</code></p>
+  </section>
+</section>
+<section class="detail" id="create_access_token/2">
+    <div class="detail-header">
+    <a href="#create_access_token/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">create_access_token(user, refresh_token_db)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/auth/auth.ex#L279" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+<p>Creates an access token</p>
+<p>Access tokens are shortlived and not saved in db, they are only cryptographically signed.</p>
+<p>Returns <code class="inline">{:ok, access_token, claims}</code>, but you can ignore the latter.</p>
+  </section>
+</section>
+<section class="detail" id="create_password_reset_object/1">
+    <div class="detail-header">
+    <a href="#create_password_reset_object/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">create_password_reset_object(user)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/auth/auth.ex#L347" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+<p>Creates a password reset object.</p>
+<p>Since the url is stored in hashed form, it also returns the original url, which can then be sent to the user.
+Please don&#39;t store this url anywhere, as it could be used by an attacker to gain full system access.</p>
+<p>Returns <code class="inline">{:ok, password_reset, url}</code></p>
+  </section>
+</section>
+<section class="detail" id="create_refresh_token/2">
+    <div class="detail-header">
+    <a href="#create_refresh_token/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">create_refresh_token(user, device)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/auth/auth.ex#L259" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+<p>Creates a refresh token</p>
+<p>Create a longlived refresh token and saves it to db
+This can be used to create access tokens later on.</p>
+<p>Returns <code class="inline">{:ok, refresh_token, refresh_token_db}</code>. The <code class="inline">refresh_token</code> is the actual token and <code class="inline">refresh_token_db</code> is an instance of <a href="Omscore.Auth.RefreshToken.html"><code class="inline">Omscore.Auth.RefreshToken</code></a></p>
+  </section>
+</section>
+<section class="detail" id="create_user/1">
+  
+    <span id="create_user/0"></span>
+  <div class="detail-header">
+    <a href="#create_user/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">create_user(attrs \\ %{})</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/auth/auth.ex#L63" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+<p>Creates a new user by attributes.</p>
+<p>See <a href="Omscore.Auth.User.html"><code class="inline">Omscore.Auth.User</code></a> for attrs.</p>
+<p>Returns <code class="inline">{:ok, user}</code> with the new user.</p>
+  </section>
+</section>
+<section class="detail" id="delete_user/1">
+    <div class="detail-header">
+    <a href="#delete_user/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">delete_user(user)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/auth/auth.ex#L140" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+<p>Deletes a user. </p>
+<p>This will cascade up and also delete the associated member, and from there to its memberships, join requests and other associated data structures.
+Also, this request can not be undone.</p>
+  </section>
+</section>
+<section class="detail" id="execute_password_reset/2">
+    <div class="detail-header">
+    <a href="#execute_password_reset/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">execute_password_reset(reset_url, password)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/auth/auth.ex#L385" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+<p>Executes a password reset</p>
+<p>This involves finding the password reset by its url, changing the password and then deleting the password reset.</p>
+<p>Returns the <a href="Omscore.Auth.User.html"><code class="inline">Omscore.Auth.User</code></a> with its updated password.</p>
+  </section>
+</section>
+<section class="detail" id="get_password_reset_by_url!/1">
+    <div class="detail-header">
+    <a href="#get_password_reset_by_url!/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_password_reset_by_url!(reset_url)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/auth/auth.ex#L371" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+<p>Finds a password reset object by its url.</p>
+<p>You can not find it by the url directly as it&#39;s stored in hashed form.</p>
+<p>Returns the <a href="Omscore.Auth.PasswordReset.html"><code class="inline">Omscore.Auth.PasswordReset</code></a> with the user preloaded.</p>
+  </section>
+</section>
+<section class="detail" id="get_user!/1">
+    <div class="detail-header">
+    <a href="#get_user!/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_user!(id)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/auth/auth.ex#L30" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+<p>Gets a user by its user ID.</p>
+<p>Throws in case the id does not exist</p>
+<p>Returns a <a href="Omscore.Auth.User.html"><code class="inline">Omscore.Auth.User</code></a>.</p>
+  </section>
+</section>
+<section class="detail" id="get_user_by_email!/1">
+    <div class="detail-header">
+    <a href="#get_user_by_email!/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_user_by_email!(email)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/auth/auth.ex#L39" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+<p>Gets a user by its email address.</p>
+<p>Casing of the email is ignored.</p>
+<p>Returns a <a href="Omscore.Auth.User.html"><code class="inline">Omscore.Auth.User</code></a></p>
+  </section>
+</section>
+<section class="detail" id="get_user_by_member_id!/1">
+    <div class="detail-header">
+    <a href="#get_user_by_member_id!/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_user_by_member_id!(member_id)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/auth/auth.ex#L50" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+<p>Gets a user by its associated <a href="Omscore.Members.Member.html"><code class="inline">Omscore.Members.Member</code></a></p>
+<p>You can either pass a string or an integer, if you pass a string it will attempt to parse it to int</p>
+<p>Returns a <a href="Omscore.Auth.User.html"><code class="inline">Omscore.Auth.User</code></a></p>
+  </section>
+</section>
+<section class="detail" id="list_users/0">
+    <div class="detail-header">
+    <a href="#list_users/0" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">list_users()</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/auth/auth.ex#L19" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+<p>Lists all <code class="inline">User</code>s in the system. </p>
+<p>Returns an array of <a href="Omscore.Auth.User.html"><code class="inline">Omscore.Auth.User</code></a>s with nothing preloaded.</p>
+  </section>
+</section>
+<section class="detail" id="login_user/3">
+  
+    <span id="login_user/2"></span>
+  <div class="detail-header">
+    <a href="#login_user/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">login_user(username, password, device \\ &quot;Unknown device&quot;)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/auth/auth.ex#L201" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+<p>Check user credentials and on success, generate a refresh and an access token.</p>
+<p>The refresh token is valid for a long time (see <code class="inline">config/config.exs</code>) and can be used to obtain new access tokens
+The access token is valid for a short period of time and should be put into the x-auth-token header field to authenticate against oms services.
+Instead of the username, you can also use the email of the user.
+If you want, you can pass a device name to later recognize which refresh token belongs to which device, as it is stored in the refresh token claims</p>
+<p>Returns <code class="inline">{:ok, user, access_token, refresh_token}</code> or <code class="inline">{:error, _}</code></p>
+  </section>
+</section>
+<section class="detail" id="logout_token/1">
+    <div class="detail-header">
+    <a href="#logout_token/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">logout_token(refresh_token_id)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/auth/auth.ex#L184" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+<p>Invalidates a single refresh token.</p>
+<p>Can be useful if a user has multiple token for different devices and only wants to log out on one of them</p>
+<p>Returns <code class="inline">{:ok, token}</code> or <code class="inline">{:error, nil}</code> in case the refresh token was not found</p>
+  </section>
+</section>
+<section class="detail" id="logout_user/1">
+    <div class="detail-header">
+    <a href="#logout_user/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">logout_user(user)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/auth/auth.ex#L171" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+<p>Invalidates all refresh tokens of the user, completely logging him out.</p>
+<p>Be careful that he can still posess valid access tokens, which can grant him access for one access token expiration phase.</p>
+<p>Returns <code class="inline">{:ok, deletes}</code>, where deletes is the number of deleted refresh tokens</p>
+  </section>
+</section>
+<section class="detail" id="renew_token/1">
+    <div class="detail-header">
+    <a href="#renew_token/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">renew_token(refresh_token)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/auth/auth.ex#L213" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+<p>Get a new access token for a valid refresh token.</p>
+<p>Returns <code class="inline">{:ok, access}</code> or <code class="inline">{:error, _}</code></p>
+  </section>
+</section>
+<section class="detail" id="trigger_password_reset/1">
+    <div class="detail-header">
+    <a href="#trigger_password_reset/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">trigger_password_reset(email)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/auth/auth.ex#L328" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+<p>Triggers a password reset for a user, based on an email provided.</p>
+<p>This will search the user (throw if nonexistent), remove all pending password resets for that user,
+create a new one and send a mail to the user with a url referencing that password reset request.
+The user then has to use <a href="Omscore.Auth.html#execute_password_reset/2"><code class="inline">Omscore.Auth.execute_password_reset/2</code></a> with the url he received in that mail to change his password.</p>
+<p>Returns <code class="inline">{:ok, password_reset}</code></p>
+  </section>
+</section>
+<section class="detail" id="update_user/2">
+    <div class="detail-header">
+    <a href="#update_user/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">update_user(user, attrs)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/auth/auth.ex#L79" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+<p>Updates an existing user. </p>
+<p>You can not change the member id, superadmin field or active status through this.
+If you want to set the member id, use <a href="Omscore.Auth.html#update_user_member_id/2"><code class="inline">Omscore.Auth.update_user_member_id/2</code></a>
+If you want to set the superadmin status, use <a href="Omscore.Auth.html#update_user_superadmin/2"><code class="inline">Omscore.Auth.update_user_superadmin/2</code></a>
+If you want to activate/deactivate a user, use <a href="Omscore.Auth.html#update_user_active/2"><code class="inline">Omscore.Auth.update_user_active/2</code></a></p>
+<p>Returns <code class="inline">{:ok, user}</code> with the updated user.</p>
+  </section>
+</section>
+<section class="detail" id="update_user_active/2">
+    <div class="detail-header">
+    <a href="#update_user_active/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">update_user_active(user, active)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/auth/auth.ex#L123" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+<p>Updates whether a user is active or not. </p>
+<p>Beware that existing access tokens are still valid, so it will take at most one access token expiration time until the user is actually deactivated.</p>
+<p>Returns <code class="inline">{:ok, user}</code> with the updated user.</p>
+  </section>
+</section>
+<section class="detail" id="update_user_member_id/2">
+    <div class="detail-header">
+    <a href="#update_user_member_id/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">update_user_member_id(user, member_id)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/auth/auth.ex#L92" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+<p>Updates the associated member_id. </p>
+<p>If you pass a binary, it will be parsed to integer.</p>
+<p>Returns <code class="inline">{:ok, user}</code> with the updated user.</p>
+  </section>
+</section>
+<section class="detail" id="update_user_superadmin/2">
+    <div class="detail-header">
+    <a href="#update_user_superadmin/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">update_user_superadmin(user, superadmin)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/auth/auth.ex#L109" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+<p>Updates the superadmin status of an existing user.</p>
+<p>Returns <code class="inline">{:ok, user}</code> with the updated user.</p>
+  </section>
+</section>
+          </div>
+        </section>
+          <footer class="footer">
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.19.3),
+          </span>
+          <span class="line">
+            designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+            </span>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+  
+  </body>
+</html>
+

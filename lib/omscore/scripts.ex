@@ -1,4 +1,11 @@
 defmodule Omscore.Scripts do
+  @moduledoc """
+  This provides some helper scripts which are not used anywhere in the system.
+
+  It is intendet to be used by an administrator to maintain a running system through the iex console.
+  To start the iex console, use `iex -S mix` in the project folder of the system.
+  """
+
   alias Omscore.Core.Body
   alias Omscore.Core.Circle
   alias Omscore.Repo

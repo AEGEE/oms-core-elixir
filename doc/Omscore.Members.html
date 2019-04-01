@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.19.3">
+    <title>Omscore.Members — OMS Core Elixir v0.0.1</title>
+    <link rel="stylesheet" href="dist/html-399e30b9b028e3059575.css" />
+    <script src="dist/sidebar_items-635002dc95.js"></script>
+    <script async src="dist/html-399e30b9b028e3059575.js"></script>
+    
+  </head>
+  <body data-type="modules">
+    <script>try { if(localStorage.getItem('night-mode')) document.body.className += ' night-mode'; } catch (e) { }</script>
+    <div class="main">
+<button class="sidebar-button sidebar-toggle">
+  <span class="icon-menu" aria-hidden="true"></span>
+  <span class="sr-only">Toggle Sidebar</span>
+</button>
+<button class="sidebar-button night-mode-toggle">
+  <span class="icon-theme" aria-hidden="true"></span>
+  <span class="sr-only">Toggle Theme</span>
+</button>
+<section class="sidebar">
+
+  <a href="https://oms-project.atlassian.net/wiki/spaces/GENERAL" class="sidebar-projectLink">
+    <div class="sidebar-projectDetails">
+      <h1 class="sidebar-projectName">
+OMS Core Elixir      </h1>
+      <h2 class="sidebar-projectVersion">
+        v0.0.1
+      </h2>
+    </div>
+  </a>
+
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button">
+      <span class="icon-search" aria-hidden="true"></span>
+    </button>
+    <input name="q" type="text" id="search-list" class="search-input" placeholder="Search" aria-label="Search" autocomplete="off" />
+  </form>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list" href="#full-list">Pages</a></li>
+
+      <li><a id="modules-list" href="#full-list">Modules</a></li>
+
+
+  </ul>
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+
+      <h1>
+        <small class="visible-xs">OMS Core Elixir v0.0.1</small>
+Omscore.Members        
+          <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/members/members.ex#L1" title="View Source" class="view-source" rel="help">
+            <span class="icon-code" aria-hidden="true"></span>
+            <span class="sr-only">View Source</span>
+          </a>
+      </h1>
+
+
+        <section id="moduledoc">
+<p>The Members context.</p>
+        </section>
+
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+            Summary
+          </h1>
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#approve_join_request/1">approve_join_request(join_request)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#change_circle_membership/1">change_circle_membership(circle_membership)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#change_member/1">change_member(member)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#create_body_membership/2">create_body_membership(body, member)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#create_circle_membership/3">create_circle_membership(circle, member, attrs \\ %{})</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#create_join_request/3">create_join_request(body, member, attrs \\ %{})</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#create_member/1">create_member(attrs)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#create_member_in_body/3">create_member_in_body(body, member_params, user_params)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#delete_all_circle_memberships/1">delete_all_circle_memberships(circle_memberships)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#delete_body_membership/1">delete_body_membership(bm)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#delete_circle_membership/1">delete_circle_membership(circle_membership)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#delete_member/1">delete_member(member)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_all_permissions/2">get_all_permissions(member, body)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_body_membership/2">get_body_membership(body, member)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_body_membership!/1">get_body_membership!(body_membership_id)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_body_membership_safe!/2">get_body_membership_safe!(body_id, body_membership_id)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_circle_membership/2">get_circle_membership(circle, member)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_circle_membership!/1">get_circle_membership!(id)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_global_permissions/1">get_global_permissions(member)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_join_request/2">get_join_request(body, member)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_join_request!/1">get_join_request!(id)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_local_permissions/2">get_local_permissions(member, body)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_member/1">get_member(id)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_member!/1">get_member!(id)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#get_member_by_userid/1">get_member_by_userid(userid)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#is_circle_admin/2">is_circle_admin(circle, member)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#is_circle_member/2">is_circle_member(circle, member)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#list_body_memberships/1">list_body_memberships(body_or_body_id)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#list_body_memberships/2">list_body_memberships(body, params)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#list_body_memberships_with_permission/3">list_body_memberships_with_permission(body, action, object)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#list_bound_circle_memberships/2">list_bound_circle_memberships(member, body)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#list_circle_memberships/1">list_circle_memberships(circle)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#list_circle_memberships/2">list_circle_memberships(circle, params)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#list_join_requests/2">list_join_requests(body, params \\ %{})</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#list_members/1">list_members(params \\ %{})</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#reject_join_request/1">reject_join_request(join_request)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#update_body_membership/2">update_body_membership(bm, attrs \\ %{})</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#update_circle_membership/2">update_circle_membership(circle_membership, attrs)</a>
+  </div>
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#update_member/2">update_member(member, attrs)</a>
+  </div>
+</div>
+  </div>
+        </section>
+
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <span class="icon-link" aria-hidden="true"></span>
+              <span class="sr-only">Link to this section</span>
+            </a>
+Functions          </h1>
+          <div class="functions-list">
+<section class="detail" id="approve_join_request/1">
+    <div class="detail-header">
+    <a href="#approve_join_request/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">approve_join_request(join_request)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/members/members.ex#L178" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="change_circle_membership/1">
+    <div class="detail-header">
+    <a href="#change_circle_membership/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">change_circle_membership(circle_membership)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/members/members.ex#L415" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="change_member/1">
+    <div class="detail-header">
+    <a href="#change_member/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">change_member(member)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/members/members.ex#L91" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="create_body_membership/2">
+    <div class="detail-header">
+    <a href="#create_body_membership/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">create_body_membership(body, member)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/members/members.ex#L249" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="create_circle_membership/3">
+  
+    <span id="create_circle_membership/2"></span>
+  <div class="detail-header">
+    <a href="#create_circle_membership/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">create_circle_membership(circle, member, attrs \\ %{})</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/members/members.ex#L372" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="create_join_request/3">
+  
+    <span id="create_join_request/2"></span>
+  <div class="detail-header">
+    <a href="#create_join_request/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">create_join_request(body, member, attrs \\ %{})</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/members/members.ex#L158" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="create_member/1">
+    <div class="detail-header">
+    <a href="#create_member/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">create_member(attrs)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/members/members.ex#L35" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="create_member_in_body/3">
+    <div class="detail-header">
+    <a href="#create_member_in_body/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">create_member_in_body(body, member_params, user_params)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/members/members.ex#L46" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="delete_all_circle_memberships/1">
+    <div class="detail-header">
+    <a href="#delete_all_circle_memberships/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">delete_all_circle_memberships(circle_memberships)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/members/members.ex#L402" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="delete_body_membership/1">
+    <div class="detail-header">
+    <a href="#delete_body_membership/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">delete_body_membership(bm)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/members/members.ex#L280" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="delete_circle_membership/1">
+    <div class="detail-header">
+    <a href="#delete_circle_membership/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">delete_circle_membership(circle_membership)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/members/members.ex#L398" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="delete_member/1">
+    <div class="detail-header">
+    <a href="#delete_member/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">delete_member(member)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/members/members.ex#L86" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="get_all_permissions/2">
+    <div class="detail-header">
+    <a href="#get_all_permissions/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_all_permissions(member, body)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/members/members.ex#L116" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="get_body_membership/2">
+    <div class="detail-header">
+    <a href="#get_body_membership/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_body_membership(body, member)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/members/members.ex#L204" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="get_body_membership!/1">
+    <div class="detail-header">
+    <a href="#get_body_membership!/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_body_membership!(body_membership_id)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/members/members.ex#L208" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="get_body_membership_safe!/2">
+    <div class="detail-header">
+    <a href="#get_body_membership_safe!/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_body_membership_safe!(body_id, body_membership_id)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/members/members.ex#L212" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="get_circle_membership/2">
+    <div class="detail-header">
+    <a href="#get_circle_membership/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_circle_membership(circle, member)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/members/members.ex#L332" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="get_circle_membership!/1">
+    <div class="detail-header">
+    <a href="#get_circle_membership!/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_circle_membership!(id)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/members/members.ex#L329" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="get_global_permissions/1">
+    <div class="detail-header">
+    <a href="#get_global_permissions/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_global_permissions(member)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/members/members.ex#L96" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="get_join_request/2">
+    <div class="detail-header">
+    <a href="#get_join_request/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_join_request(body, member)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/members/members.ex#L154" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="get_join_request!/1">
+    <div class="detail-header">
+    <a href="#get_join_request!/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_join_request!(id)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/members/members.ex#L151" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="get_local_permissions/2">
+    <div class="detail-header">
+    <a href="#get_local_permissions/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_local_permissions(member, body)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/members/members.ex#L107" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="get_member/1">
+    <div class="detail-header">
+    <a href="#get_member/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_member(id)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/members/members.ex#L23" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="get_member!/1">
+    <div class="detail-header">
+    <a href="#get_member!/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_member!(id)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/members/members.ex#L24" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="get_member_by_userid/1">
+    <div class="detail-header">
+    <a href="#get_member_by_userid/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">get_member_by_userid(userid)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/members/members.ex#L32" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="is_circle_admin/2">
+    <div class="detail-header">
+    <a href="#is_circle_admin/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">is_circle_admin(circle, member)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/members/members.ex#L339" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="is_circle_member/2">
+    <div class="detail-header">
+    <a href="#is_circle_member/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">is_circle_member(circle, member)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/members/members.ex#L356" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="list_body_memberships/1">
+    <div class="detail-header">
+    <a href="#list_body_memberships/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">list_body_memberships(body_or_body_id)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/members/members.ex#L216" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="list_body_memberships/2">
+    <div class="detail-header">
+    <a href="#list_body_memberships/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">list_body_memberships(body, params)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/members/members.ex#L217" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="list_body_memberships_with_permission/3">
+    <div class="detail-header">
+    <a href="#list_body_memberships_with_permission/3" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">list_body_memberships_with_permission(body, action, object)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/members/members.ex#L231" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="list_bound_circle_memberships/2">
+    <div class="detail-header">
+    <a href="#list_bound_circle_memberships/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">list_bound_circle_memberships(member, body)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/members/members.ex#L322" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="list_circle_memberships/1">
+    <div class="detail-header">
+    <a href="#list_circle_memberships/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">list_circle_memberships(circle)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/members/members.ex#L288" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="list_circle_memberships/2">
+    <div class="detail-header">
+    <a href="#list_circle_memberships/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">list_circle_memberships(circle, params)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/members/members.ex#L293" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="list_join_requests/2">
+  
+    <span id="list_join_requests/1"></span>
+  <div class="detail-header">
+    <a href="#list_join_requests/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">list_join_requests(body, params \\ %{})</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/members/members.ex#L136" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="list_members/1">
+  
+    <span id="list_members/0"></span>
+  <div class="detail-header">
+    <a href="#list_members/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">list_members(params \\ %{})</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/members/members.ex#L14" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="reject_join_request/1">
+    <div class="detail-header">
+    <a href="#reject_join_request/1" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">reject_join_request(join_request)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/members/members.ex#L194" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="update_body_membership/2">
+  
+    <span id="update_body_membership/1"></span>
+  <div class="detail-header">
+    <a href="#update_body_membership/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">update_body_membership(bm, attrs \\ %{})</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/members/members.ex#L274" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="update_circle_membership/2">
+    <div class="detail-header">
+    <a href="#update_circle_membership/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">update_circle_membership(circle_membership, attrs)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/members/members.ex#L391" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+<section class="detail" id="update_member/2">
+    <div class="detail-header">
+    <a href="#update_member/2" class="detail-link" title="Link to this function">
+      <span class="icon-link" aria-hidden="true"></span>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature">update_member(member, attrs)</span>
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/members/members.ex#L75" class="view-source" rel="help" title="View Source">
+       <span class="icon-code" aria-hidden="true"></span>
+       <span class="sr-only">View Source</span>
+     </a>
+          </div>
+  <section class="docstring">
+  </section>
+</section>
+          </div>
+        </section>
+          <footer class="footer">
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener">ExDoc</a> (v0.19.3),
+          </span>
+          <span class="line">
+            designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" rel="noopener" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+            </span>
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+  
+  </body>
+</html>
+
