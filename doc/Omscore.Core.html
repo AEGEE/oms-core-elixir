@@ -7,7 +7,7 @@
     <meta name="generator" content="ExDoc v0.19.3">
     <title>Omscore.Core — OMS Core Elixir v0.0.1</title>
     <link rel="stylesheet" href="dist/html-399e30b9b028e3059575.css" />
-    <script src="dist/sidebar_items-635002dc95.js"></script>
+    <script src="dist/sidebar_items-399bd84196.js"></script>
     <script async src="dist/html-399e30b9b028e3059575.js"></script>
     
   </head>
@@ -69,6 +69,8 @@ Omscore.Core
 
         <section id="moduledoc">
 <p>The Core context.</p>
+<p>This module accumulates functions for bodies, circles and permissions and implements the permission system.
+For memberships, check out the <a href="Omscore.Members.html"><code class="inline">Omscore.Members</code></a> Module.</p>
         </section>
 
         <section id="summary" class="details-list">
@@ -87,146 +89,205 @@ Omscore.Core
   <div class="summary-signature">
     <a href="#all_orphan_circles?/1">all_orphan_circles?(circles)</a>
   </div>
+    <div class="summary-synopsis"><p>Checks if all circles in <code class="inline">circles</code> do not have a parent circle</p>
+</div>
 </div>
 <div class="summary-row">
   <div class="summary-signature">
     <a href="#apply_attribute_filters/2">apply_attribute_filters(data, filters)</a>
   </div>
+    <div class="summary-synopsis"><p>Applies an attribute filter to any data</p>
+</div>
 </div>
 <div class="summary-row">
   <div class="summary-signature">
     <a href="#change_body/1">change_body(body)</a>
   </div>
+    <div class="summary-synopsis"><p>Creates a body changeset</p>
+</div>
 </div>
 <div class="summary-row">
   <div class="summary-signature">
     <a href="#change_circle/1">change_circle(circle)</a>
   </div>
+    <div class="summary-synopsis"><p>Creates a circle changeset</p>
+</div>
 </div>
 <div class="summary-row">
   <div class="summary-signature">
     <a href="#change_permission/1">change_permission(permission)</a>
   </div>
+    <div class="summary-synopsis"><p>Creates a permission changeset</p>
+</div>
 </div>
 <div class="summary-row">
   <div class="summary-signature">
     <a href="#circles_have_same_body?/1">circles_have_same_body?(list)</a>
   </div>
+    <div class="summary-synopsis"><p>Checks if all the circles are from the same body</p>
+</div>
 </div>
 <div class="summary-row">
   <div class="summary-signature">
     <a href="#create_body/1">create_body(attrs \\ %{})</a>
   </div>
+    <div class="summary-synopsis"><p>Creates a body</p>
+</div>
 </div>
 <div class="summary-row">
   <div class="summary-signature">
     <a href="#create_circle/1">create_circle(attrs \\ %{})</a>
   </div>
+    <div class="summary-synopsis"><p>Creates a free circle</p>
+</div>
 </div>
 <div class="summary-row">
   <div class="summary-signature">
     <a href="#create_circle/2">create_circle(attrs, body)</a>
   </div>
+    <div class="summary-synopsis"><p>Creates a bound circle</p>
+</div>
 </div>
 <div class="summary-row">
   <div class="summary-signature">
     <a href="#create_permission/1">create_permission(attrs \\ %{})</a>
   </div>
+    <div class="summary-synopsis"><p>Creates a permission</p>
+</div>
 </div>
 <div class="summary-row">
   <div class="summary-signature">
     <a href="#delete_body/1">delete_body(body)</a>
   </div>
+    <div class="summary-synopsis"><p>Deletes a Body</p>
+</div>
 </div>
 <div class="summary-row">
   <div class="summary-signature">
     <a href="#delete_circle/1">delete_circle(circle)</a>
   </div>
+    <div class="summary-synopsis"><p>Deletes a Circle</p>
+</div>
 </div>
 <div class="summary-row">
   <div class="summary-signature">
     <a href="#delete_permission/1">delete_permission(permission)</a>
   </div>
+    <div class="summary-synopsis"><p>Deletes a permission, cascades to CirclePermissions</p>
+</div>
 </div>
 <div class="summary-row">
   <div class="summary-signature">
     <a href="#find_array/2">find_array(type, input_data)</a>
   </div>
+    <div class="summary-synopsis"><p>Converts an array that came from the user with maps that contain an id to a list of ecto models</p>
+</div>
 </div>
 <div class="summary-row">
   <div class="summary-signature">
     <a href="#find_circles/1">find_circles(input_data)</a>
   </div>
+    <div class="summary-synopsis"><p>From an array of possibly circles, load those who are actually circles in the db</p>
+</div>
 </div>
 <div class="summary-row">
   <div class="summary-signature">
     <a href="#find_permissions/1">find_permissions(input_data)</a>
   </div>
+    <div class="summary-synopsis"><p>Finds all db permissions from a list of input permissions</p>
+</div>
 </div>
 <div class="summary-row">
   <div class="summary-signature">
     <a href="#get_body!/1">get_body!(id)</a>
   </div>
+    <div class="summary-synopsis"><p>Gets a single body, circles preloaded</p>
+</div>
 </div>
 <div class="summary-row">
   <div class="summary-signature">
     <a href="#get_body_members/1">get_body_members(body)</a>
+      <span class="deprecated" title="Use `Omscore.Members.get_body_memberships/1` instead">deprecated</span>
   </div>
+    <div class="summary-synopsis"><p>Returns all members of a body</p>
+</div>
 </div>
 <div class="summary-row">
   <div class="summary-signature">
     <a href="#get_child_circles/1">get_child_circles(circles)</a>
   </div>
+    <div class="summary-synopsis"><p>Returns all circles which are somewhere below in the inheritance tree</p>
+</div>
 </div>
 <div class="summary-row">
   <div class="summary-signature">
     <a href="#get_circle/1">get_circle(id)</a>
   </div>
+    <div class="summary-synopsis"><p>Gets a single circle without throwing</p>
+</div>
 </div>
 <div class="summary-row">
   <div class="summary-signature">
     <a href="#get_circle!/1">get_circle!(id)</a>
   </div>
+    <div class="summary-synopsis"><p>Get a single circle</p>
+</div>
 </div>
 <div class="summary-row">
   <div class="summary-signature">
     <a href="#get_members_with_permission/2">get_members_with_permission(id, params)</a>
   </div>
+    <div class="summary-synopsis"><p>Returns all members which hold a certain permission in the system</p>
+</div>
 </div>
 <div class="summary-row">
   <div class="summary-signature">
     <a href="#get_permission/3">get_permission(scope, action, object)</a>
   </div>
+    <div class="summary-synopsis"><p>Gets a single permission by scope, object and action</p>
+</div>
 </div>
 <div class="summary-row">
   <div class="summary-signature">
     <a href="#get_permission!/1">get_permission!(id)</a>
   </div>
+    <div class="summary-synopsis"><p>Gets a single permission</p>
+</div>
 </div>
 <div class="summary-row">
   <div class="summary-signature">
     <a href="#get_permissions_recursive/1">get_permissions_recursive(circle)</a>
   </div>
+    <div class="summary-synopsis"><p>Returns all permissions that are attached to this circle or any of its parent circles</p>
+</div>
 </div>
 <div class="summary-row">
   <div class="summary-signature">
     <a href="#is_parent_recursive?/2">is_parent_recursive?(circle, parent_circle)</a>
   </div>
+    <div class="summary-synopsis"><p>Checks if the parent circle actually is a parent of circle, somewhere in the inheritance tree</p>
+</div>
 </div>
 <div class="summary-row">
   <div class="summary-signature">
     <a href="#list_always_assigned_permissions/0">list_always_assigned_permissions()</a>
   </div>
+    <div class="summary-synopsis"><p>Returns all always assigned permissions. You can also use <a href="#list_permissions/1"><code class="inline">list_permissions/1</code></a> and pass a filter for always_assigned</p>
+</div>
 </div>
 <div class="summary-row">
   <div class="summary-signature">
     <a href="#list_bodies/1">list_bodies(params \\ %{})</a>
   </div>
+    <div class="summary-synopsis"><p>Returns all bodies in the system</p>
+</div>
 </div>
 <div class="summary-row">
   <div class="summary-signature">
     <a href="#list_bound_circles/2">list_bound_circles(body, params \\ %{})</a>
   </div>
+    <div class="summary-synopsis"><p>List all circles bound to a specific body</p>
+</div>
 </div>
 <div class="summary-row">
   <div class="summary-signature">
@@ -237,66 +298,92 @@ Omscore.Core
   <div class="summary-signature">
     <a href="#list_bound_circles_with_permission/3">list_bound_circles_with_permission(body, action, object)</a>
   </div>
+    <div class="summary-synopsis"><p>Lists all bound circles which have a certain permission directly or indirectly attached</p>
+</div>
 </div>
 <div class="summary-row">
   <div class="summary-signature">
     <a href="#list_circles/1">list_circles(params \\ %{})</a>
   </div>
+    <div class="summary-synopsis"><p>List all circles</p>
+</div>
 </div>
 <div class="summary-row">
   <div class="summary-signature">
     <a href="#list_free_circles/1">list_free_circles(params \\ %{})</a>
   </div>
+    <div class="summary-synopsis"><p>List all unbound circles</p>
+</div>
 </div>
 <div class="summary-row">
   <div class="summary-signature">
     <a href="#list_permissions/1">list_permissions(params \\ %{})</a>
   </div>
+    <div class="summary-synopsis"><p>Returns all permissions in the system</p>
+</div>
 </div>
 <div class="summary-row">
   <div class="summary-signature">
     <a href="#put_child_circles/2">put_child_circles(circle, child_circles)</a>
   </div>
+    <div class="summary-synopsis"><p>Puts child circles for a circle</p>
+</div>
 </div>
 <div class="summary-row">
   <div class="summary-signature">
     <a href="#put_circle_permissions/2">put_circle_permissions(circle, permissions)</a>
   </div>
+    <div class="summary-synopsis"><p>Directly assignes permissions to a circle</p>
+</div>
 </div>
 <div class="summary-row">
   <div class="summary-signature">
     <a href="#put_parent_circle/2">put_parent_circle(circle, parent_circle)</a>
   </div>
+    <div class="summary-synopsis"><p>Puts the parent circle for a circle while maintaining joinable consistency</p>
+</div>
 </div>
 <div class="summary-row">
   <div class="summary-signature">
     <a href="#reduce_permission_list/1">reduce_permission_list(permission_list)</a>
   </div>
+    <div class="summary-synopsis"><p>Reduces a permission list to remove duplicates</p>
+</div>
 </div>
 <div class="summary-row">
   <div class="summary-signature">
     <a href="#search_permission_list/3">search_permission_list(permission_list, action, object)</a>
   </div>
+    <div class="summary-synopsis"><p>Seaches a list of permissions for one specific action and object and returns it</p>
+</div>
 </div>
 <div class="summary-row">
   <div class="summary-signature">
     <a href="#search_permission_list/4">search_permission_list(permission_list, action, object, scope)</a>
   </div>
+    <div class="summary-synopsis"><p>Searches a list of permissions for one specific scope:action:object and returns it</p>
+</div>
 </div>
 <div class="summary-row">
   <div class="summary-signature">
     <a href="#update_body/2">update_body(body, attrs)</a>
   </div>
+    <div class="summary-synopsis"><p>Updates a body</p>
+</div>
 </div>
 <div class="summary-row">
   <div class="summary-signature">
     <a href="#update_circle/2">update_circle(circle, attrs)</a>
   </div>
+    <div class="summary-synopsis"><p>Update a circle</p>
+</div>
 </div>
 <div class="summary-row">
   <div class="summary-signature">
     <a href="#update_permission/2">update_permission(permission, attrs)</a>
   </div>
+    <div class="summary-synopsis"><p>Updates a permission</p>
+</div>
 </div>
   </div>
         </section>
@@ -316,12 +403,15 @@ Functions          </h1>
       <span class="sr-only">Link to this function</span>
     </a>
     <h1 class="signature">all_orphan_circles?(circles)</span>
-      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L355" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L537" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
           </div>
   <section class="docstring">
+<p>Checks if all circles in <code class="inline">circles</code> do not have a parent circle.</p>
+<p>Useful to end a recursive permission check</p>
+<p>Returns <code class="inline">true</code> if all circles are orphan or <code class="inline">false</code> if at least one is not.</p>
   </section>
 </section>
 <section class="detail" id="apply_attribute_filters/2">
@@ -331,12 +421,18 @@ Functions          </h1>
       <span class="sr-only">Link to this function</span>
     </a>
     <h1 class="signature">apply_attribute_filters(data, filters)</span>
-      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L194" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L278" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
           </div>
   <section class="docstring">
+<p>Applies an attribute filter to any data</p>
+<p>Filters should be a list of <a href="Omscore.Core.AttributeFilter.html"><code class="inline">Omscore.Core.AttributeFilter</code></a>.
+The data can be a map or a list, containing either string or atom keys
+In case fields from the filter are not present, they will be ommitted
+Filters are applied on nested items in case the field is of the form parent.child</p>
+<p>Returns <code class="inline">data</code> but in filtered form.</p>
   </section>
 </section>
 <section class="detail" id="change_body/1">
@@ -346,12 +442,13 @@ Functions          </h1>
       <span class="sr-only">Link to this function</span>
     </a>
     <h1 class="signature">change_body(body)</span>
-      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L246" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L356" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
           </div>
   <section class="docstring">
+<p>Creates a body changeset</p>
   </section>
 </section>
 <section class="detail" id="change_circle/1">
@@ -361,12 +458,13 @@ Functions          </h1>
       <span class="sr-only">Link to this function</span>
     </a>
     <h1 class="signature">change_circle(circle)</span>
-      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L336" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L500" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
           </div>
   <section class="docstring">
+<p>Creates a circle changeset.</p>
   </section>
 </section>
 <section class="detail" id="change_permission/1">
@@ -376,12 +474,13 @@ Functions          </h1>
       <span class="sr-only">Link to this function</span>
     </a>
     <h1 class="signature">change_permission(permission)</span>
-      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L90" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L139" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
           </div>
   <section class="docstring">
+<p>Creates a permission changeset</p>
   </section>
 </section>
 <section class="detail" id="circles_have_same_body?/1">
@@ -391,12 +490,14 @@ Functions          </h1>
       <span class="sr-only">Link to this function</span>
     </a>
     <h1 class="signature">circles_have_same_body?(list)</span>
-      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L450" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L656" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
           </div>
   <section class="docstring">
+<p>Checks if all the circles are from the same body</p>
+<p>Returns <code class="inline">true</code> or <code class="inline">false</code></p>
   </section>
 </section>
 <section class="detail" id="create_body/1">
@@ -408,12 +509,15 @@ Functions          </h1>
       <span class="sr-only">Link to this function</span>
     </a>
     <h1 class="signature">create_body(attrs \\ %{})</span>
-      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L223" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L323" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
           </div>
   <section class="docstring">
+<p>Creates a body</p>
+<p>Ignores the shadow_circle, set it after creation with <a href="#update_body/2"><code class="inline">update_body/2</code></a>.</p>
+<p>Returns <code class="inline">{:ok, body}</code> or <code class="inline">{:error, _}</code></p>
   </section>
 </section>
 <section class="detail" id="create_circle/1">
@@ -425,12 +529,14 @@ Functions          </h1>
       <span class="sr-only">Link to this function</span>
     </a>
     <h1 class="signature">create_circle(attrs \\ %{})</span>
-      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L312" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L465" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
           </div>
   <section class="docstring">
+<p>Creates a free circle</p>
+<p>Returns <code class="inline">{:ok, circle}</code> or <code class="inline">{:error, _}</code></p>
   </section>
 </section>
 <section class="detail" id="create_circle/2">
@@ -440,12 +546,15 @@ Functions          </h1>
       <span class="sr-only">Link to this function</span>
     </a>
     <h1 class="signature">create_circle(attrs, body)</span>
-      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L302" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L451" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
           </div>
   <section class="docstring">
+<p>Creates a bound circle</p>
+<p>The circle will be bound to the passed body</p>
+<p>Returns <code class="inline">{:ok, circle}</code> or <code class="inline">{:error, _}</code></p>
   </section>
 </section>
 <section class="detail" id="create_permission/1">
@@ -457,12 +566,14 @@ Functions          </h1>
       <span class="sr-only">Link to this function</span>
     </a>
     <h1 class="signature">create_permission(attrs \\ %{})</span>
-      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L71" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L112" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
           </div>
   <section class="docstring">
+<p>Creates a permission</p>
+<p>Returns <code class="inline">{:ok, permission}</code> or <code class="inline">{:error, _}</code></p>
   </section>
 </section>
 <section class="detail" id="delete_body/1">
@@ -472,12 +583,14 @@ Functions          </h1>
       <span class="sr-only">Link to this function</span>
     </a>
     <h1 class="signature">delete_body(body)</span>
-      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L241" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L349" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
           </div>
   <section class="docstring">
+<p>Deletes a Body.</p>
+<p>Cascades to body_memberships, bound circles and fee payments.</p>
   </section>
 </section>
 <section class="detail" id="delete_circle/1">
@@ -487,12 +600,13 @@ Functions          </h1>
       <span class="sr-only">Link to this function</span>
     </a>
     <h1 class="signature">delete_circle(circle)</span>
-      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L331" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L493" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
           </div>
   <section class="docstring">
+<p>Deletes a Circle.</p>
   </section>
 </section>
 <section class="detail" id="delete_permission/1">
@@ -502,12 +616,13 @@ Functions          </h1>
       <span class="sr-only">Link to this function</span>
     </a>
     <h1 class="signature">delete_permission(permission)</span>
-      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L85" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L132" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
           </div>
   <section class="docstring">
+<p>Deletes a permission, cascades to CirclePermissions.</p>
   </section>
 </section>
 <section class="detail" id="find_array/2">
@@ -517,12 +632,17 @@ Functions          </h1>
       <span class="sr-only">Link to this function</span>
     </a>
     <h1 class="signature">find_array(type, input_data)</span>
-      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L13" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L23" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
           </div>
   <section class="docstring">
+<p>Converts an array that came from the user with maps that contain an id to a list of ecto models.</p>
+<p>It loops through the <code class="inline">input_data</code> and tries to fetch every item from db by taking the <code class="inline">&quot;id&quot;</code> or <code class="inline">:id</code> field.
+You should specify which model to use by providing a <code class="inline">type</code> parameter.
+In case not all elements could be loaded, returns an error, even if some were successful.</p>
+<p>Returns <code class="inline">{:ok, [data]}</code> or <code class="inline">{:error, :not_found, message}</code></p>
   </section>
 </section>
 <section class="detail" id="find_circles/1">
@@ -532,12 +652,15 @@ Functions          </h1>
       <span class="sr-only">Link to this function</span>
     </a>
     <h1 class="signature">find_circles(input_data)</span>
-      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L353" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L528" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
           </div>
   <section class="docstring">
+<p>From an array of possibly circles, load those who are actually circles in the db</p>
+<p>For more details, see <a href="#find_array/2"><code class="inline">find_array/2</code></a>.
+This is useful for <a href="#put_child_circles/2"><code class="inline">put_child_circles/2</code></a></p>
   </section>
 </section>
 <section class="detail" id="find_permissions/1">
@@ -547,12 +670,15 @@ Functions          </h1>
       <span class="sr-only">Link to this function</span>
     </a>
     <h1 class="signature">find_permissions(input_data)</span>
-      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L95" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L150" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
           </div>
   <section class="docstring">
+<p>Finds all db permissions from a list of input permissions</p>
+<p>Is a wrapper on <a href="#find_array/2"><code class="inline">find_array/2</code></a>, see that method for more info.</p>
+<p>Returns <code class="inline">{:ok, [permissions]}</code> or <code class="inline">{:error, :not_found, _}</code></p>
   </section>
 </section>
 <section class="detail" id="get_body!/1">
@@ -562,12 +688,13 @@ Functions          </h1>
       <span class="sr-only">Link to this function</span>
     </a>
     <h1 class="signature">get_body!(id)</span>
-      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L214" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L304" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
           </div>
   <section class="docstring">
+<p>Gets a single body, circles preloaded</p>
   </section>
 </section>
 <section class="detail" id="get_body_members/1">
@@ -577,12 +704,16 @@ Functions          </h1>
       <span class="sr-only">Link to this function</span>
     </a>
     <h1 class="signature">get_body_members(body)</span>
-      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L216" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L310" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
           </div>
+    <div class="deprecated">
+      This function is deprecated. Use `Omscore.Members.get_body_memberships/1` instead.
+    </div>
   <section class="docstring">
+<p>Returns all members of a body</p>
   </section>
 </section>
 <section class="detail" id="get_child_circles/1">
@@ -592,12 +723,15 @@ Functions          </h1>
       <span class="sr-only">Link to this function</span>
     </a>
     <h1 class="signature">get_child_circles(circles)</span>
-      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L470" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L682" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
           </div>
   <section class="docstring">
+<p>Returns all circles which are somewhere below in the inheritance tree.</p>
+<p>You can either pass a circle or a list of circles.</p>
+<p>Returns [circles]</p>
   </section>
 </section>
 <section class="detail" id="get_circle/1">
@@ -607,12 +741,13 @@ Functions          </h1>
       <span class="sr-only">Link to this function</span>
     </a>
     <h1 class="signature">get_circle(id)</span>
-      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L293" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L436" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
           </div>
   <section class="docstring">
+<p>Gets a single circle without throwing.</p>
   </section>
 </section>
 <section class="detail" id="get_circle!/1">
@@ -622,12 +757,14 @@ Functions          </h1>
       <span class="sr-only">Link to this function</span>
     </a>
     <h1 class="signature">get_circle!(id)</span>
-      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L292" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L431" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
           </div>
   <section class="docstring">
+<p>Get a single circle</p>
+<p>Preloads permission, child_circles and parent circle.</p>
   </section>
 </section>
 <section class="detail" id="get_members_with_permission/2">
@@ -637,12 +774,16 @@ Functions          </h1>
       <span class="sr-only">Link to this function</span>
     </a>
     <h1 class="signature">get_members_with_permission(id, params)</span>
-      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L51" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L88" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
           </div>
   <section class="docstring">
+<p>Returns all members which hold a certain permission in the system</p>
+<p>This is scope-sensitive, so the local or global permission might yield other members.
+It takes into account circle permission inheritance, so it returns both directly and indirectly obtained permissions.</p>
+<p>Returns <code class="inline">[members]</code></p>
   </section>
 </section>
 <section class="detail" id="get_permission/3">
@@ -652,12 +793,14 @@ Functions          </h1>
       <span class="sr-only">Link to this function</span>
     </a>
     <h1 class="signature">get_permission(scope, action, object)</span>
-      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L49" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L77" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
           </div>
   <section class="docstring">
+<p>Gets a single permission by scope, object and action</p>
+<p>Returns nil on non-existence.</p>
   </section>
 </section>
 <section class="detail" id="get_permission!/1">
@@ -667,12 +810,14 @@ Functions          </h1>
       <span class="sr-only">Link to this function</span>
     </a>
     <h1 class="signature">get_permission!(id)</span>
-      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L47" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L70" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
           </div>
   <section class="docstring">
+<p>Gets a single permission</p>
+<p>Throws on non-existence</p>
   </section>
 </section>
 <section class="detail" id="get_permissions_recursive/1">
@@ -682,12 +827,15 @@ Functions          </h1>
       <span class="sr-only">Link to this function</span>
     </a>
     <h1 class="signature">get_permissions_recursive(circle)</span>
-      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L428" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L632" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
           </div>
   <section class="docstring">
+<p>Returns all permissions that are attached to this circle or any of its parent circles</p>
+<p>This might be rather slow as it needs to perform several db requests.</p>
+<p>Returns a list of permissions, possibly containing duplicates.</p>
   </section>
 </section>
 <section class="detail" id="is_parent_recursive?/2">
@@ -697,12 +845,14 @@ Functions          </h1>
       <span class="sr-only">Link to this function</span>
     </a>
     <h1 class="signature">is_parent_recursive?(circle, parent_circle)</span>
-      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L416" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L614" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
           </div>
   <section class="docstring">
+<p>Checks if the parent circle actually is a parent of circle, somewhere in the inheritance tree.</p>
+<p>Returns <code class="inline">true</code> or <code class="inline">false</code></p>
   </section>
 </section>
 <section class="detail" id="list_always_assigned_permissions/0">
@@ -712,12 +862,13 @@ Functions          </h1>
       <span class="sr-only">Link to this function</span>
     </a>
     <h1 class="signature">list_always_assigned_permissions()</span>
-      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L41" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L60" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
           </div>
   <section class="docstring">
+<p>Returns all always assigned permissions. You can also use <a href="#list_permissions/1"><code class="inline">list_permissions/1</code></a> and pass a filter for always_assigned</p>
   </section>
 </section>
 <section class="detail" id="list_bodies/1">
@@ -729,12 +880,14 @@ Functions          </h1>
       <span class="sr-only">Link to this function</span>
     </a>
     <h1 class="signature">list_bodies(params \\ %{})</span>
-      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L205" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L293" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
           </div>
   <section class="docstring">
+<p>Returns all bodies in the system</p>
+<p>You can pass filters, pagination or search params based on the format defined in <a href="OmscoreWeb.Helper.html"><code class="inline">OmscoreWeb.Helper</code></a></p>
   </section>
 </section>
 <section class="detail" id="list_bound_circles/2">
@@ -746,12 +899,15 @@ Functions          </h1>
       <span class="sr-only">Link to this function</span>
     </a>
     <h1 class="signature">list_bound_circles(body, params \\ %{})</span>
-      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L271" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L399" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
           </div>
   <section class="docstring">
+<p>List all circles bound to a specific body</p>
+<p>Supports filtering, search and pagination based on the syntax in <a href="OmscoreWeb.Helper.html"><code class="inline">OmscoreWeb.Helper</code></a>.</p>
+<p>Returns [circles]</p>
   </section>
 </section>
 <section class="detail" id="list_bound_circles_/2">
@@ -761,7 +917,7 @@ Functions          </h1>
       <span class="sr-only">Link to this function</span>
     </a>
     <h1 class="signature">list_bound_circles_(body, params)</span>
-      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L272" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L400" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
@@ -776,12 +932,17 @@ Functions          </h1>
       <span class="sr-only">Link to this function</span>
     </a>
     <h1 class="signature">list_bound_circles_with_permission(body, action, object)</span>
-      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L283" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L418" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
           </div>
   <section class="docstring">
+<p>Lists all bound circles which have a certain permission directly or indirectly attached.</p>
+<p>This function is rather unperformant with big numbers of circles or deep inheritance structures.
+The permission is identified by action:object, scoping is ignored.
+This can be used to track which circle has a permission or to notify all members of that circle in case something happened to the object.</p>
+<p>Returns [circles] where each circle holds his permissions in :all_permissions</p>
   </section>
 </section>
 <section class="detail" id="list_circles/1">
@@ -793,12 +954,15 @@ Functions          </h1>
       <span class="sr-only">Link to this function</span>
     </a>
     <h1 class="signature">list_circles(params \\ %{})</span>
-      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L253" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L369" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
           </div>
   <section class="docstring">
+<p>List all circles</p>
+<p>Supports filtering, search and pagination based on the syntax in <a href="OmscoreWeb.Helper.html"><code class="inline">OmscoreWeb.Helper</code></a>.</p>
+<p>Returns [circles]</p>
   </section>
 </section>
 <section class="detail" id="list_free_circles/1">
@@ -810,12 +974,15 @@ Functions          </h1>
       <span class="sr-only">Link to this function</span>
     </a>
     <h1 class="signature">list_free_circles(params \\ %{})</span>
-      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L262" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L384" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
           </div>
   <section class="docstring">
+<p>List all unbound circles</p>
+<p>Supports filtering, search and pagination based on the syntax in <a href="OmscoreWeb.Helper.html"><code class="inline">OmscoreWeb.Helper</code></a>.</p>
+<p>Returns [circles]</p>
   </section>
 </section>
 <section class="detail" id="list_permissions/1">
@@ -827,12 +994,16 @@ Functions          </h1>
       <span class="sr-only">Link to this function</span>
     </a>
     <h1 class="signature">list_permissions(params \\ %{})</span>
-      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L32" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L49" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
           </div>
   <section class="docstring">
+<p>Returns all permissions in the system</p>
+<p>You can pass filter, search or pagination parameters by the format defined in <a href="OmscoreWeb.Helper.html"><code class="inline">OmscoreWeb.Helper</code></a>.
+Search is done automatically on object, action and scope</p>
+<p>Returns a list.</p>
   </section>
 </section>
 <section class="detail" id="put_child_circles/2">
@@ -842,12 +1013,19 @@ Functions          </h1>
       <span class="sr-only">Link to this function</span>
     </a>
     <h1 class="signature">put_child_circles(circle, child_circles)</span>
-      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L361" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L552" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
           </div>
   <section class="docstring">
+<p>Puts child circles for a circle</p>
+<p>Removes the child-relation to existing children which are not in the list (but leaves the circles themselves intact, just nillifying the parent_circle_id)
+You do not have to sanitize data <a href="#find_circles/1"><code class="inline">find_circles/1</code></a> if the data came from the user, as this is done internally
+<code class="inline">child_circles</code> can be a list of maps which somehow hold a <code class="inline">:id</code> or <code class="inline">&quot;id&quot;</code> field to an existing circle.
+If any of the circles was not found, it will fail and not change anything.
+If any of the circles was not an orphan circle, it will fail and not change anything.</p>
+<p>Returns <code class="inline">{:ok, circle}</code> or <code class="inline">{:error, code, msg}</code></p>
   </section>
 </section>
 <section class="detail" id="put_circle_permissions/2">
@@ -857,12 +1035,17 @@ Functions          </h1>
       <span class="sr-only">Link to this function</span>
     </a>
     <h1 class="signature">put_circle_permissions(circle, permissions)</span>
-      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L342" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L513" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
           </div>
   <section class="docstring">
+<p>Directly assignes permissions to a circle</p>
+<p>Expects a list of <a href="Omscore.Core.Permission.html"><code class="inline">Omscore.Core.Permission</code></a>s and assigns them as the new list of assigned permissions.
+It will unassign existing assigned permissions that are not in the list of permissions.
+You should preload the permission data with find_permissions if the data came from the user</p>
+<p>Returns <code class="inline">{:ok, circle}</code> or <code class="inline">{:error, _}</code></p>
   </section>
 </section>
 <section class="detail" id="put_parent_circle/2">
@@ -872,12 +1055,15 @@ Functions          </h1>
       <span class="sr-only">Link to this function</span>
     </a>
     <h1 class="signature">put_parent_circle(circle, parent_circle)</span>
-      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L401" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L598" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
           </div>
   <section class="docstring">
+<p>Puts the parent circle for a circle while maintaining joinable consistency</p>
+<p>Maintaining joinable consistency means this method will fail in case the parent is non joinable and this circle is joinable</p>
+<p>Returns <code class="inline">{:ok, circle}</code> or <code class="inline">{:error, error-data}</code></p>
   </section>
 </section>
 <section class="detail" id="reduce_permission_list/1">
@@ -887,12 +1073,20 @@ Functions          </h1>
       <span class="sr-only">Link to this function</span>
     </a>
     <h1 class="signature">reduce_permission_list(permission_list)</span>
-      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L99" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L164" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
           </div>
   <section class="docstring">
+<p>Reduces a permission list to remove duplicates</p>
+<p>Expects a list of <a href="Omscore.Core.Permission.html"><code class="inline">Omscore.Core.Permission</code></a> and removes duplicates.
+If the same scope:action:object tuple exists in <code class="inline">permission_list</code>, the filters are intersected and the duplicate is removed.
+If a permission exists with different scopes but with the same action:object tuple, the one with the highest scope is returned after filters were intersected.
+Intersecting filters creates a theoretical loophole where a strongly filtered global permission intersected with an unfiltered local permission will result in an unfiltered global permission,
+so please <strong>don&#39;t check on scope anymore</strong> after reducing a permission list.
+Scope order is global-local-join_request.</p>
+<p>If no duplicates existed, the list is left intact.</p>
   </section>
 </section>
 <section class="detail" id="search_permission_list/3">
@@ -902,12 +1096,17 @@ Functions          </h1>
       <span class="sr-only">Link to this function</span>
     </a>
     <h1 class="signature">search_permission_list(permission_list, action, object)</span>
-      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L145" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L215" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
           </div>
   <section class="docstring">
+<p>Seaches a list of permissions for one specific action and object and returns it.</p>
+<p>In case none was found, returns {:forbidden, &quot;Permission xy required but not granted to you&quot;}
+Ignores the scope of the permission. If you want a specific scope, use <a href="#search_permission_list/4"><code class="inline">search_permission_list/4</code></a>
+Returns the first occurrence, use reduce_permission_list in advance in case you want the highest scoped one</p>
+<p>Returns <code class="inline">{:ok, permission}</code> or <code class="inline">{:forbidden, msg}</code></p>
   </section>
 </section>
 <section class="detail" id="search_permission_list/4">
@@ -917,12 +1116,15 @@ Functions          </h1>
       <span class="sr-only">Link to this function</span>
     </a>
     <h1 class="signature">search_permission_list(permission_list, action, object, scope)</span>
-      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L151" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L229" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
           </div>
   <section class="docstring">
+<p>Searches a list of permissions for one specific scope:action:object and returns it</p>
+<p>behaves like <a href="#search_permission_list/3"><code class="inline">search_permission_list/3</code></a> but taking into account the scope aswell.</p>
+<p>Returns <code class="inline">{:ok, permission}</code> or <code class="inline">{:forbidden, msg}</code></p>
   </section>
 </section>
 <section class="detail" id="update_body/2">
@@ -932,12 +1134,14 @@ Functions          </h1>
       <span class="sr-only">Link to this function</span>
     </a>
     <h1 class="signature">update_body(body, attrs)</span>
-      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L234" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L338" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
           </div>
   <section class="docstring">
+<p>Updates a body</p>
+<p>Returns <code class="inline">{:ok, body}</code> or <code class="inline">{:error, _}</code></p>
   </section>
 </section>
 <section class="detail" id="update_circle/2">
@@ -947,12 +1151,17 @@ Functions          </h1>
       <span class="sr-only">Link to this function</span>
     </a>
     <h1 class="signature">update_circle(circle, attrs)</span>
-      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L322" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L482" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
           </div>
   <section class="docstring">
+<p>Update a circle</p>
+<p>You can only update name, description and joinable status with this method.
+If you want to update parent or child circles, use <a href="#put_child_circles/2"><code class="inline">put_child_circles/2</code></a> or <a href="#put_parent_circle/2"><code class="inline">put_parent_circle/2</code></a>.
+If you want to update assigned permissions, use <a href="#put_circle_permissions/2"><code class="inline">put_circle_permissions/2</code></a>.</p>
+<p>Returns <code class="inline">{:ok, circle}</code> or <code class="inline">{:error, _}</code>.</p>
   </section>
 </section>
 <section class="detail" id="update_permission/2">
@@ -962,12 +1171,14 @@ Functions          </h1>
       <span class="sr-only">Link to this function</span>
     </a>
     <h1 class="signature">update_permission(permission, attrs)</span>
-      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L78" class="view-source" rel="help" title="View Source">
+      <a href="https://github.com/AEGEE/oms-core-elixir/blob/master/lib/omscore/core/core.ex#L123" class="view-source" rel="help" title="View Source">
        <span class="icon-code" aria-hidden="true"></span>
        <span class="sr-only">View Source</span>
      </a>
           </div>
   <section class="docstring">
+<p>Updates a permission</p>
+<p>Returns <code class="inline">{:ok, permission}</code> or <code class="inline">{:error, _}</code></p>
   </section>
 </section>
           </div>

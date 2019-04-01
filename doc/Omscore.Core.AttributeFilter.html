@@ -7,7 +7,7 @@
     <meta name="generator" content="ExDoc v0.19.3">
     <title>Omscore.Core.AttributeFilter — OMS Core Elixir v0.0.1</title>
     <link rel="stylesheet" href="dist/html-399e30b9b028e3059575.css" />
-    <script src="dist/sidebar_items-635002dc95.js"></script>
+    <script src="dist/sidebar_items-399bd84196.js"></script>
     <script async src="dist/html-399e30b9b028e3059575.js"></script>
     
   </head>
@@ -67,6 +67,13 @@ Omscore.Core.AttributeFilter
       </h1>
 
 
+        <section id="moduledoc">
+<p>AttributeFilters are an embedded extension to permissions.</p>
+<p>It enriches the permission system by providing filters for fields, and it&#39;s associated to a <a href="Omscore.Core.Permission.html"><code class="inline">Omscore.Core.Permission</code></a>. This is a blacklist system, meaning if a permission has filters, it gives less access than a permission without filters.</p>
+<p>If applied on a view request, the fields are filtered out and not passed to the user in the <code class="inline">OmscoreWeb.View</code> module.
+If applied on a create or update request, the fields are filtered out of the data sent by the user, effectively leaving those fields untouched or in default value.
+You can access nested fields by using the dot notation <code class="inline">parent.child</code>.</p>
+        </section>
 
 
           <footer class="footer">

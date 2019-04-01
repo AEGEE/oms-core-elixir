@@ -7,7 +7,7 @@
     <meta name="generator" content="ExDoc v0.19.3">
     <title>Omscore.Core.Circle — OMS Core Elixir v0.0.1</title>
     <link rel="stylesheet" href="dist/html-399e30b9b028e3059575.css" />
-    <script src="dist/sidebar_items-635002dc95.js"></script>
+    <script src="dist/sidebar_items-399bd84196.js"></script>
     <script async src="dist/html-399e30b9b028e3059575.js"></script>
     
   </head>
@@ -67,6 +67,19 @@ Omscore.Core.Circle
       </h1>
 
 
+        <section id="moduledoc">
+<p>A circle is basically a group of people.</p>
+<p>A circle only has a <code class="inline">:name</code>, a <code class="inline">:description</code> and a <code class="inline">:joinable</code> state, but it defines the structure of the association and takes part in the permission system.</p>
+<p>Joinable means whether people can join the circle by own will or whether they have to ask a circle admin to add them.
+A circle can only be joinable if all of the parent circles are also joinable, to prevent leaking permissions.</p>
+<p>A circle can be <strong><em>bound</em></strong> or <strong><em>unbound</em></strong>, meaning it belongs to a body or not. 
+In case it is bound, only body members can be in that circle. In case it is unbound, every member can be part.</p>
+<p>It is possible to directly attach permissions to a circle, which are then given to all circle members. </p>
+<p>Also, a circle can have one parent and any number of child circles. 
+The parent circle inherits all its permissions to the child, while the children get their permissions from this circle.
+Scoping is not applied during inheritance, so even if a circle has a unbound parent which gives it locally scoped permissions, those are still passed on.
+Inheritance is independent from bound state.</p>
+        </section>
 
 
           <footer class="footer">

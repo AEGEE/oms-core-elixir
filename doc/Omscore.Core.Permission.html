@@ -7,7 +7,7 @@
     <meta name="generator" content="ExDoc v0.19.3">
     <title>Omscore.Core.Permission — OMS Core Elixir v0.0.1</title>
     <link rel="stylesheet" href="dist/html-399e30b9b028e3059575.css" />
-    <script src="dist/sidebar_items-635002dc95.js"></script>
+    <script src="dist/sidebar_items-399bd84196.js"></script>
     <script async src="dist/html-399e30b9b028e3059575.js"></script>
     
   </head>
@@ -67,6 +67,16 @@ Omscore.Core.Permission
       </h1>
 
 
+        <section id="moduledoc">
+<p>A permission describes one action and can be granted to members based on circle membership.</p>
+<p>It consists of a tuple scope:action:object, which narrows down the actions that can be performed when this permission is in posession.
+<code class="inline">:object</code> describes the object, database table or concept that the action is applied to
+<code class="inline">:action</code> is a verb describing what can be done to the object
+<code class="inline">:scope</code> defines the scope in which this permission should be active.</p>
+<p>You can create <code class="inline">:always_assigned</code> permissions, which are granted automatically without circle membership
+Also you can add a <code class="inline">:description</code> to explain what this permission can do.</p>
+<p>To understand more about the permission system, check out <a href="https://oms-project.atlassian.net/wiki/spaces/GENERAL/pages/178716673/Permission+system">our wiki</a></p>
+        </section>
 
 
           <footer class="footer">

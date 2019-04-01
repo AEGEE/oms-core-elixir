@@ -7,7 +7,7 @@
     <meta name="generator" content="ExDoc v0.19.3">
     <title>Omscore.Auth.RefreshToken — OMS Core Elixir v0.0.1</title>
     <link rel="stylesheet" href="dist/html-399e30b9b028e3059575.css" />
-    <script src="dist/sidebar_items-635002dc95.js"></script>
+    <script src="dist/sidebar_items-399bd84196.js"></script>
     <script async src="dist/html-399e30b9b028e3059575.js"></script>
     
   </head>
@@ -67,6 +67,12 @@ Omscore.Auth.RefreshToken
       </h1>
 
 
+        <section id="moduledoc">
+<p>A refresh token which can be used by a user to generate access tokens</p>
+<p>This is the longlived variant of a token, which is also stored in db. Validating a refresh token means also cross-checking with the db entry.
+Deleting the db entry means that future validations will fail, resulting in the user not being able to generate any more access tokens.
+A refresh token naturally expires after a while, after which the expiry worker will clean it from db and also the cryptographic check will fail.</p>
+        </section>
 
 
           <footer class="footer">

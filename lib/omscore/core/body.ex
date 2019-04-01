@@ -1,4 +1,28 @@
 defmodule Omscore.Core.Body do
+  @moduledoc """
+  Defines a body schema.
+
+  A body holds several information fields and is the biggest structural component of the association modelled.
+  Also it holds members. There is a bit of a confusion possible between members of the members circle and body members.
+
+  Being a body member means being in that body, but this does not imply any permissions yet, as bodies are not part of the permission system.
+  Thus, we created a shadow circle, which accumulates all members of the body to be able to give all members permissions by default.
+
+  We decided to not make a body a circle, as circles normally don't ***contain*** other circles, they only ***inherit*** them, and we thought having some circles having both might lead to confusion.
+  When joining a body, people are automatically added to the shadow circle.
+
+  Joining a body is possible through either a `Omscore.Members.JoinRequest` or through a `Omscore.Registration.Campaign`. 
+  The join request is for internals, who are already members but want to also be part of the body, the campaign is for externals who are not members yet.
+  Also, `Omscore.Members.create_member_in_body/3` can create a member and directly give him body membership, which can be used by administrators to add members which do not want to proactively sign up.
+
+  `Omscore.Core.Circles` which are assigned to the body are called ***bound circles*** and treated a bit differently than other circles.
+
+  Also there are bodies which pay fees, indicated by the `:pays_fees` boolean. These take part in the membership fee system defined in `Omscore.Finances`.
+
+  Most fields should be self-explanatory. `:legacy_key` means a short code for a body which can be used for referencing. `:type` can be used to differentiate between several types of bodies.
+
+  """
+
   use Ecto.Schema
   import Ecto.Changeset
 

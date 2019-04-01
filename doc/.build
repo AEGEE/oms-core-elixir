@@ -4,12 +4,11 @@ dist/html/fonts/icomoon.eot
 dist/html/fonts/icomoon.svg
 dist/html/fonts/icomoon.ttf
 dist/html/fonts/icomoon.woff
-dist/sidebar_items-635002dc95.js
+dist/sidebar_items-399bd84196.js
 api-reference.html
 search.html
 404.html
 Omscore.html
-Omscore.Application.html
 Omscore.Auth.html
 Omscore.Auth.PasswordReset.html
 Omscore.Auth.RefreshToken.html
@@ -18,7 +17,6 @@ Omscore.Core.html
 Omscore.Core.AttributeFilter.html
 Omscore.Core.Body.html
 Omscore.Core.Circle.html
-Omscore.Core.CirclePermission.html
 Omscore.Core.Permission.html
 Omscore.ExpireTokens.html
 Omscore.Finances.html

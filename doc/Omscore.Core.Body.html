@@ -7,7 +7,7 @@
     <meta name="generator" content="ExDoc v0.19.3">
     <title>Omscore.Core.Body — OMS Core Elixir v0.0.1</title>
     <link rel="stylesheet" href="dist/html-399e30b9b028e3059575.css" />
-    <script src="dist/sidebar_items-635002dc95.js"></script>
+    <script src="dist/sidebar_items-399bd84196.js"></script>
     <script async src="dist/html-399e30b9b028e3059575.js"></script>
     
   </head>
@@ -67,6 +67,21 @@ Omscore.Core.Body
       </h1>
 
 
+        <section id="moduledoc">
+<p>Defines a body schema.</p>
+<p>A body holds several information fields and is the biggest structural component of the association modelled.
+Also it holds members. There is a bit of a confusion possible between members of the members circle and body members.</p>
+<p>Being a body member means being in that body, but this does not imply any permissions yet, as bodies are not part of the permission system.
+Thus, we created a shadow circle, which accumulates all members of the body to be able to give all members permissions by default.</p>
+<p>We decided to not make a body a circle, as circles normally don&#39;t <strong><em>contain</em></strong> other circles, they only <strong><em>inherit</em></strong> them, and we thought having some circles having both might lead to confusion.
+When joining a body, people are automatically added to the shadow circle.</p>
+<p>Joining a body is possible through either a <a href="Omscore.Members.JoinRequest.html"><code class="inline">Omscore.Members.JoinRequest</code></a> or through a <a href="Omscore.Registration.Campaign.html"><code class="inline">Omscore.Registration.Campaign</code></a>. 
+The join request is for internals, who are already members but want to also be part of the body, the campaign is for externals who are not members yet.
+Also, <a href="Omscore.Members.html#create_member_in_body/3"><code class="inline">Omscore.Members.create_member_in_body/3</code></a> can create a member and directly give him body membership, which can be used by administrators to add members which do not want to proactively sign up.</p>
+<p><code class="inline">Omscore.Core.Circles</code> which are assigned to the body are called <strong><em>bound circles</em></strong> and treated a bit differently than other circles.</p>
+<p>Also there are bodies which pay fees, indicated by the <code class="inline">:pays_fees</code> boolean. These take part in the membership fee system defined in <a href="Omscore.Finances.html"><code class="inline">Omscore.Finances</code></a>.</p>
+<p>Most fields should be self-explanatory. <code class="inline">:legacy_key</code> means a short code for a body which can be used for referencing. <code class="inline">:type</code> can be used to differentiate between several types of bodies.</p>
+        </section>
 
 
           <footer class="footer">

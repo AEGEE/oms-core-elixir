@@ -1,4 +1,23 @@
 defmodule Omscore.Core.Circle do
+  @moduledoc """
+  A circle is basically a group of people.
+
+  A circle only has a `:name`, a `:description` and a `:joinable` state, but it defines the structure of the association and takes part in the permission system.
+
+  Joinable means whether people can join the circle by own will or whether they have to ask a circle admin to add them.
+  A circle can only be joinable if all of the parent circles are also joinable, to prevent leaking permissions.
+
+  A circle can be ***bound*** or ***unbound***, meaning it belongs to a body or not. 
+  In case it is bound, only body members can be in that circle. In case it is unbound, every member can be part.
+
+  It is possible to directly attach permissions to a circle, which are then given to all circle members. 
+
+  Also, a circle can have one parent and any number of child circles. 
+  The parent circle inherits all its permissions to the child, while the children get their permissions from this circle.
+  Scoping is not applied during inheritance, so even if a circle has a unbound parent which gives it locally scoped permissions, those are still passed on.
+  Inheritance is independent from bound state.
+  """
+
   use Ecto.Schema
   import Ecto.Changeset
 
