@@ -102,6 +102,7 @@ defmodule Omscore.Members do
     |> Enum.filter(fn(x) -> x.scope == "global" end)  # Filter out non-global permissions
     |> Omscore.Core.reduce_permission_list()          # Remove duplicates
   end
+  def get_global_permissions(%{}), do: []
 
   # Get all local permissions that the user has through his membership in the body
   def get_local_permissions(%Member{} = member, %Omscore.Core.Body{} = body) do
@@ -111,6 +112,7 @@ defmodule Omscore.Members do
     |> Omscore.Core.get_permissions_recursive()       # Gather all permissions on any of the circles
     #|> Omscore.Core.reduce_permission_list()          # Remove duplicates and overwrite local permissions with global permission, thus no need to filter before
   end
+  def get_local_permissions(%{}, _), do: []
 
   # A bit of a lazy implementation of a get all permissions from the body plus all global ones
   def get_all_permissions(%Member{} = member, %Omscore.Core.Body{} = body) do
@@ -120,6 +122,7 @@ defmodule Omscore.Members do
     |> Kernel.++(Task.await(task))
     |> Omscore.Core.reduce_permission_list()
   end
+  def get_all_permissions(%{}, _), do: []
 
   alias Omscore.Members.JoinRequest
 

@@ -1,10 +1,14 @@
 use Mix.Config
 
+config :omscore,
+  supertoken: "supertoken"
+
 # We don't run a server during test. If one is required,
 # you can enable the server option below.
 config :omscore, OmscoreWeb.Endpoint,
   http: [port: 4001],
-  server: false
+  server: false,
+  max_login_attempts: 1000000
 
 # Print only warnings and errors during test
 config :logger, level: :warn

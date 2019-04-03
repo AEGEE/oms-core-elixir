@@ -12,6 +12,9 @@ defmodule Omscore.Application do
       :ets.new(:core_fake_responses, [:set, :public, :named_table])
     end
 
+    # Save login attempts in a ets
+    :ets.new(:login_attempts, [:duplicate_bag, :public, :named_table])
+
     # Define workers and child supervisors to be supervised
     children = [
       # Start the Ecto repository
