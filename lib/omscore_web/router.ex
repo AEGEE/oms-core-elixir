@@ -35,12 +35,14 @@ defmodule OmscoreWeb.Router do
     post "/renew", LoginController, :renew_token
     get "/user_existence", LoginController, :check_user_existence
     post "/password_reset", LoginController, :password_reset
+    post "/confirm_reset_password/", LoginController, :confirm_password_reset_ex
     post "/confirm_reset_password/:reset_url", LoginController, :confirm_password_reset
 
     get "/campaigns", CampaignController, :index
     get "/campaigns/:campaign_url", CampaignController, :show
     post "/campaigns/:campaign_url", CampaignController, :submit
     post "/campaigns/:campaign_url/resend_mail/:submission_token", CampaignController, :resend_confirmation_mail
+    post "/confirm_mail/", CampaignController, :confirm_mail_ex # Optional route with the confirmation token as body param
     post "/confirm_mail/:confirmation_url", CampaignController, :confirm_mail
   end
 

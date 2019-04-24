@@ -69,6 +69,7 @@ defmodule OmscoreWeb.LoginController do
     end
   end
 
+  def confirm_password_reset_ex(conn, params), do: confirm_password_reset(conn, params)
   def confirm_password_reset(conn, %{"reset_url" => reset_url, "password" => password}) do
     with {:ok, _} <- Auth.execute_password_reset(reset_url, password) do
       render(conn, "success.json")     
