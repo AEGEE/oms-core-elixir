@@ -8,7 +8,7 @@ defmodule Omscore do
   """
 
   def random_url() do
-    :crypto.strong_rand_bytes(32) |> Base.url_encode64 |> binary_part(0, 32)
+    :crypto.strong_rand_bytes(30) |> Base.encode32
   end
 
   def hash_without_salt(data) do
