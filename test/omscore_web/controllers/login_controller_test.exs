@@ -239,7 +239,35 @@ defmodule OmscoreWeb.LoginControllerTest do
     conn = post conn, login_path(conn, :login), username: user.name, password: "new password"
     assert json_response(conn, 200)["refresh_token"]
     assert json_response(conn, 200)["access_token"]
+  end
 
+  test "password reset works with the url as body param", %{conn: conn} do
+    user = user_fixture()
+    :ets.delete_all_objects(:saved_mail)
+
+    conn = post conn, login_path(conn, :password_reset), email: user.email
+    assert json_response(conn, 200)
+
+    password_reset = Repo.get_by(Auth.PasswordReset, user_id: user.id)
+    assert password_reset != nil
+
+    url = :ets.lookup(:saved_mail, user.email)
+    |> assert
+    |> Enum.at(0)
+    |> parse_url_from_mail()
+
+    assert password_reset_new = Auth.get_password_reset_by_url!(url)
+    assert password_reset.id == password_reset_new.id
+    assert password_reset.url != url
+
+    conn = recycle(conn)
+
+    conn = post conn, login_path(conn, :confirm_password_reset_ex), reset_url: url, password: "new password"
+    assert json_response(conn, 200)
+
+    conn = post conn, login_path(conn, :login), username: user.name, password: "new password"
+    assert json_response(conn, 200)["refresh_token"]
+    assert json_response(conn, 200)["access_token"]
   end
 
   test "returns 422 on too short password", %{conn: conn} do

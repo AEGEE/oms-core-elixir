@@ -559,6 +559,53 @@ defmodule OmscoreWeb.CampaignControllerTest do
       assert mail_confirmation == nil
     end
 
+    @tag only: true
+    test "confirmations can be sent as json body", %{conn: conn, campaign: campaign} do
+      :ets.delete_all_objects(:saved_mail)
+
+      conn = post conn, campaign_path(conn, :submit, campaign.url), submission: @valid_submission
+      assert json_response(conn, 201)
+      
+      url = :ets.lookup(:saved_mail, @valid_submission.email)
+      |> assert
+      |> Enum.at(0)
+      |> parse_url_from_mail()
+
+      user = Repo.get_by(User, name: @valid_submission.name)
+      assert user != nil
+      assert user.active == false
+
+      submission = Repo.get_by(Omscore.Registration.Submission, user_id: user.id)
+      assert submission != nil
+      assert submission.mail_confirmed == false
+
+      mail_confirmation = Repo.get_by(Omscore.Registration.MailConfirmation, submission_id: submission.id)
+      assert mail_confirmation != nil
+      assert mail_confirmation.url != url # It should be hashed in the db
+
+      conn = recycle(conn)
+
+      conn = post conn, campaign_path(conn, :confirm_mail_ex), %{confirmation_url: url}
+      assert json_response(conn, 200)
+
+      # User is active
+      user = Repo.get(User, user.id)
+      assert user != nil
+      assert user.active == true
+
+      # Member object exists
+      member = Repo.get(Omscore.Members.Member, user.member_id)
+      assert member != nil
+
+      # In the submission the mail_confirmed field is true
+      submission = Repo.get(Omscore.Registration.Submission, submission.id)
+      assert submission != nil
+      assert submission.mail_confirmed == true
+
+      mail_confirmation = Repo.get(Omscore.Registration.MailConfirmation, mail_confirmation.id)
+      assert mail_confirmation == nil
+    end
+
     test "a confirmed campaign won't activate the user in case the campaign doesn't have the activate_user flag set", %{conn: conn} do
       campaign = campaign_fixture(%{activate_user: false, url: "bla"})
       :ets.delete_all_objects(:saved_mail)
