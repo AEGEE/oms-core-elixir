@@ -559,7 +559,6 @@ defmodule OmscoreWeb.CampaignControllerTest do
       assert mail_confirmation == nil
     end
 
-    @tag only: true
     test "confirmations can be sent as json body", %{conn: conn, campaign: campaign} do
       :ets.delete_all_objects(:saved_mail)
 
@@ -647,6 +646,11 @@ defmodule OmscoreWeb.CampaignControllerTest do
 
       mail_confirmation = Repo.get(Omscore.Registration.MailConfirmation, mail_confirmation.id)
       assert mail_confirmation == nil
+    end
+
+    test "confirm_mail throws an error on invalid token", %{conn: conn} do
+      conn = post conn, campaign_path(conn, :confirm_mail_ex), %{confirmation_url: "12345"}
+      assert json_response(conn, 422)
     end
 
     test "the submission contains a link to resend the password", %{conn: conn, campaign: campaign} do

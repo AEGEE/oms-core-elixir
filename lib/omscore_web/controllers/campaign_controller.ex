@@ -127,8 +127,8 @@ defmodule OmscoreWeb.CampaignController do
   # Confirm a users mail because he clicked the right link
   def confirm_mail_ex(conn, params), do: confirm_mail(conn, params)
   def confirm_mail(conn, %{"confirmation_url" => confirmation_url}) do
-    confirmation = Registration.get_confirmation_by_url!(confirmation_url)
-    with {:ok} <- Registration.confirm_mail(confirmation) do
+    with {:ok, confirmation} <- Registration.get_confirmation_by_url(confirmation_url),
+         {:ok} <- Registration.confirm_mail(confirmation) do
       render(conn, "success.json", msg: "Mail confirmed!")
     end
   end

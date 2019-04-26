@@ -140,6 +140,16 @@ defmodule Omscore.RegistrationTest do
       assert Registration.get_confirmation_by_url!(url)
     end
 
+    test "get_confirmation_by_url returns a confirmation or an unprocessable_entity error" do
+      submission = submission_fixture()
+
+      assert {:ok, confirmation, url} = Registration.create_confirmation_object(submission)
+      assert confirmation = Registration.get_confirmation!(confirmation.id)
+
+      assert {:ok, ^confirmation} = Registration.get_confirmation_by_url(url)
+      assert {:error, :unprocessable_entity, _msg} = Registration.get_confirmation_by_url("lololololol")
+    end
+
     test "send_confirmation_mail/2 creates a confirmation object and sends a confirmation mail" do
       user = user_fixture(%{active: false})
       submission = submission_fixture(user)

@@ -244,24 +244,27 @@ defmodule Omscore.Auth do
     Omscore.Interfaces.Mail.send_mail(user.email, "password_reset", %{token: token})
   end
 
-  def get_password_reset_by_url!(reset_url) do
+  def get_password_reset_by_url(reset_url) do
     hash = Omscore.hash_without_salt(reset_url)
 
-    Repo.get_by!(PasswordReset, url: hash)
-    |> Repo.preload([:user])
+    case Repo.get_by(PasswordReset, url: hash) |> Repo.preload([:user]) do
+      nil -> {:error, :unprocessable_entity, "Could not find password reset"}
+      token -> {:ok, token}
+    end
   end
 
   def execute_password_reset(reset_url, password) do
-    password_reset = get_password_reset_by_url!(reset_url)
+    with {:ok, password_reset} <- get_password_reset_by_url(reset_url) do
 
-    res = password_reset.user
-    |> User.changeset(%{password: password})
-    |> Repo.update()
+      res = password_reset.user
+      |> User.changeset(%{password: password})
+      |> Repo.update()
 
-    if Kernel.elem(res, 0) == :ok do
-      Repo.delete!(password_reset)
+      if Kernel.elem(res, 0) == :ok do
+        Repo.delete!(password_reset)
+      end
+
+      res
     end
-
-    res
   end
 end
