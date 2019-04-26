@@ -135,6 +135,14 @@ defmodule Omscore.Registration do
 
     Repo.get_by!(MailConfirmation, url: hash)
   end
+  def get_confirmation_by_url(confirmation_url) do
+    hash = Omscore.hash_without_salt(confirmation_url)
+
+    case Repo.get_by(MailConfirmation, url: hash) do
+      nil -> {:error, :unprocessable_entity, "Could not find the mail confirmation token in db"}
+      token -> {:ok, token}
+    end
+  end
 
   def get_submission!(submission_id), do: Repo.get!(Submission, submission_id)
   def get_submission_by_token!(token), do: Repo.get_by!(Submission, token: token)

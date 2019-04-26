@@ -298,7 +298,7 @@ defmodule Omscore.AuthTest do
       assert {:ok, _, url} = Auth.create_password_reset_object(user)
       res = Repo.all(Auth.PasswordReset)
       assert !Enum.any?(res, fn(x) -> x.url == url end)
-      assert reset = Auth.get_password_reset_by_url!(url)
+      assert {:ok, reset} = Auth.get_password_reset_by_url(url)
       assert reset.user_id == user.id
     end
 

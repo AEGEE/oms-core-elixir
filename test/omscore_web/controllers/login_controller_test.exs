@@ -227,7 +227,7 @@ defmodule OmscoreWeb.LoginControllerTest do
     |> Enum.at(0)
     |> parse_url_from_mail()
 
-    assert password_reset_new = Auth.get_password_reset_by_url!(url)
+    assert {:ok, password_reset_new} = Auth.get_password_reset_by_url(url)
     assert password_reset.id == password_reset_new.id
     assert password_reset.url != url
 
@@ -256,7 +256,7 @@ defmodule OmscoreWeb.LoginControllerTest do
     |> Enum.at(0)
     |> parse_url_from_mail()
 
-    assert password_reset_new = Auth.get_password_reset_by_url!(url)
+    assert {:ok, password_reset_new} = Auth.get_password_reset_by_url(url)
     assert password_reset.id == password_reset_new.id
     assert password_reset.url != url
 
@@ -285,7 +285,7 @@ defmodule OmscoreWeb.LoginControllerTest do
     |> Enum.at(0)
     |> parse_url_from_mail()
 
-    assert password_reset_new = Auth.get_password_reset_by_url!(url)
+    assert {:ok, password_reset_new} = Auth.get_password_reset_by_url(url)
     assert password_reset.id == password_reset_new.id
     assert password_reset.url != url
 
@@ -301,9 +301,10 @@ defmodule OmscoreWeb.LoginControllerTest do
   test "cannot confirm passwort reset without a valid token", %{conn: conn} do
     user = user_fixture()
 
-    assert_error_sent 404, fn ->
-      post conn, login_path(conn, :confirm_password_reset, "invalid_url"), password: "new password"
-    end
+    conn = post conn, login_path(conn, :confirm_password_reset, "invalid_url"), password: "new password"
+    assert json_response(conn, 422)
+
+    conn = recycle(conn)
 
     conn = post conn, login_path(conn, :login), username: user.name, password: "new password"
     assert json_response(conn, 422)
