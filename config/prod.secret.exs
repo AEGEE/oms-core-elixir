@@ -16,7 +16,7 @@ config :omscore, OmscoreWeb.Endpoint,
 config :omscore, Omscore.Repo,
   adapter: Ecto.Adapters.Postgres,
   username: Helper.read_secret_from_file("/run/secrets/db_user", "postgres"),
-  password: Helper.read_secret_from_file("/run/secrets/db_password", "postgres"),
+  password: Helper.read_secret_from_file("/run/secrets/db_password", "5ecr3t"),
   database: "omscore_dev",
   hostname: System.get_env("DB_HOST") || "localhost",
   pool_size: 10

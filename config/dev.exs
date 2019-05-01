@@ -39,7 +39,7 @@ config :phoenix, :stacktrace_depth, 20
 config :omscore, Omscore.Repo,
   adapter: Ecto.Adapters.Postgres,
   username: "postgres",
-  password: "postgres",
+  password: "5ecr3t",
   database: "omscore_dev",
   hostname: System.get_env("DB_HOST") || "localhost",
   pool_size: 10
