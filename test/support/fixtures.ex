@@ -103,7 +103,7 @@ defmodule OmscoreWeb.Fixtures do
     circle
   end
 
-  @body_attrs %{address: "some address", description: "some description", email: "some email", legacy_key: "some legacy_key", name: "some name", phone: "some phone", type: "antenna", pays_fees: true}
+  @body_attrs %{address: "some address", description: "some description", email: "some email", legacy_key: "some legacy_key", name: "some name", phone: "some phone", type: "antenna", pays_fees: true, founded_at: ~D[2018-11-11]}
   def body_fixture(attrs \\ %{}) do
     {:ok, body} =
       attrs

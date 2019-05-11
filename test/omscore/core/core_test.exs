@@ -230,7 +230,7 @@ defmodule Omscore.CoreTest do
     alias Omscore.Core.Body
 
     @valid_attrs %{address: "some address", description: "some description", email: "some email", legacy_key: "some legacy_key", name: "some name", phone: "some phone", type: "other"}
-    @update_attrs %{address: "some updated address", description: "some updated description", email: "some updated email", legacy_key: "some updated legacy_key", name: "some updated name", phone: "some updated phone"}
+    @update_attrs %{address: "some updated address", description: "some updated description", email: "some updated email", legacy_key: "some updated legacy_key", name: "some updated name", phone: "some updated phone", founded_at: ~D[2018-11-15]}
     @invalid_attrs %{address: nil, description: nil, email: nil, legacy_key: nil, name: nil, phone: nil}
 
 
@@ -257,6 +257,7 @@ defmodule Omscore.CoreTest do
       assert body.name == "some name"
       assert body.phone == "some phone"
       assert body.type == "other"
+      assert body.founded_at != nil
     end
 
     test "create_body/1 validates body_types" do
@@ -283,6 +284,7 @@ defmodule Omscore.CoreTest do
       assert body.legacy_key == "some updated legacy_key"
       assert body.name == "some updated name"
       assert body.phone == "some updated phone"
+      assert body.founded_at == ~D[2018-11-15]
     end
 
     test "update_body/2 can update the shadow_circle" do
