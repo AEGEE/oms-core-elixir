@@ -13,7 +13,7 @@ defmodule Omscore.MembersTest do
     @valid_user_attrs %{email: "some@email.com", name: "some name", password: "some password", active: true, superadmin: false}
 
     test "list_members/0 returns all members" do
-      member = member_fixture() |> Map.put(:bodies, [])
+      member = member_fixture() |> Repo.preload([:bodies, :user])
       assert Members.list_members() == [member]
     end
 
