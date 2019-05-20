@@ -14,6 +14,7 @@ defmodule Omscore.Core.Body do
     field :phone, :string
     field :type, :string
     field :pays_fees, :boolean
+    field :founded_at, :date
 
     has_many :circles, Omscore.Core.Circle
     many_to_many :members, Omscore.Members.Member, join_through: Omscore.Members.BodyMembership
@@ -29,10 +30,11 @@ defmodule Omscore.Core.Body do
   @doc false
   def changeset(body, attrs) do
     body
-    |> cast(attrs, [:name, :email, :phone, :address, :description, :legacy_key, :shadow_circle_id, :type, :pays_fees])
+    |> cast(attrs, [:name, :email, :phone, :address, :description, :legacy_key, :shadow_circle_id, :type, :pays_fees, :founded_at])
     |> validate_required([:name, :legacy_key, :address, :email, :type])
     |> validate_inclusion(:type, @body_types, message: "must be one of " <> Kernel.inspect(@body_types))
     |> validate_shadow_circle()
+    |> put_default_founded_at()
   end
 
   defp validate_shadow_circle(%Ecto.Changeset{valid?: true} = changeset) do
@@ -50,4 +52,13 @@ defmodule Omscore.Core.Body do
     end
   end
   defp validate_shadow_circle(changeset), do: changeset
+
+  defp put_default_founded_at(changeset) do
+    if get_field(changeset, :founded_at) == nil do
+      changeset
+      |> put_change(:founded_at, Date.utc_today())
+    else
+      changeset
+    end
+  end
 end

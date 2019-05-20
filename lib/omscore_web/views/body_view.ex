@@ -41,6 +41,7 @@ defmodule OmscoreWeb.BodyView do
       type: body.type,
       pays_fees: body.pays_fees,
       shadow_circle_id: body.shadow_circle_id,
+      founded_at: body.founded_at,
       circles: Helper.render_assoc_many(body.circles, OmscoreWeb.CircleView, "circle.json"),
       shadow_circle: Helper.render_assoc_one(body.shadow_circle, OmscoreWeb.CircleView, "circle.json")
     }
