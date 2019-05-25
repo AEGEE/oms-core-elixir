@@ -6,6 +6,7 @@ services:
         build:
             context: ./$PATH_OMS_CORE_ELIXIR/oms-core-elixir/
             dockerfile: ./Dockerfile.dev
+        image: aegee/oms-core-elixir
         volumes:
             - ./$PATH_OMS_CORE_ELIXIR/../:/usr/src/myapp
         depends_on:

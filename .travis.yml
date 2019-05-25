@@ -9,13 +9,21 @@ notifications:
   slack: myaegee:jhn0jBOynuYf93wsSfJI1XQk
 
 before_script:
-    - cd docker
-    - sudo docker network create OMS
-    - sudo docker-compose -f docker-compose-secrets.yml -f docker-compose.yml build
-    - sudo docker-compose -f docker-compose-secrets.yml -f docker-compose.yml up -d
-    - sudo docker-compose -f docker-compose-secrets.yml -f docker-compose.yml logs -f oms-core-elixir &
-    - sudo docker-compose -f docker-compose-secrets.yml -f docker-compose.yml exec oms-core-elixir ash /usr/src/scripts/wait.sh
+  - cd docker
+  - sudo docker network create OMS
+  - sudo docker-compose -f docker-compose-secrets.yml -f docker-compose.yml build
+  - sudo docker-compose -f docker-compose-secrets.yml -f docker-compose.yml up -d
+  - sudo docker-compose -f docker-compose-secrets.yml -f docker-compose.yml logs -f oms-core-elixir &
+  - sudo docker-compose -f docker-compose-secrets.yml -f docker-compose.yml exec oms-core-elixir ash /usr/src/scripts/wait.sh
 
 
 script:
-    - sudo docker-compose -f docker-compose-secrets.yml -f docker-compose.yml exec oms-core-elixir env MIX_ENV=test mix coveralls
+  - sudo docker-compose -f docker-compose-secrets.yml -f docker-compose.yml exec oms-core-elixir env MIX_ENV=test mix coveralls
+
+after_script:
+  - sudo docker login -u ${DOCKER_USER} -p ${DOCKER_PASSWORD}
+  - sudo docker tag aegee/oms-core-elixir aegee/oms-core-elixir:${TRAVIS_COMMIT}
+  - sudo docker push aegee/oms-core-elixir:${TRAVIS_COMMIT}
+  - sudo docker tag aegee/oms-core-elixir:${TRAVIS_COMMIT} aegee/oms-core-elixir:latest
+  - sudo docker push aegee/oms-core-elixir:latest
+  #if: branch = master
