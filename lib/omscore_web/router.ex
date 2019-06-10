@@ -31,6 +31,8 @@ defmodule OmscoreWeb.Router do
   scope "/", OmscoreWeb do
     pipe_through [:api]
 
+    get "/healthcheck", GeneralController, :healthcheck
+
     post "/login", LoginController, :login
     post "/renew", LoginController, :renew_token
     get "/user_existence", LoginController, :check_user_existence
