@@ -1,9 +1,10 @@
 .gitignore
+.git/
 .dockerignore
 .travis.yml
 apiary.apib
 README.md
 TODO
-docker/*
-deps/*
-priv/static/*
+docker/
+deps/
+priv/static/
