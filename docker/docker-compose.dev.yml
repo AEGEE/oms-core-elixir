@@ -1,0 +1,10 @@
+version: "2.4"
+
+services:
+  oms-core-elixir:
+    build:
+      context: ./${PATH_OMS_CORE_ELIXIR}/..
+      dockerfile: ./docker/oms-core-elixir/Dockerfile.dev
+    image: aegee/oms-core-elixir:latest
+    volumes:
+      - ./${PATH_OMS_CORE_ELIXIR}/../:/usr/src/myapp

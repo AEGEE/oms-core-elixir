@@ -6,11 +6,21 @@ RUN mkdir -p /usr/src/myapp \
   && mix local.rebar --force \
 	&& apk add --update --no-cache nodejs nodejs-npm make gcc g++
 
-ADD bootstrap.sh /usr/src/scripts/bootstrap.sh
-ADD wait.sh /usr/src/scripts/wait.sh
-
 WORKDIR /usr/src/myapp
 
-EXPOSE 4000
+COPY mix.exs /usr/src/myapp/mix.exs
+RUN ["mix", "deps.get"]
 
-CMD ash /usr/src/scripts/bootstrap.sh && mix phx.server
+COPY . /usr/src/myapp/
+
+ENV MIX_ENV=prod
+ENV PORT=4000
+RUN ["mix", "compile"]
+
+EXPOSE ${PORT}
+
+COPY bootstrap.sh /usr/src/scripts/bootstrap.sh
+COPY wait.sh /usr/src/scripts/wait.sh
+
+CMD ash /usr/src/scripts/bootstrap.sh \
+      && mix phx.server
