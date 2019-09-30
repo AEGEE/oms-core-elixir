@@ -1,4 +1,4 @@
-version: "2.4"
+version: "3.4"
 
 services:
   postgres-oms-core-elixir:
@@ -47,8 +47,8 @@ services:
     #   timeout: 10s
     #   retries: 3
     #   start_period: 40s
-    cpu_count: 1
-    mem_limit: 900m
+    # cpu_count: 1
+    # mem_limit: 900m
 
 volumes:
   postgres-oms-core-elixir:
