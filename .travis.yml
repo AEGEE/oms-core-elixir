@@ -10,6 +10,7 @@ notifications:
 
 before_script:
     - cd docker
+    - sudo docker network create OMS
     - sudo docker-compose -f docker-compose-secrets.yml -f docker-compose.yml build
     - sudo docker-compose -f docker-compose-secrets.yml -f docker-compose.yml up -d
     - sudo docker-compose -f docker-compose-secrets.yml -f docker-compose.yml logs -f oms-core-elixir &
