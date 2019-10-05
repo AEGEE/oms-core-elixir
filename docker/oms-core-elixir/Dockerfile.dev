@@ -15,7 +15,6 @@ RUN ["mix", "deps.get"]
 ENV MIX_ENV=prod
 ENV PORT=4000
 RUN ["mix", "compile"]
-RUN ["npm", "install"]
 
 EXPOSE ${PORT}
 

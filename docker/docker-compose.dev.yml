@@ -7,4 +7,5 @@ services:
       dockerfile: ./docker/oms-core-elixir/Dockerfile.dev
     image: aegee/oms-core-elixir:latest
     volumes:
+      - /usr/src/myapp/deps
       - ./${PATH_OMS_CORE_ELIXIR}/../:/usr/src/myapp
