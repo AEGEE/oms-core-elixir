@@ -11,4 +11,4 @@ services:
     volumes:
       - /usr/src/myapp/deps
       - ./${PATH_OMS_CORE_ELIXIR}/../:/usr/src/myapp
-    command: mix compile && ash /usr/src/scripts/bootstrap.sh && mix phx.server
+    #command: mix compile && ash /usr/src/scripts/bootstrap.sh && mix phx.server
