@@ -12,7 +12,8 @@ COPY . /usr/src/myapp/
 
 RUN ["mix", "deps.get"]
 
-ENV MIX_ENV=prod
+ARG MIX_ENV=prod
+ENV MIX_ENV=${MIX_ENV}
 ENV PORT=4000
 RUN ["mix", "compile"]
 
