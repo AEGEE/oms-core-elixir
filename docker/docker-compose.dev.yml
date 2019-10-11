@@ -1,0 +1,14 @@
+version: "3.4"
+
+services:
+  oms-core-elixir:
+    build:
+      context: ./${PATH_OMS_CORE_ELIXIR}/..
+      dockerfile: ./docker/oms-core-elixir/Dockerfile.dev
+      args: 
+        MIX_ENV: dev
+    image: aegee/oms-core-elixir:latest
+    volumes:
+      - /usr/src/myapp/deps
+      - ./${PATH_OMS_CORE_ELIXIR}/../:/usr/src/myapp
+    #command: mix compile && ash /usr/src/scripts/bootstrap.sh && mix phx.server

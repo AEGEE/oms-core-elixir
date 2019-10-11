@@ -1,0 +1,9 @@
+.gitignore
+.git/
+.dockerignore
+.travis.yml
+apiary.apib
+README.md
+TODO
+deps/
+priv/static/

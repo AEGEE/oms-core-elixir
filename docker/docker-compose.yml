@@ -1,63 +1,60 @@
-version: '3.2'
+version: "3.4"
 
 services:
-    oms-core-elixir:
-        build:
-            context: ./$PATH_OMS_CORE_ELIXIR/oms-core-elixir/
-            dockerfile: ./Dockerfile.dev
-        volumes:
-            - ./$PATH_OMS_CORE_ELIXIR/../:/usr/src/myapp
-        depends_on:
-            - postgres-oms-core-elixir
-        expose:
-            - "4000"
-        labels:
-            - "traefik.frontend.rule=HostRegexp:{domain:[a-z0-9.]+};PathPrefix:/services/oms-core-elixir/api;PathPrefixStrip:/services/oms-core-elixir/api"
-            - "traefik.frontend.priority=101"
-            - "traefik.port=4000"
-            - "traefik.backend=oms-core-elixir"
-            - "traefik.enable=true"
-            #- "registry.modules=/static/getModules.json"
-            #- "registry.status=/status"
-        environment:
-            JWT_ISSUER: OMS
-            JWT_SECRET_KEY_FILE: /run/secrets/jwt_key
-            SENDGRID_KEY_FILE: /run/secrets/sendgrid_key
-            MAIL_PASSWORD: /run/secrets/mail_password
-            MAIL_USER: /run/secrets/mail_user
-            DB_HOST: postgres-oms-core-elixir
-            MIX_ENV: prod
-        secrets:
-            - jwt_key
-            - sendgrid_key
-            - mail_password
-            - mail_user
+  postgres-oms-core-elixir:
+    restart: always
+    image: postgres:10.6
+    volumes:
+      - postgres-oms-core-elixir:/var/lib/postgresql/data
+    expose:
+      - "5432"
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "${PW_POSTGRES}"
 
-
-    postgres-oms-core-elixir:
-        image: postgres:10.6
-        volumes:
-            - postgres-oms-core-elixir:/var/lib/postgresql/data
-        expose:
-            - "5432"
-        environment:
-            POSTGRES_USER: postgres
-            POSTGRES_PASSWORD: postgres
-
-    oms-core-elixir-nginx:
-        image: nginx:alpine
-        volumes:
-            - ./$PATH_OMS_CORE_ELIXIR/../frontend/:/usr/share/nginx/html:ro
-        labels:
-            - "traefik.frontend.rule=HostRegexp:{domain:[a-z0-9.]+};PathPrefix:/services/oms-core-elixir;PathPrefixStrip:/services/oms-core-elixir"
-            - "traefik.frontend.priority=100"
-            - "traefik.port=80"
-            - "traefik.backend=oms-core-elixir-frontend"
-            - "traefik.enable=true"
-            - "registry.status=status.json"
-            - "registry.modules=getModules.json"
+  oms-core-elixir:
+    restart: on-failure
+    image: aegee/oms-core-elixir:stable
+    depends_on:
+      - postgres-oms-core-elixir
+    expose:
+      - "4000"
+    labels:
+      - "traefik.frontend.rule=PathPrefix:/services/oms-core-elixir/api;PathPrefixStrip:/services/oms-core-elixir/api"
+      - "traefik.frontend.priority=101"
+      - "traefik.port=4000"
+      - "traefik.backend=oms-core-elixir"
+      - "traefik.enable=true"
+    environment:
+      MIX_ENV: "${MYAEGEE_ENV}"
+      BUGSNAG_KEY: "${BUGSNAG_KEY_CORE}"
+      PG_PASSWORD: "${PW_POSTGRES}"
+      JWT_ISSUER: "OMS"
+      JWT_SECRET_KEY_FILE: "/run/secrets/jwt_key"
+      SENDGRID_KEY_FILE: "/run/secrets/sendgrid_key"
+      MAIL_PASSWORD: "/run/secrets/mail_password"
+      MAIL_USER: "/run/secrets/mail_user"
+      DB_HOST: "postgres-oms-core-elixir"
+    secrets:
+      - jwt_key
+      - sendgrid_key
+      - mail_password
+      - mail_user
+      - db_password
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/healthcheck"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    # cpu_count: 1
+    # mem_limit: 900m
 
 volumes:
-    postgres-oms-core-elixir:
-        driver: "local"
+  postgres-oms-core-elixir:
+    driver: local
 
+networks:
+  default:
+    external:
+      name: OMS
