@@ -9,12 +9,12 @@ RUN mkdir -p /usr/src/myapp \
 WORKDIR /usr/src/myapp
 
 COPY . /usr/src/myapp/
-
-RUN ["mix", "deps.get"]
+#COPY mix.exs /usr/src/myapp/mix.exs
 
 ARG MIX_ENV=prod
 ENV MIX_ENV=${MIX_ENV}
 ENV PORT=4000
+RUN ["mix", "deps.get"]
 RUN ["mix", "compile"]
 
 EXPOSE ${PORT}
