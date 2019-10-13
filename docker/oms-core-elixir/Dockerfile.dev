@@ -11,7 +11,7 @@ WORKDIR /usr/src/myapp
 COPY . /usr/src/myapp/
 #COPY mix.exs /usr/src/myapp/mix.exs
 
-ARG MIX_ENV=prod
+ARG MIX_ENV=production
 ENV MIX_ENV=${MIX_ENV}
 ENV PORT=4000
 RUN ["mix", "deps.get"]
