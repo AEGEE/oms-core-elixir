@@ -11,10 +11,20 @@ defmodule OmscoreWeb.GeneralController do
       DBConnection.ConnectionError -> :error
     end
 
+    package_info = File.read!("package.json")
+    |> Poison.decode!()
+
     if status == :ok do
       conn
       |> put_status(200)
-      |> json(%{success: true})
+      |> json(%{
+          success: true,
+          data: %{
+            name: package_info["name"],
+            description: package_info["description"],
+            version: package_info["version"]
+          }
+        })
     else
       conn
       |> put_status(500)
