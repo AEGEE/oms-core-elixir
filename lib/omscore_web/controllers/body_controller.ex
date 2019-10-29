@@ -8,10 +8,8 @@ defmodule OmscoreWeb.BodyController do
   action_fallback OmscoreWeb.FallbackController
 
   def index(conn, params) do
-    with {:ok, %Core.Permission{filters: filters}} <- Core.search_permission_list(conn.assigns.permissions, "view", "body") do
-      bodies = Core.list_bodies(params)
-      render(conn, "index.json", bodies: bodies, filters: filters)
-    end
+    bodies = Core.list_bodies(params)
+    render(conn, "index.json", bodies: bodies)
   end
 
   def index_campaigns(conn, params) do
@@ -31,12 +29,11 @@ defmodule OmscoreWeb.BodyController do
     end
   end
 
-  def show(conn, _params) do
-    body = conn.assigns.body |> Omscore.Repo.preload([:circles, :shadow_circle])
+  def show(conn, %{"body_id" => body_id}) do
+    body = Omscore.Core.get_body!(body_id)
+      |> Omscore.Repo.preload([:circles, :shadow_circle])
 
-    with {:ok, %Core.Permission{filters: filters}} <- Core.search_permission_list(conn.assigns.permissions, "view", "body") do
-      render(conn, "show.json", body: body, filters: filters)
-    end
+    render(conn, "show.json", body: body)
   end
 
   def update(conn, %{"body" => body_params}) do
