@@ -46,6 +46,14 @@ defmodule OmscoreWeb.Router do
     post "/campaigns/:campaign_url/resend_mail/:submission_token", CampaignController, :resend_confirmation_mail
     post "/confirm_mail/", CampaignController, :confirm_mail_ex # Optional route with the confirmation token as body param
     post "/confirm_mail/:confirmation_url", CampaignController, :confirm_mail
+
+    get "/bodies", BodyController, :index
+  end
+
+  scope "/bodies/:body_id", OmscoreWeb, as: :body do
+    pipe_through [:api]
+
+    get "", BodyController, :show
   end
 
   # For user-based request, don't fetch anything from the db but just validate the token
@@ -69,7 +77,6 @@ defmodule OmscoreWeb.Router do
     get "/circles", CircleController, :index
     post "/circles", CircleController, :create
 
-    get "/bodies", BodyController, :index
     post "/bodies", BodyController, :create
 
     get "/members", MemberController, :index
@@ -128,7 +135,6 @@ defmodule OmscoreWeb.Router do
     get "/circles", CircleController, :index_bound
     post "/circles", CircleController, :create_bound
 
-    get "/", BodyController, :show
     put "/", BodyController, :update
     delete "/", BodyController, :delete
     get "/members", BodyController, :show_members

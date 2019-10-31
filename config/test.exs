@@ -24,7 +24,7 @@ config :tesla, adapter: Tesla.Mock
 config :omscore, Omscore.Repo,
   adapter: Ecto.Adapters.Postgres,
   username: "postgres",
-  password: "postgres",
+  password: "5ecr3t",
   database: "omscore_test",
   hostname: System.get_env("DB_HOST") || "localhost",
   pool: Ecto.Adapters.SQL.Sandbox

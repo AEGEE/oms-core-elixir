@@ -3,10 +3,9 @@ defmodule OmscoreWeb.BodyView do
   alias OmscoreWeb.BodyView
   alias OmscoreWeb.Helper
 
-  def render("index.json", %{bodies: bodies, filters: filters}) do
+  def render("index.json", %{bodies: bodies}) do
     data = bodies
     |> render_many(BodyView, "body.json")
-    |> Omscore.Core.apply_attribute_filters(filters)
 
     %{success: true, data: data}
   end
@@ -20,10 +19,9 @@ defmodule OmscoreWeb.BodyView do
     %{success: true, data: data}
   end
 
-  def render("show.json", %{body: body, filters: filters}) do
+  def render("show.json", %{body: body}) do
     data = body
     |> render_one(BodyView, "body.json")
-    |> Omscore.Core.apply_attribute_filters(filters)
 
     %{success: true, data: data}
   end

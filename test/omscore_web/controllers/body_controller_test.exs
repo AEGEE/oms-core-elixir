@@ -64,23 +64,12 @@ defmodule OmscoreWeb.BodyControllerTest do
       assert json_response(conn, 200)["data"] == []
     end
 
-    test "rejects request to unauthorized user", %{conn: conn} do
+    test "returns 200 to unauthorized user", %{conn: conn} do
       %{token: token} = create_member_with_permissions([])
       conn = put_req_header(conn, "x-auth-token", token)
 
       conn = get conn, body_path(conn, :index)
-      assert json_response(conn, 403)
-    end
-
-    test "works with filtered permissions", %{conn: conn} do
-      %{token: token} = create_member_with_permissions([%{action: "view", object: "body", filters: [%{field: "name"}]}])
-      conn = put_req_header(conn, "x-auth-token", token)
-
-      body_fixture()
-
-      conn = get conn, body_path(conn, :index)
-      assert res = json_response(conn, 200)["data"]
-      assert !Enum.any?(res, fn(x) -> Map.has_key?(x, "name") end)
+      assert json_response(conn, 200)
     end
 
     test "filters the result if filters are passed", %{conn: conn} do
@@ -131,21 +120,12 @@ defmodule OmscoreWeb.BodyControllerTest do
       assert Map.has_key?(res, "circles")
     end
 
-    test "rejects request to unauthorized user", %{conn: conn, body: body} do
+    test "returns 200 to unauthorized user", %{conn: conn, body: body} do
       %{token: token} = create_member_with_permissions([])
       conn = put_req_header(conn, "x-auth-token", token)
 
       conn = get conn, body_body_path(conn, :show, body.id)
-      assert json_response(conn, 403)
-    end
-
-    test "works with filtered permissions", %{conn: conn, body: body} do
-      %{token: token} = create_member_with_permissions([%{action: "view", object: "body", filters: [%{field: "name"}]}])
-      conn = put_req_header(conn, "x-auth-token", token)
-
-      conn = get conn, body_body_path(conn, :show, body.id)
-      assert res = json_response(conn, 200)["data"]
-      assert !Map.has_key?(res, "name")
+      assert json_response(conn, 200)
     end
   end
 
