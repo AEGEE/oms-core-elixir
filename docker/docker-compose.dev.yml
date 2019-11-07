@@ -4,7 +4,7 @@ services:
   oms-core-elixir:
     build:
       context: ./${PATH_OMS_CORE_ELIXIR}/..
-      dockerfile: ./docker/oms-core-elixir/Dockerfile.dev
+      dockerfile: ./docker/oms-core-elixir/Dockerfile
       args: 
         MIX_ENV: development
     image: aegee/oms-core-elixir:latest
