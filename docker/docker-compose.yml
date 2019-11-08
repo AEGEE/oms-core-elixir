@@ -14,7 +14,7 @@ services:
 
   oms-core-elixir:
     restart: on-failure
-    image: aegee/oms-core-elixir:stable
+    image: aegee/oms-core-elixir:latest
     depends_on:
       - postgres-oms-core-elixir
     expose:
