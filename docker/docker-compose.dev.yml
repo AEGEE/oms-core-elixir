@@ -7,7 +7,7 @@ services:
       dockerfile: ./docker/oms-core-elixir/Dockerfile
       args: 
         MIX_ENV: development
-    image: aegee/oms-core-elixir:latest
+    image: aegee/oms-core-elixir:dev
     volumes:
       - /usr/src/myapp/deps
       - ./${PATH_OMS_CORE_ELIXIR}/../:/usr/src/myapp
