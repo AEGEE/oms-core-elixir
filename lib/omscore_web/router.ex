@@ -53,7 +53,7 @@ defmodule OmscoreWeb.Router do
   scope "/bodies/:body_id", OmscoreWeb, as: :body do
     pipe_through [:api]
 
-    get "", BodyController, :show
+    get "/", BodyController, :show
   end
 
   # For user-based request, don't fetch anything from the db but just validate the token
