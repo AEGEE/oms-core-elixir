@@ -56,7 +56,14 @@ defmodule OmscoreWeb.Helper do
     key = Atom.to_string(attribute)
     query = if Map.has_key?(filters, key) do
       querystring = filters[key]
-      from q in query, where: ilike(field(q, ^attribute), ^"#{querystring}")
+
+      # If it's a string, just passing it into the ILIKE statement.
+      # If it's an array, pass it into the IN statement.
+      if is_binary(querystring) do
+        from q in query, where: ilike(field(q, ^attribute), ^"#{querystring}")
+      else
+        from q in query, where: field(q, ^attribute) in ^querystring
+      end
     else
       query
     end
