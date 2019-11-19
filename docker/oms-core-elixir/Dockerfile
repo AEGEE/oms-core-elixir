@@ -23,4 +23,4 @@ COPY ./docker/oms-core-elixir/bootstrap.sh /usr/src/scripts/bootstrap.sh
 COPY ./docker/oms-core-elixir/wait.sh /usr/src/scripts/wait.sh
 
 CMD ash /usr/src/scripts/bootstrap.sh \
-      && mix phx.server --no-recompile
+      && mix phx.server --no-compile
