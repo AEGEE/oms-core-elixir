@@ -81,6 +81,21 @@ defmodule OmscoreWeb.BodyControllerTest do
       conn = get conn, body_path(conn, :index), [{"filter", %{"name" => "some really exotic query that definitely doesn't match any member at all"}}]
       assert json_response(conn, 200)["data"] == []
     end
+
+    test "filters if the values are passed as array", %{conn: conn} do
+      %{token: token} = create_member_with_permissions([%{action: "view", object: "body"}])
+      conn = put_req_header(conn, "x-auth-token", token)
+
+      {:ok, _} = Core.create_body(@create_attrs |> Map.put(:type, "antenna"))
+      {:ok, _} = Core.create_body(@create_attrs |> Map.put(:type, "contact"))
+      {:ok, _} = Core.create_body(@create_attrs |> Map.put(:type, "partner"))
+
+      conn = get conn, body_path(conn, :index), [{"filter", %{"type" => ["antenna", "contact"]}}]
+      response_data = json_response(conn, 200)["data"]
+      #IO.puts(response_data)
+
+      assert Kernel.length(response_data) === 2 # "partner" shouldn't be there
+    end
   end
 
   describe "index_campaigns" do
