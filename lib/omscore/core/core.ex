@@ -65,6 +65,7 @@ defmodule Omscore.Core do
     |> OmscoreWeb.Helper.search(params, [:first_name, :last_name], " ")
     |> OmscoreWeb.Helper.filter(params, Omscore.Members.Member.__schema__(:fields))
     |> Repo.all()
+    |> Repo.preload(:user)
   end
 
   # Creates a permission
